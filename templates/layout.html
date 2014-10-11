@@ -68,7 +68,7 @@
                             </li>
                         {% endif %}
                         <li {% if request.path in [url_for('Tools_Catalog'), '/Login', '/']%} class="active" {% endif %}><a href={{url_for('Tools_Catalog')}}>Tools Catalog</a></li>
-                        <li {% if request.path == url_for('Register_Tool') %} class="active" {% endif %}><a href={{url_for('Register_Tool')}}>Regiter Tools</a></li>
+                        <li {% if request.path == url_for('Register_Tool') %} class="active" {% endif %}><a href={{url_for('Register_Tool')}}>Register Tools</a></li>
                     </ul>
                 {% endif %}
             </div>
