@@ -6,8 +6,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta charset="utf-8">
-    <link rel="icon" href="static/images/tab_figure.ico">
-    <title>TriageRobot, from VMware cpd-team</title>
+    <link rel="icon" href="static/images/cpdtools.ico">
+    <title>CPD Tools Catalog, portal of all CPD tools</title>
     <link rel='stylesheet' type='text/css' href='static/css/bootstrap-3.1.1.css'>
     <!-- <link rel="stylesheet" type='text/css' href="static/css/bootstrap.css" >-->
     <link href="static/css/dashboard.css" rel="stylesheet">
@@ -25,7 +25,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">TriageRobot {% if session.username %}- User: {{session.username}} {% endif %}</a>
+                <a class="navbar-brand" href="/">CPD Tools Catalog {% if session.username %}- User: {{session.username}} {% endif %}</a>
             </div>
             <div class="navbar-collapse collapse">
                 {% if not session.logged_in %}
@@ -44,11 +44,9 @@
                         <a href={{url_for('Logout')}} class="btn btn-success">Logout</a>
                     </form>
                 {% endif %}
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="https://wiki.eng.vmware.com/CPD/TriageRobot">Wiki</a></li>
+                <!-- <ul class="nav navbar-nav navbar-right">
                     <li><a href="https://email.vmware.com">Email</a></li>
-                    <li><a href="https://wiki.eng.vmware.com/CPD/TriageRobot">Help</a></li>
-                </ul>
+                </ul> -->
             </div>
             
             
@@ -60,7 +58,7 @@
             <div class="col-sm-3 col-md-2 sidebar" id="div_sidebar">
                 {% if session.logged_in%}
                     <ul class="nav nav-sidebar">
-                        {% if session.admin %}
+                        {% if 0 %}
                             <li {% if request.path == url_for('Admin_Custom_Webpage') %} class="active" {% endif %} ><!-- active open --><a href={{url_for('Admin_Custom_Webpage')}}><i class="icon icon-th-list"></i> <span>Administrator</span> <span class="label">1</span></a>
                                 <li class="submenu"><!-- active open -->
                                 <ul> <!-- li class="active" -->
@@ -69,17 +67,8 @@
                                 </ul>
                             </li>
                         {% endif %}
-                        <li {% if request.path in [url_for('Query'), '/', url_for('Show_Entries'), url_for('Entries_Processing')]%} class="active" {% endif %}><a href={{url_for('Query')}}>Triage Decision</a></li>
-                        <li {% if request.path == url_for('Admin_Custom_Email') or request.path == url_for('Admin_Email_Processing') %} class="active" {% endif %}><a href={{url_for('Admin_Custom_Email')}}>Email Notification</a></li>
-                        <li {% if request.path == url_for('Triage_Report') %} class="active" {% endif %}><a href={{url_for('Triage_Report')}}>Triage Report (BETA)</a></li>
-                        <li {% if request.path == url_for('Custom_Webpage') %} class="active" {% endif %}><a href={{url_for('Custom_Webpage')}}>Customize</a></li>
-                            <li class="submenu"><!-- active open -->
-                            <ul>
-                                <li id="Custom_Setting"><a href="{{url_for('Custom_Setting')}}">{% if request.path == url_for('Custom_Setting') %}<b>{%endif%}Settings{% if request.path == url_for('Custom_Setting') %}</b>{%endif%}</a></li>
-                                <li id="Custom_Alias"><a href="{{url_for('Custom_Alias')}}">{% if request.path == url_for('Custom_Alias') %}<b>{%endif%}Alias{% if request.path == url_for('Custom_Alias') %}</b>{%endif%}</a></li>
-                                </ul>
-                            </li>
-                        <li {% if request.path == url_for('Download_chrome_plugin') %} class="active" {% endif %}><a href={{url_for('Download_chrome_plugin')}}>Download Chrome Plugin</a></li>
+                        <li {% if request.path in [url_for('Tools_Catalog'), '/Login', '/']%} class="active" {% endif %}><a href={{url_for('Tools_Catalog')}}>Tools Catalog</a></li>
+                        <li {% if request.path == url_for('Register_Tool') %} class="active" {% endif %}><a href={{url_for('Register_Tool')}}>Regiter Tools</a></li>
                     </ul>
                 {% endif %}
             </div>

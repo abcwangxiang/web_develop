@@ -42,7 +42,7 @@ LOCAL_DATABASE_HOST = "localhost"
 LOCAL_DATABASE_PORT = 3306
 LOCAL_DATABASE_USER = "root"
 LOCAL_DATABASE_PW = "vmware"
-LOCAL_DATABASE_DATABASE = "TriageRobot"
+LOCAL_DATABASE_DATABASE = "cpdtools"
 #local_conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, port=LOCAL_DATABASE_PORT, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
 
 
@@ -98,10 +98,7 @@ with app.test_request_context('/hello', method='POST'):
 
 @app.route('/')
 def index():
-    try:
-        return Query()
-    except:
-        return render_template('query.html')
+    return Tools_Catalog()
 
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
@@ -129,23 +126,20 @@ def Login():
         return render_template('query.html', error = "Error Account/Password, Please Login again")
         
     
-    
-    
-    
     session['username'] = request.form['BG_account']
     session['password'] = request.form['BG_password']
     session['cookie_file'] = cookie_file
     
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
-    cursor = conn.cursor()
-    sql="""
-        select userid from profiles where login_name = '{}'
-        """.format(session["username"])
-    cursor.execute(sql)
-    profile_number = cursor.fetchone()[0]
+    #conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    #cursor = conn.cursor()
+    #sql="""
+    #    select userid from profiles where login_name = '{}'
+    #    """.format(session["username"])
+    #cursor.execute(sql)
+    #profile_number = cursor.fetchone()[0]
     
     
-    session['userid'] = profile_number
+    #session['userid'] = profile_number
     session['logged_in'] = True
     
     admin_file_path = open(BAR_ADMINFILE, "r")
@@ -162,8 +156,123 @@ def Login():
     logging.warning("{} login into the bugzilla successfully.".format(session['username']))
     
     
-    return Query()
+    return index()
     #return render_template('query.html')
+
+@app.route('/Tools_Catalog')
+def Tools_Catalog():
+    """
+    This should be modified to match the database
+    """
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        
+    sql = """SELECT * from tools"""
+    
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+    return render_template('tools_catalog.html', tools=impure_results)
+
+@app.route('/Register_Tool', methods=['GET', 'POST'])
+def Register_Tool():
+    if request.method == 'GET':
+        return render_template('tools_register.html')
+    else:
+
+        tool_name = str(request.form["tool_name"]) 
+        authors = str(request.form["authors"]) 
+        team = str(request.form["team"]) 
+        keywords = str(request.form["keywords"]) 
+        maturity = str(request.form["maturity"]) 
+        url = str(request.form["url"]) 
+        wiki = str(request.form["wiki"]) 
+        description = str(request.form["description"]) 
+
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        cursor = conn.cursor()
+        sql="""
+        INSERT INTO tools
+                    (authors,team,tool_name,description,keywords,url,wiki,maturity)
+                    VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+
+        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity))
+
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return Tools_Catalog()
+       
+    
+@app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
+def Edit_Tool_Details():
+    if request.method == 'GET':
+        para = request.args
+        tool_name = para.get('name', '').strip()
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        sql = """SELECT * from tools where tool_name = %(tool_name)s"""
+        cursor = conn.cursor()
+        cursor.execute(sql, {"tool_name":tool_name})
+        columns = [column[0] for column in cursor.description]
+        impure_results = []
+        for row in cursor.fetchall():
+            impure_results.append(dict(zip(columns, row)))
+
+        return render_template('tools_edit.html', tool=impure_results[0])
+    elif request.method == 'POST':
+        tool_name = str(request.form["tool_name"]) 
+        authors = str(request.form["authors"]) 
+        team = str(request.form["team"]) 
+        keywords = str(request.form["keywords"]) 
+        maturity = str(request.form["maturity"]) 
+        url = str(request.form["url"]) 
+        wiki = str(request.form["wiki"]) 
+        description = str(request.form["description"]) 
+        original_name = str(request.form["original_name"])
+
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        cursor = conn.cursor()
+
+        sql="""
+            DELETE FROM tools
+            WHERE tool_name=%(tool_name)s
+            """
+        cursor.execute(sql, {"tool_name":original_name})
+
+        sql="""
+        INSERT INTO tools
+                    (authors,team,tool_name,description,keywords,url,wiki,maturity)
+                    VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                    authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s
+                    """
+
+        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity, authors,team,tool_name,description,keywords,url,wiki,maturity))
+
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return Tools_Catalog()
+       
+@app.route("/Show_Tool_Details")
+def Show_Tool_Details():
+    para = request.args
+    tool_name = para.get('name', '').strip()
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    sql = """SELECT * from tools where tool_name = %(tool_name)s"""
+    cursor = conn.cursor()
+    cursor.execute(sql, {"tool_name": tool_name})
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+
+    return render_template('tools_detail.html', tool=impure_results[0])
 
 @app.route('/Logout', methods=['GET', 'POST'])
 def Logout():

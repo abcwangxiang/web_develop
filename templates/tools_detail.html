@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% if session.logged_in %}
+<head>
+    {%block head%}
+    <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
+    <script src="static/js/jquery-1.11.1.js"></script>
+    <script src="static/js/jquery-ui.js"></script>
+
+    <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
+    {%endblock%}
+</head>
+<body>
+    {%block body%}
+    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">
+                <h2 class="sub-header">Tool Details</h2>
+            </h1>
+
+<style>
+.form-group.required .control-label:after { 
+   content:"";
+   color:red;
+}
+</style>
+
+<style>
+.form-group.required .control-label2:after { 
+   content:"";
+   color:gray;
+}
+</style>
+
+<div class="form-group required"><label class="col-md-2 control-label">Tool's Name</label><div class="col-md-4"><input class="form-control" id="id_tool_name" value="{{tool['tool_name']}}" name="tool_name" placeholder="Your Tool's Name" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Authors</label><div class="col-md-4"><input class="form-control" id="id_authors" value="{{tool['authors']}}" name="authors" placeholder="Comma-separated Names" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Team</label><div class="col-md-4"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Team" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Keywords</label><div class="col-md-4"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Maturity Level</label><div class="col-md-4"><input class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Description</label><div class="col-md-4"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools" readonly="readonly">{{tool['description']}}</textarea></div></div>
+
+
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open Wiki</a>{%endif%}
+      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch APP</a>{%endif%}
+        <!--<span class="glyphicon glyphicon-star"></span>--> 
+    </div>
+    </div>
+        </div>
+    </form>
+    {%endblock%}
+</body>
+{% endif %}

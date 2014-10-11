@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% if session.logged_in and session.admin %}
+{%block head%}
+<link rel='stylesheet' type='text/css' href='static/css/dataTables.bootstrap.css'>
+<link rel="stylesheet" type="text/css" href="static/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="static/css/dataTables.colVis.css">
+<link rel="stylesheet" type="text/css" href="static/css/dataTables.tableTools.css">
+
+<script type='text/javascript' src='static/js/jquery-1.11.1.js'></script>
+<script type='text/javascript' src='static/js/dataTables.bootstrap.js'></script>
+<script type='text/javascript' src='static/js/bootstrap-3.1.1.js'></script>
+<script type='text/javascript' src='static/js/jquery.dataTables.js'></script>
+<script type='text/javascript' src='static/js/dataTables.colVis.js'></script>
+<script type='text/javascript' src='static/js/dataTables.fixedColumns.js'></script>
+<script type="text/javascript" src="static/js/dataTables.tableTools.js"></script>
+<script src="static/highstock.js"></script>
+
+<!--
+When setting the name of posted variables, the name of "check_id", "comment_id" should not be assigned since I used the check_id to represent the checkboxes and comment_id to represent the comments
+07/15/2014 ShinYeh
+-->
+<link rel="stylesheet" type="text/css" href="static/css/jquery-ui.css">
+<script type='text/javascript' src='static/js/Chart.js'></script>
+<script type='text/javascript' src='static/js/jquery-ui.js'></script>
+
+{%endblock%}
+{%block body%}
+
+<script>
+function openPopup() {
+  var popup = window.open("", ""),
+      table = document.getElementById("T_ETA_bugs_table");
+
+  popup.document.write(table.outerHTML);
+  popup.document.close();
+  if (window.focus) 
+    popup.focus();
+}
+</script>
+
+
+<form action="{{ url_for('Admin_Email_Processing') }}" method=post>
+<ul class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+{% set num_report = 1%}
+
+<script>
+$(document).ready(function(){
+    var CPDtools_table = $('#Table_CPDtools').DataTable({
+        dom: 'lfrtip',
+        //scrollY:        true,
+        //scrollX:        true,
+        paging:         false,
+        autoWidth:      false,
+        //"aoColumns": [ 
+        //    {"bVisible":true},  
+        //]
+    });
+});
+</script>
+
+    <h3><span class="label label-primary">
+        List of all tools
+    </span></h3>
+    {%if not tools==[]%}
+    <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Tool's Name</th>
+                <th>Owner</th>
+                <th>Team</th>
+                <th>Keywords</th>
+                <th>Maturity Level</th>
+                <th>APP URL</th>
+                <th>Wiki</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tool in tools %}
+            <tr>
+                <td><a href='{{url_for("Show_Tool_Details")}}?name={{tool['tool_name']}}'>{{tool['tool_name']}}</a></td>
+                <td>{{tool['authors']}}</td>
+                <td>{{tool['team']}}</td>
+                <td>{{tool['keywords']}}</td>
+                <td>{{tool['maturity']}}</td>
+                <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch</a>{%endif%}</td>
+                <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open</a>{%endif%}</td>
+                <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}' class="btn btn-danger">Edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {%else%}
+    N/A
+    {%endif%}
+    <br>
+{% set num_report = num_report+1 %}
+
+</ul>
+</form>
+{% endblock %}
+{% endif %}
