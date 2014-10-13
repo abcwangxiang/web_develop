@@ -195,17 +195,18 @@ def Register_Tool():
         wiki = str(request.form["wiki"]) 
         description = str(request.form["description"]) 
         emails = str(request.form["emails"]) 
+        source = str(request.form["source"]) 
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         cursor = conn.cursor()
         sql="""
         INSERT INTO tools
-                    (authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
+                    (authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
 
-        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
+        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
 
         cursor.close()
         conn.commit()
@@ -243,6 +244,7 @@ def Edit_Tool_Details():
         original_name = str(request.form["original_name"])
         emails = str(request.form["emails"])
         tool_id = str(request.form["id"])
+        source = str(request.form["source"])
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         cursor = conn.cursor()
@@ -255,14 +257,14 @@ def Edit_Tool_Details():
 
         sql="""
         INSERT INTO tools
-                    (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
+                    (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE
-                    authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s
+                    authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s,source=%s
                     """
 
-        cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails, authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
+        cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
 
         cursor.close()
         conn.commit()
