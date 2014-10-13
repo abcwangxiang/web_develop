@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{%block head%}
+<link rel='stylesheet' type='text/css' href='static/css/dataTables.bootstrap.css'>
+<link rel="stylesheet" type="text/css" href="static/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="static/css/dataTables.colVis.css">
+<link rel="stylesheet" type="text/css" href="static/css/dataTables.tableTools.css">
+
+<script type='text/javascript' src='static/js/jquery-1.11.1.js'></script>
+<script type='text/javascript' src='static/js/dataTables.bootstrap.js'></script>
+<script type='text/javascript' src='static/js/bootstrap-3.1.1.js'></script>
+<script type='text/javascript' src='static/js/jquery.dataTables.js'></script>
+<script type='text/javascript' src='static/js/dataTables.colVis.js'></script>
+<script type='text/javascript' src='static/js/dataTables.fixedColumns.js'></script>
+<script type="text/javascript" src="static/js/dataTables.tableTools.js"></script>
+<script src="static/highstock.js"></script>
+
+<!--
+When setting the name of posted variables, the name of "check_id", "comment_id" should not be assigned since I used the check_id to represent the checkboxes and comment_id to represent the comments
+07/15/2014 ShinYeh
+-->
+<link rel="stylesheet" type="text/css" href="static/css/jquery-ui.css">
+<script type='text/javascript' src='static/js/Chart.js'></script>
+<script type='text/javascript' src='static/js/jquery-ui.js'></script>
+
+{%endblock%}
+{%block body%}
+<form action="{{ url_for('Login') }}" method=post class="form-horizontal">
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+<style>
+.form-group.required .control-label:after { 
+   content:"";
+   color:red;
+}
+</style>
+
+<style>
+.form-group.required .control-label2:after { 
+   content:"";
+   color:gray;
+}
+</style>
+{%if 0%}
+<div class="form-group required"><label class="col-md-2 control-label control-label2">Account</label><div class="col-md-2"><input class="form-control" id="id_account" name="BG_account" placeholder="" required="required" title="" type="text" style="display:inline;">@vmware.com</input></div></div>
+<div class="form-group required"><label class="col-md-2 control-label control-label2">Password</label><div class="col-md-2"><input class="form-control" id="id_password" name="BG_password" placeholder="" required="required" title="" type="password" /></div></div>
+<input type=hidden id="hidden_request_path" name="request_path" value="{{previous_url}}">
+
+<div class="form-group">
+<div class="col-sm-offset-2 col-sm-10">
+  <button type="submit" class="btn btn-primary">
+    <!--<span class="glyphicon glyphicon-star"></span>--> Login
+  </button>
+</div>
+</div>
+</div>
+{%endif%}
+
+</form>
+{% endblock %}
