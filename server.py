@@ -10,7 +10,7 @@ from BAR_Rules import *
 from BAR import gRecordSchema
 from flask import request
 from flask import render_template
-from flask import flash
+from flask import flash, jsonify
 from flask import Flask, session, redirect, url_for, escape, request, send_file
 from werkzeug.contrib.cache import SimpleCache
 import MySQLdb
@@ -220,10 +220,11 @@ def Edit_Tool_Details():
     if request.method == 'GET':
         para = request.args
         tool_name = para.get('name', '').strip()
+        tool_id = para.get('id', '').strip()
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
-        sql = """SELECT * from tools where tool_name = %(tool_name)s"""
+        sql = """SELECT * from tools where tool_id = %(tool_id)s"""
         cursor = conn.cursor()
-        cursor.execute(sql, {"tool_name":tool_name})
+        cursor.execute(sql, {"tool_id":tool_id})
         columns = [column[0] for column in cursor.description]
         impure_results = []
         for row in cursor.fetchall():
@@ -241,26 +242,27 @@ def Edit_Tool_Details():
         description = str(request.form["description"]) 
         original_name = str(request.form["original_name"])
         emails = str(request.form["emails"])
+        tool_id = str(request.form["id"])
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         cursor = conn.cursor()
 
         sql="""
             DELETE FROM tools
-            WHERE tool_name=%(tool_name)s
+            WHERE tool_id=%(tool_id)s
             """
-        cursor.execute(sql, {"tool_name":original_name})
+        cursor.execute(sql, {"tool_id":tool_id})
 
         sql="""
         INSERT INTO tools
-                    (authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
+                    (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE
                     authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s
                     """
 
-        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity,emails, authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
+        cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails, authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
 
         cursor.close()
         conn.commit()
@@ -271,16 +273,117 @@ def Edit_Tool_Details():
 def Show_Tool_Details():
     para = request.args
     tool_name = para.get('name', '').strip()
+    tool_id = int(para.get('id', '').strip())
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
-    sql = """SELECT * from tools where tool_name = %(tool_name)s"""
+    sql = """SELECT * from tools where tool_id = %(tool_id)s"""
     cursor = conn.cursor()
-    cursor.execute(sql, {"tool_name": tool_name})
+    cursor.execute(sql, {"tool_id": tool_id})
     columns = [column[0] for column in cursor.description]
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
 
     return render_template('tools_detail.html', tool=impure_results[0], catalog=1)
+
+
+@app.route('/Tool_Like', methods=['GET', 'POST'])
+def Tool_Like():
+    res = {}
+    res['res'] = 'Please login first'
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please login first'
+    else:
+        username = session['username']
+        para = request.args
+        tool_id = int(para.get('id', '').strip())
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        sql="""
+        INSERT INTO likes
+                    (username, tool_id)
+                    VALUES
+                    (%s, %s)
+                    """
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (username, tool_id))
+            res['res'] = 'success'
+        except:
+            res['res'] = 'already'
+    return jsonify(res)
+
+@app.route('/Tool_Unlike', methods=['GET', 'POST'])
+def Tool_Unlike():
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        return 'please login first'
+    else:
+        try:
+            username = session['username']
+            para = request.args
+            tool_id = int(para.get('id', '').strip())
+            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+            sql="""
+                DELETE FROM likes
+                WHERE tool_id=%(tool_id)s
+                AND
+                username = %(username)s
+                """
+            cursor = conn.cursor()
+        except:
+            return
+        try:
+            cursor.execute(sql, {'tool_id':tool_id, 'username':username})
+        except:
+            return "you have already liked it"
+        return "success"
+
+
+@app.route('/Tool_Like_Query', methods=['GET', 'POST'])
+def Tool_Like_Query():
+    #username = session['username']
+    res = {}
+    para = request.args
+    tool_id = int(para.get('id', '').strip())
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    sql="""
+        SELECT COUNT(tool_id)
+                from likes
+                where
+                tool_id = %(tool_id)s
+                """
+    cursor = conn.cursor()
+    cursor.execute(sql, {"tool_id":tool_id})
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+    #print impure_results[0]
+    data = impure_results[0]
+    res['data'] = str(data['COUNT(tool_id)'])
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['liked'] = 0
+    else:
+        username = session['username']
+        sql = """
+            SELECT *
+                    from likes
+                    where
+                    tool_id = %(tool_id)s
+                    AND
+                    username = %(username)s
+            """
+        cursor.execute(sql, {"tool_id":tool_id, 'username':username})
+        if cursor.fetchall():
+            res['liked'] = 1
+        else:
+            res['liked'] = 0
+
+    res['res'] = 'success'
+
+    return jsonify(res)
+        
+        
+
+        
 
 @app.route('/Logout', methods=['GET', 'POST'])
 def Logout():

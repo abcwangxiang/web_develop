@@ -58,6 +58,76 @@ $(document).ready(function(){
 });
 </script>
 
+<script>
+$(function(){
+    $(".do_like_a").on('click', function(){   
+        var like_a = $(this);   
+        var id = like_a.attr("id"); //..id   
+        //love.fadeOut(300); //....   
+        $.ajax({   
+            type:"GET",   
+            url:"/Tool_Like",   
+            data:"id="+id,   
+            cache:false, //......   
+            success:function(res){   
+                if(res.res=="success"){
+                    var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
+                    ori += 1;
+                    document.getElementById("likes_"+id).innerHTML = ori;
+                    var button = document.getElementById("img_div_"+id);
+                    button.style.background="#777";
+                }
+                else if(res.res=="already"){
+                    if (confirm('You have aleady liked it, undo like?')) {
+                        $.ajax({
+                            type:"GET",
+                            url:"/Tool_Unlike",
+                            data:"id="+id,
+                            cache:false, 
+                            success:function(res){
+                                var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
+                                ori -= 1;
+                                document.getElementById("likes_"+id).innerHTML = ori;
+                                var button = document.getElementById("img_div_"+id);
+                                button.style.background="#FFF";
+                            }
+                        });
+                    } 
+                }
+                else{
+                    alert(res.res);   
+                }
+            }   
+        });   
+    })
+})
+</script>
+
+<script>
+function query_tool_likes(id) {
+    $.ajax({
+        type:"GET",
+        url:"/Tool_Like_Query",
+        data:"id="+id,
+        cache:false, //......
+        success:function(res){
+            if(res.res=="success"){
+                var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
+                ori += 1;
+                document.getElementById("likes_"+id).innerHTML = res.data;
+                if(res.liked==1){
+                    var button = document.getElementById("img_div_"+id);
+                    button.style.background="#777";
+                }
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+}
+</script>
+
     <h1 class="page-header">
         <h2 class="sub-header">List of all tools</h2>
     </h1>
@@ -73,19 +143,38 @@ $(document).ready(function(){
                 <th>APP URL</th>
                 <th>Wiki</th>
                 <th>Edit</th>
+                <th>Likes</th>
             </tr>
         </thead>
         <tbody>
         {% for tool in tools %}
             <tr>
-                <td><a href='{{url_for("Show_Tool_Details")}}?name={{tool['tool_name']}}'>{{tool['tool_name']}}</a></td>
+                <td><a href='{{url_for("Show_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}'>{{tool['tool_name']}}</a></td>
                 <td>{{tool['authors']}}</td>
                 <td>{{tool['team']}}</td>
                 <td>{{tool['keywords']}}</td>
                 <td>{{tool['maturity']}}</td>
                 <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch</a>{%endif%}</td>
                 <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open</a>{%endif%}</td>
-                <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}' class="btn btn-danger">Edit</a></td>
+                <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}' class="btn btn-danger">Edit</a></td>
+                <td><div id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
+                <script>
+                    query_tool_likes({{tool['tool_id']}})
+                </script>
+                <style>
+                    #img_div a {
+                        display: inline-block;
+                        position: relative;
+                        line-height: 0;
+                        float: left;
+                    }
+                    #img_div img {
+                    }
+                    #img_div span {
+                        position: absolute;
+                        top: 5px;
+                    }
+                </style>
             </tr>
         {% endfor %}
         </tbody>
