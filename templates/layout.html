@@ -56,7 +56,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-3 col-md-2 sidebar" id="div_sidebar">
-                {% if session.logged_in%}
+                {% if 1%}
                     <ul class="nav nav-sidebar">
                         {% if 0 %}
                             <li {% if request.path == url_for('Admin_Custom_Webpage') %} class="active" {% endif %} ><!-- active open --><a href={{url_for('Admin_Custom_Webpage')}}><i class="icon icon-th-list"></i> <span>Administrator</span> <span class="label">1</span></a>
@@ -67,16 +67,16 @@
                                 </ul>
                             </li>
                         {% endif %}
-                        <li {% if request.path in [url_for('Tools_Catalog'), '/Login', '/']%} class="active" {% endif %}><a href={{url_for('Tools_Catalog')}}>Tools Catalog</a></li>
-                        <li {% if request.path == url_for('Register_Tool') %} class="active" {% endif %}><a href={{url_for('Register_Tool')}}>Register Tools</a></li>
+                        <li {% if request.path in [url_for('Tools_Catalog'), '/Login', '/'] or catalog == 1%} class="active" {% endif %}><a href={{url_for('Tools_Catalog')}}>Tools Catalog</a></li>
+                        <li {% if request.path == url_for('Register_Tool') and catalog == 0%} class="active" {% endif %}><a href={{url_for('Register_Tool')}}>Register Tools</a></li>
                     </ul>
                 {% endif %}
             </div>
             {% if error or message%}
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 {% if error %}
-                <div class="alert alert-danger" role="alert">
-                    <strong>Error: </strong> {{error}}.
+                <div class="alert alert-danger" role="alert" style="font-size:150%;">
+                    <strong></strong> {{error}}.
                 </div>
                 {% endif %}
                 {% if message %}
@@ -88,7 +88,7 @@
             {% endif %}
         </div>
     </div>
-    {% if session.logged_in%}
+    {% if 1%}
     {% block body %}
     {% endblock %}
     {% endif %}

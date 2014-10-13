@@ -89,6 +89,9 @@ EMAIL_WARNING_MESSAGE = "If you want to send additinal message after default {} 
 
 FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 
+
+NO_LOGIN = 'Please login before register/edit tools'
+
 with app.test_request_context('/hello', method='POST'):
     # now you can do something with the request until the
     # end of the with block, such as basic assertions:
@@ -174,14 +177,15 @@ def Tools_Catalog():
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-    return render_template('tools_catalog.html', tools=impure_results)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=1)
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        return render_template('tools_login.html', previous_url=request.path, error=NO_LOGIN)
     if request.method == 'GET':
-        return render_template('tools_register.html')
+        return render_template('tools_register.html', catalog=0)
     else:
-
         tool_name = str(request.form["tool_name"]) 
         authors = str(request.form["authors"]) 
         team = str(request.form["team"]) 
@@ -190,17 +194,18 @@ def Register_Tool():
         url = str(request.form["url"]) 
         wiki = str(request.form["wiki"]) 
         description = str(request.form["description"]) 
+        emails = str(request.form["emails"]) 
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         cursor = conn.cursor()
         sql="""
         INSERT INTO tools
-                    (authors,team,tool_name,description,keywords,url,wiki,maturity)
+                    (authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
 
-        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity))
+        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
 
         cursor.close()
         conn.commit()
@@ -210,6 +215,8 @@ def Register_Tool():
     
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
 def Edit_Tool_Details():
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        return render_template('tools_login.html', previous_url=request.path, error=NO_LOGIN)
     if request.method == 'GET':
         para = request.args
         tool_name = para.get('name', '').strip()
@@ -221,8 +228,8 @@ def Edit_Tool_Details():
         impure_results = []
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
-
-        return render_template('tools_edit.html', tool=impure_results[0])
+        #print impure_results[0]
+        return render_template('tools_edit.html', tool=impure_results[0], catalog=1)
     elif request.method == 'POST':
         tool_name = str(request.form["tool_name"]) 
         authors = str(request.form["authors"]) 
@@ -233,6 +240,7 @@ def Edit_Tool_Details():
         wiki = str(request.form["wiki"]) 
         description = str(request.form["description"]) 
         original_name = str(request.form["original_name"])
+        emails = str(request.form["emails"])
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         cursor = conn.cursor()
@@ -245,14 +253,14 @@ def Edit_Tool_Details():
 
         sql="""
         INSERT INTO tools
-                    (authors,team,tool_name,description,keywords,url,wiki,maturity)
+                    (authors,team,tool_name,description,keywords,url,wiki,maturity,emails)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE
-                    authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s
+                    authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s
                     """
 
-        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity, authors,team,tool_name,description,keywords,url,wiki,maturity))
+        cursor.execute(sql, (authors,team,tool_name,description,keywords,url,wiki,maturity,emails, authors,team,tool_name,description,keywords,url,wiki,maturity,emails))
 
         cursor.close()
         conn.commit()
@@ -272,7 +280,7 @@ def Show_Tool_Details():
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
 
-    return render_template('tools_detail.html', tool=impure_results[0])
+    return render_template('tools_detail.html', tool=impure_results[0], catalog=1)
 
 @app.route('/Logout', methods=['GET', 'POST'])
 def Logout():
@@ -288,7 +296,8 @@ def Logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     session.pop('admin', None)
-    return render_template('query.html', message = 'You were logged out')
+    return Tools_Catalog()
+    #return render_template('tools_catalog.html', message = 'You were logged out')
 
 
 

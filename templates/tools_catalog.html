@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-{% if session.logged_in and session.admin %}
 {%block head%}
 <link rel='stylesheet' type='text/css' href='static/css/dataTables.bootstrap.css'>
 <link rel="stylesheet" type="text/css" href="static/css/jquery.dataTables.css">
@@ -59,9 +58,9 @@ $(document).ready(function(){
 });
 </script>
 
-    <h3><span class="label label-primary">
-        List of all tools
-    </span></h3>
+    <h1 class="page-header">
+        <h2 class="sub-header">List of all tools</h2>
+    </h1>
     {%if not tools==[]%}
     <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
         <thead>
@@ -100,4 +99,3 @@ $(document).ready(function(){
 </ul>
 </form>
 {% endblock %}
-{% endif %}
