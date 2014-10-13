@@ -37,6 +37,7 @@
 <div class="form-group required"><label class="col-md-2 control-label">Product/Component</label><div class="col-md-4"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Example:ESX/platform" required="required" title="" type="text"/></div></div>
 <div class="form-group required"><label class="col-md-2 control-label">Keywords</label><div class="col-md-4"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text"/></div></div>
 <div class="form-group required"><label class="col-md-2 control-label">Maturity Level</label><div class="col-md-4"><input list=maturity_options class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-2 control-label">Source</label><div class="col-md-4"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Where is this tool coming from?" required="required" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-2 control-label control-label2">Website URL</label><div class="col-md-4"><input class="form-control" id="id_url" value="{{tool['url']}}" name="url" placeholder="Website URL" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-2 control-label control-label2">Wiki URL</label><div class="col-md-4"><input class="form-control" id="id_wiki" value="{{tool['wiki']}}" name="wiki" placeholder="Wiki URL" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-2 control-label">Description</label><div class="col-md-4"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools">{{tool['description']}}</textarea></div></div>
@@ -49,6 +50,16 @@
     <option> Ship < 1 year
     <option> Ship > 1 year
 </datalist>
+
+<datalist id=source_options >
+    <option> CPD
+    <option> GSS
+    <option> Core
+    <option> Internal Other
+    <option> External
+</datalist>
+
+
 
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
