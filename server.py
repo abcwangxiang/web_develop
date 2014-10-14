@@ -126,7 +126,7 @@ def Login():
     login_result = server.login(str(request.form["BG_account"]), str(request.form["BG_password"]))
     if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
-        return render_template('query.html', error = "Error Account/Password, Please Login again")
+        return Tools_Catalog(error = "Error Account/Password, Please Login again")
         
     
     session['username'] = request.form['BG_account']
@@ -163,7 +163,7 @@ def Login():
     #return render_template('query.html')
 
 @app.route('/Tools_Catalog')
-def Tools_Catalog():
+def Tools_Catalog(error=''):
     """
     This should be modified to match the database
     """
@@ -177,7 +177,7 @@ def Tools_Catalog():
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-    return render_template('tools_catalog.html', tools=impure_results, catalog=1)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=1, error=error)
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
