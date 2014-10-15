@@ -46,7 +46,12 @@ function openPopup() {
 $.fn.dataTable.ext.order['dom-text-numeric'] = function  ( settings, col )
 {
     return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
-        return $('input', td).val() * 1;
+        //alert(i);
+        //alert(td);
+        var spann = $("span", td)[0].innerText * 1
+        //alert($("span", td))
+        //alert("??");
+        return spann;
     } );
 }
 </script>
@@ -63,10 +68,22 @@ var fnBuild = function (){
         //"aoColumns": [ 
         //    {"bVisible":true},  
         //]
-        columnDefs: [ {
-            "type": "dom-text-numeric",
-            "targets": -1
-        } ]
+        //columnDefs: [ {
+        //    "type": "dom-text-numeric",
+        //    "targets": -1
+        //} ]
+
+        "columns": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            { "orderDataType": "dom-text-numeric" }
+        ]
     });
 } 
 </script>
@@ -177,7 +194,7 @@ function query_tool_likes(id) {
                 <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch</a>{%endif%}</td>
                 <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open</a>{%endif%}</td>
                 <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}' class="btn btn-danger">Edit</a></td>
-                <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'>{{tool['tool_id']}}</div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
+                <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <script>
                     query_tool_likes({{tool['tool_id']}})
                 </script>
