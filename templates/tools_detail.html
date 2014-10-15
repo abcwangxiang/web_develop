@@ -5,17 +5,19 @@
     <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
     <script src="static/js/jquery-1.11.1.js"></script>
     <script src="static/js/jquery-ui.js"></script>
+    <script src="static/easy-comment/jquery.easy-comment.js"></script>
 
     <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
     {%endblock%}
 </head>
 <body>
     {%block body%}
-    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal">
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div class="row col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h1 class="page-header">
                 <h2 class="sub-header">Tool Details</h2>
             </h1>
+<div class="col-md-7 text-center" >
+    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal">
 
 <style>
 .form-group.required .control-label:after { 
@@ -31,25 +33,153 @@
 }
 </style>
 
-<div class="form-group required"><label class="col-md-2 control-label">Tool's Name</label><div class="col-md-4"><input class="form-control" id="id_tool_name" value="{{tool['tool_name']}}" name="tool_name" placeholder="Your Tool's Name" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Authors</label><div class="col-md-4"><input class="form-control" id="id_authors" value="{{tool['authors']}}" name="authors" placeholder="Comma-separated Names" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Contacts</label><div class="col-md-4"><input class="form-control" id="id_emails" value="{{tool['emails']}}" name="emails" placeholder="Comma-separated Emails/Alias" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Product/Component</label><div class="col-md-4"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Team" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Keywords</label><div class="col-md-4"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Maturity Level</label><div class="col-md-4"><input class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Source</label><div class="col-md-4"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Unknown" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-2 control-label">Description</label><div class="col-md-4"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools" readonly="readonly">{{tool['description']}}</textarea></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Tool's Name</label><div class="col-md-7"><input class="form-control" id="id_tool_name" value="{{tool['tool_name']}}" name="tool_name" placeholder="Your Tool's Name" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Authors</label><div class="col-md-7"><input class="form-control" id="id_authors" value="{{tool['authors']}}" name="authors" placeholder="Comma-separated Names" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Contacts</label><div class="col-md-7"><input class="form-control" id="id_emails" value="{{tool['emails']}}" name="emails" placeholder="Comma-separated Emails/Alias" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Product/Component</label><div class="col-md-7"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Team" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Keywords</label><div class="col-md-7"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Maturity Level</label><div class="col-md-7"><input class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Source</label><div class="col-md-7"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Unknown" required="required" title="" type="text" readonly="readonly"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Description</label><div class="col-md-7"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools" readonly="readonly">{{tool['description']}}</textarea></div></div>
 
 
     <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
+    <div class="col-md-4 col-md-offset-3">
       {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open Wiki</a>{%endif%}
       {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch APP</a>{%endif%}
         <!--<span class="glyphicon glyphicon-star"></span>--> 
-    </div>
-    </div>
-        </div>
     </form>
+    </div>
+    </div>
+</div>
+
+<style>
+.comment{
+    margin:20px 0 40px
+}
+
+.comment .comment-content{
+    background-color:#eaeaea;
+    padding:5px 15px 15px;
+    word-wrap: break-word;
+}
+
+.comment .comment-content:after{
+    position:absolute;
+    left:50px;
+    border-color:transparent #eaeaea transparent transparent;
+    border-style:solid;
+    border-width:0 29px 25px 0
+}
+
+.clearfix:before,.clearfix:after{
+    content:" ";
+    display:table
+}
+
+.clearfix:after{
+    clear:both
+}
+
+.comment .comment-meta{
+    margin:15px 0 0 0
+}
+
+img.avatar-small {
+    height: 40px;
+    width: 40px;
+    vertical-align: bottom;
+}
+
+.cpdtools_no_padding_right {
+    padding-right: 0px;
+}
+
+.cpdtools_no_padding_left {
+    padding-left: 0px;
+}
+</style>
+<div class='comment-container col-md-5'>
+    <div class='col-sm-12'>
+    <h3 style="font-family: bebasneue">Comments</h3>
+        <div>
+        <form accept-charset="UTF-8" id="commentForm" action="/Tool_Post_Comment"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="1" /></div><input id="comment_id" name="comment_tool_id" type="hidden" value="{{tool['tool_id']}}" />
+        <textarea class="form-control" style="resize: vertical; margin-bottom:5px;" id="comment_content" name="comment_content" {%if session['logged_in']%} placeholder="Leave a comment..."{%else %} placeholder="Login before leave comments..." disabled{%endif%} required="required" rows="2"></textarea>
+        {%if session['logged_in']%}
+        <button class="btn btn-primary" type="submit"><i class='fa fa-comment'></i>
+        Comment
+        </button>{%endif%}
+</form>
+
+        </div>
+
+<div class='comments'>
+
+</div><!--comments-->
+
+</div>
+</div>
+
+
+<script>
+//callback handler for form submit must under the form
+$( "#commentForm" ).submit(function(event) {
+    event.preventDefault();
+    var postData = $(this).serializeArray();
+    var formURL = $(this).attr("action");
+    $.ajax(
+    {
+        url : formURL,
+        type: "POST",
+        data : postData,
+        success:function(data, textStatus, jqXHR)
+        {
+            if(data.res=='success'){
+                $( ".comments" ).prepend( data.new_div ); 
+            }
+            else {
+                alert(data.res);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown)
+        {
+            alert("There is one internal error.");
+        }
+    });
+});
+
+function query_comments(id) {
+    $.ajax(
+    {
+        url : '/Tool_Get_Comments',
+        type: "GET",
+        data : "id="+id,
+        success:function(data, textStatus, jqXHR)
+        {
+            if(data.res=='success'){
+                $( ".comments" ).prepend( data.new_div );
+            }
+            else {
+                alert(data.res);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown)
+        {
+            alert("There is one internal error when loadding comments");
+        }
+    });
+
+}
+
+query_comments({{tool['tool_id']}})
+</script>
+
+
+
+
+
+
+</div>
     {%endblock%}
 </body>
 {% endif %}

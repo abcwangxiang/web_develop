@@ -6,9 +6,9 @@
 <link rel="stylesheet" type="text/css" href="static/css/dataTables.tableTools.css">
 
 <script type='text/javascript' src='static/js/jquery-1.11.1.js'></script>
+<script type='text/javascript' src='static/js/jquery.dataTables.js'></script>
 <script type='text/javascript' src='static/js/dataTables.bootstrap.js'></script>
 <script type='text/javascript' src='static/js/bootstrap-3.1.1.js'></script>
-<script type='text/javascript' src='static/js/jquery.dataTables.js'></script>
 <script type='text/javascript' src='static/js/dataTables.colVis.js'></script>
 <script type='text/javascript' src='static/js/dataTables.fixedColumns.js'></script>
 <script type="text/javascript" src="static/js/dataTables.tableTools.js"></script>
@@ -38,13 +38,22 @@ function openPopup() {
 </script>
 
 
-<form action="{{ url_for('Admin_Email_Processing') }}" method=post>
+<form action="" method=post>
 <ul class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
-{% set num_report = 1%}
+<script>
+/* Create an array with the values of all the input boxes in a column, parsed as numbers */
+$.fn.dataTable.ext.order['dom-text-numeric'] = function  ( settings, col )
+{
+    return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+        return $('input', td).val() * 1;
+    } );
+}
+</script>
+
 
 <script>
-$(document).ready(function(){
+var fnBuild = function (){
     var CPDtools_table = $('#Table_CPDtools').DataTable({
         dom: 'lfrtip',
         //scrollY:        true,
@@ -54,7 +63,17 @@ $(document).ready(function(){
         //"aoColumns": [ 
         //    {"bVisible":true},  
         //]
+        columnDefs: [ {
+            "type": "dom-text-numeric",
+            "targets": -1
+        } ]
     });
+} 
+</script>
+
+<script>
+$(document).ready(function(){
+    fnBuild();
 });
 </script>
 
@@ -74,6 +93,7 @@ $(function(){
                     var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
                     ori += 1;
                     document.getElementById("likes_"+id).innerHTML = ori;
+                    document.getElementById("hidden_likes_"+id).innerHTML = ori;
                     var button = document.getElementById("img_div_"+id);
                     button.style.background="#777";
                 }
@@ -88,6 +108,7 @@ $(function(){
                                 var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
                                 ori -= 1;
                                 document.getElementById("likes_"+id).innerHTML = ori;
+                                document.getElementById("hidden_likes_"+id).innerHTML = ori;
                                 var button = document.getElementById("img_div_"+id);
                                 button.style.background="#FFF";
                             }
@@ -112,9 +133,8 @@ function query_tool_likes(id) {
         cache:false, //......
         success:function(res){
             if(res.res=="success"){
-                var ori = parseInt(document.getElementById("likes_"+id).innerHTML);
-                ori += 1;
                 document.getElementById("likes_"+id).innerHTML = res.data;
+                document.getElementById("hidden_likes_"+id).innerHTML = res.data;
                 if(res.liked==1){
                     var button = document.getElementById("img_div_"+id);
                     button.style.background="#777";
@@ -157,7 +177,7 @@ function query_tool_likes(id) {
                 <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch</a>{%endif%}</td>
                 <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open</a>{%endif%}</td>
                 <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}' class="btn btn-danger">Edit</a></td>
-                <td><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
+                <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'>{{tool['tool_id']}}</div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <script>
                     query_tool_likes({{tool['tool_id']}})
                 </script>
@@ -189,7 +209,6 @@ function query_tool_likes(id) {
     N/A
     {%endif%}
     <br>
-{% set num_report = num_report+1 %}
 
 </ul>
 </form>

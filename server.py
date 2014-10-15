@@ -126,7 +126,7 @@ def Login():
     login_result = server.login(str(request.form["BG_account"]), str(request.form["BG_password"]))
     if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
-        return Tools_Catalog(error = "Error Account/Password, Please Login again")
+        return render_template('query.html', error = "Error Account/Password, Please Login again")
         
     
     session['username'] = request.form['BG_account']
@@ -163,7 +163,7 @@ def Login():
     #return render_template('query.html')
 
 @app.route('/Tools_Catalog')
-def Tools_Catalog(error=''):
+def Tools_Catalog():
     """
     This should be modified to match the database
     """
@@ -177,7 +177,7 @@ def Tools_Catalog(error=''):
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-    return render_template('tools_catalog.html', tools=impure_results, catalog=1, error=error)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=1)
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
@@ -384,8 +384,105 @@ def Tool_Like_Query():
     return jsonify(res)
         
         
+COMMENT_INNER_TEMPLATE = '''
+     <div class='comment'>
+     <div class='comment-meta clearfix row'><!---->
+     <div class='col-md-1 cpdtools_no_padding_left'>
+     <a href="https://vmwaresearch.vmware.com/search?proxystylesheet=vmlinksearch_frontend&getfields=*&site=People&q=%s@vmware.com"><img class='avatar-small' src='/static/images/default_avatar.png'></div></a>
+     <div class='col-md-11 cpdtools_no_padding_right'>
+     <a><span class='author'>%s</span></a>
+     <span class='date' style="float:right;">%s</span>
+     <div class='comment-content'>%s</div>
+     </div><!--name&content-->
+     </div><!--comment-meta-->
+     </div><!--comment-->
+'''
 
+
+@app.route('/Tool_Post_Comment', methods=['POST'])
+def Tool_Post_Comment():
+    res = {}
+    res['res'] = 'Please login first'
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please login first'
+    else:
+        username = session['username']
+        tool_id = str(request.form["comment_tool_id"])
+        utf8 = request.form["utf8"]
+        comment = request.form["comment_content"]
+        mydate = datetime.now()
+        date_str = mydate.strftime("%b %d, %Y")
+        realname = get_realname(username)
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        cursor = conn.cursor()
+        sql="""
+        INSERT INTO comments
+                    (username,tool_id,text,date,realname)
+                    VALUES
+                    (%s, %s, %s, %s, %s)
+                    """
+        cursor.execute(sql, (username,tool_id,comment,date_str,realname))
+
+        cursor.close()
+        conn.commit()
+        conn.close()
         
+        res['res'] = 'success'
+        res['data'] = {'username':username, 'realname':realname, 'comment':comment, 'date':date_str}
+
+        res['new_div'] = render_template('comment.html', data=res['data'])
+        #print res
+        
+    return jsonify(res)
+
+@app.route('/Tool_Get_Comments', methods=['GET'])
+def Tool_Get_Comments():
+    res = {}
+    res['new_div'] = ''
+    para = request.args
+    tool_id = int(para.get('id', '').strip())
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+    sql="""
+        Select * from comments
+        Where tool_id = %(tool_id)s
+        ORDER BY id ASC
+        """
+    cursor.execute(sql, {'tool_id': tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+    for comment in impure_results:
+        comment['comment'] = comment['text']
+        res['new_div'] += render_template('comment.html', data=comment)
+
+    res['res'] = 'success'
+    return jsonify(res)
+
+
+def get_realname(username):
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db='TriageRobot', charset='utf8')
+    cursor = conn.cursor()
+    sql="""
+        SELECT realname FROM profiles
+        Where login_name = %(login_name)s
+        """
+    cursor.execute(sql, {'login_name':username})
+
+    username = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+    return username
 
 @app.route('/Logout', methods=['GET', 'POST'])
 def Logout():
