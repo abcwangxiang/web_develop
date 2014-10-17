@@ -151,6 +151,7 @@ function query_tool_likes(id) {
 </div>
 
 <script>
+var originalHTML = "";
 rebind_edit_button();
 function rebind_edit_button(){
     rebind_like();
@@ -163,8 +164,10 @@ function rebind_edit_button(){
             cache:false, //......
             success:function(res){
                 if(res.res=="success"){
+                    originalHTML = document.getElementById("tool_info").innerHTML;
                     document.getElementById("tool_info").innerHTML = res.data;
                     rebind_submit_button();
+                    rebind_cancel_button();
                 }
                 else{
                     alert(res.res);
@@ -178,7 +181,7 @@ function rebind_edit_button(){
 
 <script>
 function rebind_submit_button() {
-    $( "#tool_edit_submit2" ).click(function() {
+    $( "#tool_edit_submit" ).click(function() {
         var form = $( "#tool_edit_form" )
         var postData = $(form).serializeArray();
         var formURL = $(form).attr("action");
@@ -205,6 +208,36 @@ function rebind_submit_button() {
     });
 }
 </script>
+
+<script>
+function rebind_cancel_button() {
+    $( "#tool_edit_cancel" ).click(function() {
+        /*$.ajax(
+        {
+            url : formURL,
+            type: "POST",
+            data : postData,
+            success:function(data, textStatus, jqXHR)
+            {
+                if(data.res=='success'){
+                    document.getElementById("tool_info").innerHTML = data.data;
+                    rebind_edit_button();
+                }
+                else {
+                    alert(data.res);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert("There is one internal error.");
+            }
+        });*/
+        document.getElementById("tool_info").innerHTML = originalHTML;
+        rebind_edit_button();
+    });
+}
+</script>
+
 
 
 <style>
