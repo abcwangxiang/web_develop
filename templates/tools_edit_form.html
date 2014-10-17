@@ -1,0 +1,55 @@
+<form action="{{ url_for('Tool_Edit_Frag') }}" method=post class="form-horizontal" id="tool_edit_form">
+
+<style>
+.form-group.required .control-label:after { 
+   content:"*";
+   color:red;
+}
+</style>
+
+<style>
+.form-group.required .control-label2:after { 
+   content:"";
+   color:gray;
+}
+</style>
+
+<div class="form-group required"><label class="col-md-3 control-label">Tool's Name</label><div class="col-md-7"><input class="form-control" id="id_tool_name" value="{{tool['tool_name']}}" name="tool_name" placeholder="Your Tool's Name" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Authors</label><div class="col-md-7"><input class="form-control" id="id_authors" value="{{tool['authors']}}" name="authors" placeholder="Comma-separated Names" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Emails</label><div class="col-md-7"><input class="form-control" id="id_emails" value="{{tool['emails']}}" name="emails" placeholder="Comma-separated Emails/Alias" required="required" title="" type="text" /></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Product/Component</label><div class="col-md-7"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Example:ESX/platform" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Keywords</label><div class="col-md-7"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Maturity Level</label><div class="col-md-7"><input list=maturity_options class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Source</label><div class="col-md-7"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Where is this tool coming from?" required="required" title="" type="text" /></div></div>
+<div class="form-group required"><label class="col-md-3 control-label control-label2">Website URL</label><div class="col-md-7"><input class="form-control" id="id_url" value="{{tool['url']}}" name="url" placeholder="Website URL" title="" type="text" /></div></div>
+<div class="form-group required"><label class="col-md-3 control-label control-label2">Wiki URL</label><div class="col-md-7"><input class="form-control" id="id_wiki" value="{{tool['wiki']}}" name="wiki" placeholder="Wiki URL" title="" type="text" /></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Description</label><div class="col-md-7"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools">{{tool['description']}}</textarea></div></div>
+
+<input type=hidden id="hidden_tool_origin_name" name="original_name" value="{{tool['tool_name']}}">
+<input type=hidden id="hidden_tool_origin_id" name="id" value="{{tool['tool_id']}}">
+<datalist id=maturity_options >
+    <option> <50% complete 
+    <option> 50%~100% complete 
+    <option> Ship < 1 year
+    <option> Ship > 1 year
+</datalist>
+
+<datalist id=source_options >
+    <option> CPD
+    <option> GSS
+    <option> Core
+    <option> Internal Other
+    <option> External
+</datalist>
+
+
+
+    <div class="form-group">
+    <label class="col-md-3 control-label"></label>
+    <div class="col-md-7 div_same_line" style="text-align: left;">
+      <a id="tool_edit_submit2" class="btn btn-danger" style="width: 100px;">submit</a>
+        <!--<span class="glyphicon glyphicon-star"></span>-->
+    </div>
+    </div>
+</form>
+

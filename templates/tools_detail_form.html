@@ -1,22 +1,4 @@
-{% extends "layout.html" %}
-{% if session.logged_in %}
-<head>
-    {%block head%}
-    <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
-    <script src="static/js/jquery-1.11.1.js"></script>
-    <script src="static/js/jquery-ui.js"></script>
-
-    <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
-    {%endblock%}
-</head>
-<body>
-    {%block body%}
-        <div class="row col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            <h1 class="page-header">
-                <h2 class="sub-header">Tool Details</h2>
-            </h1>
-<div class="col-md-7 text-center" id="tool_info">
-    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
+<form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
 
 <style>
 .form-group.required .control-label:after { 
@@ -42,7 +24,7 @@
 <div class="form-group required"><label class="col-md-3 control-label">Description</label><div class="col-md-7"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools" readonly="readonly">{{tool['description']}}</textarea></div></div>
 
 <script>
-function rebind_like(){
+$(function(){
     $(".do_like_a").on('click', function(){   
         var like_a = $(this);   
         var id = like_a.attr("ref"); //..id   
@@ -83,7 +65,7 @@ function rebind_like(){
             }   
         });   
     })
-}
+})
 </script>
 
 
@@ -113,12 +95,15 @@ function query_tool_likes(id) {
 
 
 
+
+
     <div class="form-group">
     <label class="col-md-3 control-label"></label>
     <div class="col-md-7 div_same_line" style="text-align: left;">
-      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch APP</a>{%endif%}
       {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open Wiki</a>{%endif%}
+      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch APP</a>{%endif%}
       <a id="tool_edit_button" class="btn btn-danger" style="width: 100px;">Edit</a>
+        <!--<span class="glyphicon glyphicon-star"></span>--> 
       <a class='btn btn-default do_like_a' ref="{{tool['tool_id']}}" id="img_div_{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a><span class="badge" id='likes_{{tool['tool_id']}}'>0</span>
         <!--<span class="glyphicon glyphicon-star"></span>--> 
       <script>
@@ -139,6 +124,7 @@ function query_tool_likes(id) {
           }
       </style>
 
+
       <style>
           .div_same_line {
               overflow: hidden;
@@ -148,191 +134,4 @@ function query_tool_likes(id) {
     </div>
     </div>
     </form>
-</div>
 
-<script>
-rebind_edit_button();
-function rebind_edit_button(){
-    rebind_like();
-    query_tool_likes({{tool['tool_id']}});
-    $( "#tool_edit_button" ).click(function() {
-        $.ajax({
-            type:"GET",
-            url:"/Tool_Edit_Frag",
-            data:"id="+{{tool['tool_id']}},
-            cache:false, //......
-            success:function(res){
-                if(res.res=="success"){
-                    document.getElementById("tool_info").innerHTML = res.data;
-                    rebind_submit_button();
-                }
-                else{
-                    alert(res.res);
-                }
-            }
-        });
-
-    });
-}
-</script>
-
-<script>
-function rebind_submit_button() {
-    $( "#tool_edit_submit2" ).click(function() {
-        var form = $( "#tool_edit_form" )
-        var postData = $(form).serializeArray();
-        var formURL = $(form).attr("action");
-        $.ajax(
-        {
-            url : formURL,
-            type: "POST",
-            data : postData,
-            success:function(data, textStatus, jqXHR)
-            {
-                if(data.res=='success'){
-                    document.getElementById("tool_info").innerHTML = data.data;
-                    rebind_edit_button();
-                }
-                else {
-                    alert(data.res);
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown)
-            {
-                alert("There is one internal error.");
-            }
-        });
-    });
-}
-</script>
-
-
-<style>
-.comment{
-    margin:20px 0 40px
-}
-
-.comment .comment-content{
-    background-color:#eaeaea;
-    padding:5px 15px 15px;
-    word-wrap: break-word;
-}
-
-.comment .comment-content:after{
-    position:absolute;
-    left:50px;
-    border-color:transparent #eaeaea transparent transparent;
-    border-style:solid;
-    border-width:0 29px 25px 0
-}
-
-.clearfix:before,.clearfix:after{
-    content:" ";
-    display:table
-}
-
-.clearfix:after{
-    clear:both
-}
-
-.comment .comment-meta{
-    margin:15px 0 0 0
-}
-
-img.avatar-small {
-    height: 40px;
-    width: 40px;
-    vertical-align: bottom;
-}
-
-.cpdtools_no_padding_right {
-    padding-right: 0px;
-}
-
-.cpdtools_no_padding_left {
-    padding-left: 0px;
-}
-</style>
-<div class='comment-container col-md-5'>
-    <div class='col-sm-12'>
-    <h3 style="font-family: bebasneue">Comments</h3>
-        <div>
-        <form accept-charset="UTF-8" id="commentForm" action="/Tool_Post_Comment"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="1" /></div><input id="comment_id" name="comment_tool_id" type="hidden" value="{{tool['tool_id']}}" />
-        <textarea class="form-control" style="resize: vertical; margin-bottom:5px;" id="comment_content" name="comment_content" {%if session['logged_in']%} placeholder="Leave a comment..."{%else %} placeholder="Login before leave comments..." disabled{%endif%} required="required" rows="2"></textarea>
-        {%if session['logged_in']%}
-        <button class="btn btn-primary" type="submit"><i class='fa fa-comment'></i>
-        Comment
-        </button>{%endif%}
-</form>
-
-        </div>
-<div class='comments'>
-
-</div><!--comments-->
-
-</div>
-</div>
-
-
-<script>
-//callback handler for form submit must under the form
-$( "#commentForm" ).submit(function(event) {
-    event.preventDefault();
-    var postData = $(this).serializeArray();
-    var formURL = $(this).attr("action");
-    $.ajax(
-    {
-        url : formURL,
-        type: "POST",
-        data : postData,
-        success:function(data, textStatus, jqXHR)
-        {
-            if(data.res=='success'){
-                $( ".comments" ).prepend( data.new_div ); 
-            }
-            else {
-                alert(data.res);
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown)
-        {
-            alert("There is one internal error.");
-        }
-    });
-});
-
-function query_comments(id) {
-    $.ajax(
-    {
-        url : '/Tool_Get_Comments',
-        type: "GET",
-        data : "id="+id,
-        success:function(data, textStatus, jqXHR)
-        {
-            if(data.res=='success'){
-                $( ".comments" ).prepend( data.new_div );
-            }
-            else {
-                alert(data.res);
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown)
-        {
-            alert("There is one internal error when loadding comments");
-        }
-    });
-
-}
-
-query_comments({{tool['tool_id']}})
-</script>
-
-
-
-
-
-
-</div>
-    {%endblock%}
-</body>
-{% endif %}

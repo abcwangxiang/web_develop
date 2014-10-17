@@ -213,6 +213,79 @@ def Register_Tool():
         conn.close()
         return Tools_Catalog()
        
+@app.route("/Tool_Edit_Frag", methods=['GET', 'POST'])
+def Tool_Edit_Frag():
+    res = {}
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please Login before edit'
+    else:
+        if request.method == 'GET':
+            para = request.args
+            tool_id = para.get('id', '').strip()
+            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+            sql = """SELECT * from tools where tool_id = %(tool_id)s"""
+            cursor = conn.cursor()
+            cursor.execute(sql, {"tool_id":tool_id})
+            columns = [column[0] for column in cursor.description]
+            impure_results = []
+            for row in cursor.fetchall():
+                impure_results.append(dict(zip(columns, row)))
+            #print impure_results[0]
+            res['data'] = render_template('tools_edit_form.html', tool=impure_results[0], catalog=1)
+        else:
+            tool_item = edit_tool_details()
+            res['data'] = render_template('tools_detail_form.html', tool=tool_item, catalog=1)
+        res['res'] = 'success'
+    return jsonify(res)
+
+def edit_tool_details():
+    tool_name = str(request.form["tool_name"]) 
+    authors = str(request.form["authors"]) 
+    team = str(request.form["team"]) 
+    keywords = str(request.form["keywords"]) 
+    maturity = str(request.form["maturity"]) 
+    url = str(request.form["url"]) 
+    wiki = str(request.form["wiki"]) 
+    description = str(request.form["description"]) 
+    original_name = str(request.form["original_name"])
+    emails = str(request.form["emails"])
+    tool_id = str(request.form["id"])
+    source = str(request.form["source"])
+
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    cursor = conn.cursor()
+
+    sql="""
+        DELETE FROM tools
+        WHERE tool_id=%(tool_id)s
+        """
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    sql="""
+    INSERT INTO tools
+                (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s,source=%s
+                """
+
+    cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
+
+    sql = """SELECT * from tools where tool_id = %(tool_id)s"""
+    cursor = conn.cursor()
+    cursor.execute(sql, {"tool_id": tool_id})
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+    return impure_results[0]
     
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
 def Edit_Tool_Details():
