@@ -126,7 +126,7 @@ def Login():
     login_result = server.login(str(request.form["BG_account"]), str(request.form["BG_password"]))
     if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
-        return render_template('tools_login.html', error = "Error Account/Password, Please Login again")
+        return render_template('query.html', error = "Error Account/Password, Please Login again")
         
     
     session['username'] = request.form['BG_account']
