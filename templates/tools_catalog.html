@@ -244,6 +244,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 })
 
 function query_tab_table(id) {
+    document.getElementById("table_place_holder").innerHTML = 'Loading...';
     $.ajax({
         type:"GET",
         url:"/Tools_Catalog_Query",
