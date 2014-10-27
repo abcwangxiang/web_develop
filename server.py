@@ -162,6 +162,51 @@ def Login():
     return index()
     #return render_template('query.html')
 
+@app.route('/Tools_Catalog_Query')
+def Tools_Catalog_Query():
+    res = {}
+    res['res'] = 'internal error'
+    para = request.args
+    tool_tab_id = para.get('id', '').strip()
+    if tool_tab_id == '100_m':
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        sql="""
+            SELECT *
+            from tools
+            where
+            maturity like 'Ship%'
+            """
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        columns = [column[0] for column in cursor.description]
+        impure_results = []
+        for row in cursor.fetchall():
+            impure_results.append(dict(zip(columns, row)))
+        #print impure_results[0]
+        data = impure_results
+        res['res'] = 'success'
+        res['data'] = render_template("tools_catalog_table_frag.html", tools=impure_results)
+    elif tool_tab_id == "all":
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        sql="""
+            SELECT *
+            from tools
+            """
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        columns = [column[0] for column in cursor.description]
+        impure_results = []
+        for row in cursor.fetchall():
+            impure_results.append(dict(zip(columns, row)))
+        #print impure_results[0]
+        data = impure_results
+        res['res'] = 'success'
+        res['data'] = render_template("tools_catalog_table_frag.html", tools=impure_results)
+
+    return jsonify(res)
+ 
+
+
 @app.route('/Tools_Catalog')
 def Tools_Catalog():
     """

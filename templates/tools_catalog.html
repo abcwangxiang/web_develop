@@ -25,21 +25,6 @@ When setting the name of posted variables, the name of "check_id", "comment_id" 
 {%endblock%}
 {%block body%}
 
-<script>
-function openPopup() {
-  var popup = window.open("", ""),
-      table = document.getElementById("T_ETA_bugs_table");
-
-  popup.document.write(table.outerHTML);
-  popup.document.close();
-  if (window.focus) 
-    popup.focus();
-}
-</script>
-
-
-<form action="" method=post>
-<ul class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
 <script>
 /* Create an array with the values of all the input boxes in a column, parsed as numbers */
@@ -96,7 +81,7 @@ $(document).ready(function(){
 </script>
 
 <script>
-$(function(){
+function bind_like(){
     $(".do_like_a").on('click', function(){   
         var like_a = $(this);   
         var id = like_a.attr("id"); //..id   
@@ -139,7 +124,12 @@ $(function(){
             }   
         });   
     })
+}
+
+$(function(){
+    bind_like();
 })
+
 </script>
 
 <script>
@@ -166,9 +156,20 @@ function query_tool_likes(id) {
 }
 </script>
 
+<form action="" method=post>
+<ul class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
     <h1 class="page-header">
         <h2 class="sub-header">List of all tools</h2>
     </h1>
+    <!--tab nav-->
+    <ul class="nav nav-tabs" role="tablist" id="tools_tab">
+      <li class="active"><a href="" id="tools_tab_all" data-toggle="tab">All</a></li>
+      <li><a href="" id="tools_tab_100_m" data-toggle="tab">100% Maturity</a></li>
+      <li><a href=""></a></li>
+    </ul>
+
+    <br>
+    <div id='table_place_holder'>
     {%if not tools==[]%}
     <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
         <thead>
@@ -226,7 +227,47 @@ function query_tool_likes(id) {
     {%else%}
     N/A
     {%endif%}
+    </div> <!--table place holder-->
     <br>
+
+<script>
+$('#tools_tab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+})
+
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  var a = e.target; // activated tab
+  var id = a.id.replace("tools_tab_", "");
+  query_tab_table(id)
+  //e.relatedTarget // previous tab
+})
+
+function query_tab_table(id) {
+    $.ajax({
+        type:"GET",
+        url:"/Tools_Catalog_Query",
+        data:"id="+id,
+        cache:false, //......
+        success:function(res){
+            if(res.res=="success"){
+                document.getElementById("table_place_holder").innerHTML = res.data;
+                fnBuild(); 
+                bind_like();
+                $('#Table_CPDtools > tbody > tr > td > div[id^=hidden]').each(function(){
+                    query_tool_likes(this.id.replace('hidden_likes_',""));
+                });
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+}
+</script>
+
+
+
 
 </ul>
 </form>

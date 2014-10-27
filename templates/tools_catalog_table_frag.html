@@ -1,0 +1,58 @@
+    {%if not tools==[]%}
+    <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Tool's Name</th>
+                <th>Owner</th>
+                <th>Team</th>
+                <th>Keywords</th>
+                <th>Maturity Level</th>
+                <th>APP URL</th>
+                <th>Wiki</th>
+                <th>Edit</th>
+                <th>Likes</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tool in tools %}
+            <tr>
+                <td><a href='{{url_for("Show_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}'>{{tool['tool_name']}}</a></td>
+                <td>{{tool['authors']}}</td>
+                <td>{{tool['team']}}</td>
+                <td>{{tool['keywords']}}</td>
+                <td>{{tool['maturity']}}</td>
+                <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch</a>{%endif%}</td>
+                <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open</a>{%endif%}</td>
+                <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}' class="btn btn-danger">Edit</a></td>
+                <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
+                <script>
+                    //query_tool_likes({{tool['tool_id']}})
+                </script>
+                <style>
+                    #img_div a {
+                        display: inline-block;
+                        position: relative;
+                        line-height: 0;
+                        float: left;
+                    }
+                    #img_div img {
+                    }
+                    #img_div span {
+                        position: absolute;
+                        top: 5px;
+                    }
+                </style>
+                <style>
+                    .div_same_line {
+                        overflow: hidden;
+                        white-space: nowrap;
+                    }
+                </style>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {%else%}
+    N/A
+    {%endif%}
+
