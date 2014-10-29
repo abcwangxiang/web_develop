@@ -240,11 +240,11 @@ def Register_Tool():
         maturity = str(request.form["maturity"]) 
         url = str(request.form["url"]) 
         wiki = str(request.form["wiki"]) 
-        description = str(request.form["description"]) 
+        description = request.form["description"] 
         emails = str(request.form["emails"]) 
         source = str(request.form["source"]) 
 
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         cursor = conn.cursor()
         sql="""
         INSERT INTO tools
@@ -269,7 +269,7 @@ def Tool_Edit_Frag():
         if request.method == 'GET':
             para = request.args
             tool_id = para.get('id', '').strip()
-            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
             sql = """SELECT * from tools where tool_id = %(tool_id)s"""
             cursor = conn.cursor()
             cursor.execute(sql, {"tool_id":tool_id})
@@ -293,20 +293,20 @@ def edit_tool_details():
     maturity = str(request.form["maturity"]) 
     url = str(request.form["url"]) 
     wiki = str(request.form["wiki"]) 
-    description = str(request.form["description"]) 
+    description = request.form["description"] 
     original_name = str(request.form["original_name"])
     emails = str(request.form["emails"])
     tool_id = str(request.form["id"])
     source = str(request.form["source"])
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     cursor = conn.cursor()
 
-    sql="""
-        DELETE FROM tools
-        WHERE tool_id=%(tool_id)s
-        """
-    cursor.execute(sql, {"tool_id":tool_id})
+    #sql="""
+    #    DELETE FROM tools
+    #    WHERE tool_id=%(tool_id)s
+    #    """
+    #cursor.execute(sql, {"tool_id":tool_id})
 
     sql="""
     INSERT INTO tools
@@ -342,7 +342,7 @@ def Edit_Tool_Details():
         para = request.args
         tool_name = para.get('name', '').strip()
         tool_id = para.get('id', '').strip()
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         sql = """SELECT * from tools where tool_id = %(tool_id)s"""
         cursor = conn.cursor()
         cursor.execute(sql, {"tool_id":tool_id})
@@ -360,20 +360,20 @@ def Edit_Tool_Details():
         maturity = str(request.form["maturity"]) 
         url = str(request.form["url"]) 
         wiki = str(request.form["wiki"]) 
-        description = str(request.form["description"]) 
+        description = request.form["description"] 
         original_name = str(request.form["original_name"])
         emails = str(request.form["emails"])
         tool_id = str(request.form["id"])
         source = str(request.form["source"])
 
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         cursor = conn.cursor()
 
-        sql="""
-            DELETE FROM tools
-            WHERE tool_id=%(tool_id)s
-            """
-        cursor.execute(sql, {"tool_id":tool_id})
+        #sql="""
+        #    DELETE FROM tools
+        #    WHERE tool_id=%(tool_id)s
+        #    """
+        #cursor.execute(sql, {"tool_id":tool_id})
 
         sql="""
         INSERT INTO tools
@@ -396,7 +396,7 @@ def Show_Tool_Details():
     para = request.args
     tool_name = para.get('name', '').strip()
     tool_id = int(para.get('id', '').strip())
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     sql = """SELECT * from tools where tool_id = %(tool_id)s"""
     cursor = conn.cursor()
     cursor.execute(sql, {"tool_id": tool_id})
