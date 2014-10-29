@@ -100,8 +100,8 @@ function query_tool_likes(id) {
     <div class="form-group">
     <label class="col-md-3 control-label"></label>
     <div class="col-md-7 div_same_line" style="text-align: left;">
-      {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank">Open Wiki</a>{%endif%}
-      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank">Launch APP</a>{%endif%}
+      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank" id='tool_activity_app_{{tool['tool_id']}}'>Launch APP</a>{%endif%}
+      {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank" id='tool_activity_wiki_{{tool['tool_id']}}'>Open Wiki</a>{%endif%}
       <a id="tool_edit_button" class="btn btn-danger" style="width: 100px;">Edit</a>
         <!--<span class="glyphicon glyphicon-star"></span>--> 
       <a class='btn btn-default do_like_a' ref="{{tool['tool_id']}}" id="img_div_{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a><span class="badge" id='likes_{{tool['tool_id']}}'>0</span>

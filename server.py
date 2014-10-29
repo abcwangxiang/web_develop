@@ -156,8 +156,8 @@ def Login():
     else:
         session['admin'] = False
     
-    cache.set('username', str(request.form["BG_account"]))
-    cache.set('cookie', cookie_file)
+    #cache.set('username', str(request.form["BG_account"]))
+    #cache.set('cookie', cookie_file)
     logging.warning("{} login into the bugzilla successfully.".format(session['username']))
     
     
@@ -585,6 +585,61 @@ def Tool_Get_Comments():
 
     res['res'] = 'success'
     return jsonify(res)
+
+@app.route('/Tool_Activity', methods=['GET'])
+def Tool_Activity():
+    res = {}
+    res['new_div'] = ''
+    tool_id = 0
+    para = request.args
+    paratuple = para.get('activity', '').strip().split("_")
+
+    if len(paratuple) > 1:
+        tool_id = int(paratuple[1])
+    
+    activity = paratuple[0]
+    
+    try:
+        update_activity(activity, tool_id)
+        res['res'] = 'success'
+    except:
+        res['res'] = 'internal error'
+    
+    return jsonify(res)
+   
+
+def update_activity(activity='', tool_id=0):
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        username = request.remote_addr
+    else:
+        username = session['username']
+    
+    if not activity:
+        activity = str(request)
+
+    mydate = datetime.now()
+    date_str = mydate.strftime("%b %d %H:%M:%S, %Y")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    sql="""
+        INSERT INTO activity
+        (username,tool_id,time,activity)
+        VALUES
+        (%s, %s, %s, %s)
+        """
+    cursor.execute(sql, (username,tool_id,date_str,activity))
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+
+def get_conn():
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    
+    return conn
 
 
 def get_realname(username):
@@ -3048,6 +3103,8 @@ def common_get_local_cursor():
 
 @app.route('/test_error')
 def test_error():
+    print dir(session)
+    print session.keys()
     error['1'] = 1
     return "index"
 
