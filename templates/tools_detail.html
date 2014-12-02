@@ -15,8 +15,9 @@
             <h1 class="page-header">
                 <h2 class="sub-header">Tool Details</h2>
             </h1>
-<div class="col-md-7 text-center" id="tool_info">
-    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
+<div class="col-md-7" id="tool_info_all">
+<div class="col-md-12 text-center" id="tool_info">
+<form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
 
 <style>
 .form-group.required .control-label:after { 
@@ -148,12 +149,74 @@ function query_tool_likes(id) {
     </div>
     </div>
     </form>
+</div><!--tool_info-->
+
+<div class="col-md-12 text-left">
+<h3>Plan&Track</h3>
+<div id="tool_active_info">
+</div><!--tool_active_info-->
 </div>
 
-<script>
 
+</div><!--tool_info_all-->
+
+<script>
+function update_active_tool_info(id){
+    document.getElementById("tool_active_info").innerHTML = "Updating...";
+    $.ajax({
+        type:"GET",
+        url:"/Tool_Active_Info_Frag",
+        data:"id="+id,
+        cache:false, //......
+        success:function(res){
+            if(res.res=="success"){
+                document.getElementById("tool_active_info").innerHTML = res.data;
+                var Progress_table = $('#Table_Active_Progress').DataTable({
+                    dom: 't',
+                    //scrollY:        true,
+                    //scrollX:        true,
+                    paging:         false,
+                    autoWidth:      false,
+                    //"aoColumns": [ 
+                    //    {"bVisible":true},  
+                    //]
+                    //columnDefs: [ {
+                    //    "type": "dom-text-numeric",
+                    //    "targets": -1
+                    //} ]
+                    "order": [[ 2, "desc" ]]
+                });
+
+                var Track_table = $('#Table_Active_Track').DataTable({
+                    dom: 't',
+                    //scrollY:        true,
+                    //scrollX:        true,
+                    paging:         false,
+                    autoWidth:      false,
+                    //"aoColumns": [ 
+                    //    {"bVisible":true},  
+                    //]
+                    //columnDefs: [ {
+                    //    "type": "dom-text-numeric",
+                    //    "targets": -1
+                    //} ]
+                    //"order": [[ 2, "desc" ]]
+                });
+                bind_activate_button();
+                bind_deactive_button();
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+}
+</script>
+
+<script>
 var originalHTML = "";
 rebind_edit_button();
+update_active_tool_info({{tool['tool_id']}});
 function rebind_edit_button(){
     rebind_like();
     query_tool_likes({{tool['tool_id']}});
@@ -262,7 +325,7 @@ function rebind_cancel_button() {
 }
 
 .clearfix:before,.clearfix:after{
-    content:" ";
+    content:"";
     display:table
 }
 
@@ -306,8 +369,7 @@ img.avatar-small {
 </div><!--comments-->
 
 </div>
-</div>
-
+</div><!--comments-container-->
 
 <script>
 //callback handler for form submit must under the form
@@ -364,8 +426,159 @@ query_comments({{tool['tool_id']}})
 
 
 
+<!--Update matuirty for active tools-->
+<script>
+function update_maturity(){
+    var elem = document.getElementById("id_progress");
+    new_value = elem.options[elem.selectedIndex].value;
+    if (new_value != $("#hidden_tool_origin_progress")[0].value){
+        //alert(new_value);
+        if ($('.content-one')[0].style.display == "none"){
+            $('.content-one').slideToggle('slow');
+        }
+    }
+    else{
+        if ($('.content-one')[0].style.display != "none"){
+            $('.content-one').slideToggle('slow');
+        }
+    }
+}
+</script>
 
+<!--bind activate button-->
+<script>
+function bind_activate_button() {
+    var btn = $( "#tool_activate" );
+    if(btn){
+        btn.click(function() {
+            document.getElementById("tool_active_info").innerHTML = "Loading...";
+            $.ajax(
+            {
+                url : "/Tool_Activate",
+                type: "GET",
+                data:"id="+{{tool['tool_id']}},
+                cache:false, //......
+                success:function(data, textStatus, jqXHR)
+                {
+                    if(data.res=='success'){
+                        document.getElementById("tool_active_info").innerHTML = data.data;
+                        bind_edit_active_info_submit();
+                        bind_edit_active_info_cancel();
+                        active_info_edit_table_init();
+                    }
+                    else {
+                        alert(data.res);
+                        update_active_tool_info({{tool['tool_id']}});
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    alert("There is one internal error.");
+                    update_active_tool_info({{tool['tool_id']}});
+                }
+            });
+            //rebind_edit_button();
+        });
+    }
+}
 
+function bind_edit_active_info_submit(){
+    var btn = $( "#active_info_edit_submit" );
+    if(btn){
+        btn.click(function() {
+            var form = $( "#tool_active_info_edit_form" )
+            var postData = $(form).serializeArray();
+            var formURL = $(form).attr("action");
+            $.ajax(
+            {
+                url : formURL,
+                type: "POST",
+                data : postData,
+                success:function(data, textStatus, jqXHR)
+                {
+                    if(data.res=='success'){
+                        update_active_tool_info({{tool['tool_id']}});
+                    }
+                    else {
+                        alert(data.res);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    alert("There is one internal error.");
+                }
+            });
+        });
+
+    }
+}
+
+function bind_edit_active_info_cancel(){
+    var btn = $( "#active_info_edit_cancel" );
+    if(btn){
+        btn.click(function() {
+            update_active_tool_info({{tool['tool_id']}});
+        });
+    }
+}
+
+function bind_deactive_button(){
+    var btn = $( "#tool_deactivate" );
+    if(btn){
+        btn.click(function() {
+            $.ajax(
+            {
+                url : "/Tool_Deactivate",
+                type: "GET",
+                data:"id="+{{tool['tool_id']}},
+                cache:false, //......
+                success:function(data, textStatus, jqXHR)
+                {
+                    if(data.res=='success'){
+                        alert("Successfully deactivated this tool")
+                    }
+                    else {
+                        alert(data.res);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    alert("There is one internal error.");
+                }
+            });
+            update_active_tool_info({{tool['tool_id']}});
+        });
+    }
+}
+
+function active_info_edit_table_init(){
+    var input = $( "#id_e_timeline_cal" )
+    if(input){
+        input.datepicker({
+            dateFormat: "yy-mm-dd",
+            altFormat: "yy-mm-dd",
+            altField: "#id_e_timeline",
+            minDate: "2014-01-01"
+        });
+    }
+
+    $('#id_backlog_check').popover({
+            trigger:"click hover", 
+            delay: {show: 50, hide: 4000},
+            content: "Add this tool to the backlog",
+            title: "",
+    });
+
+    $('#id_backlog_check').click(function(event) {  //on click
+        if(this.checked) { // check select status
+            $('.form-group.required .control-label3').addClass('control-label2');
+        }else{
+            $('.form-group.required .control-label3').removeClass('control-label2');
+        }
+    });
+
+}
+</script>
 
 </div>
     {%endblock%}

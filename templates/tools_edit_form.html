@@ -19,7 +19,16 @@
 <div class="form-group required"><label class="col-md-3 control-label">Emails</label><div class="col-md-7"><input class="form-control" id="id_emails" value="{{tool['emails']}}" name="emails" placeholder="Comma-separated Emails/Alias" required="required" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-3 control-label">Product/Component</label><div class="col-md-7"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Example:ESX/platform" required="required" title="" type="text"/></div></div>
 <div class="form-group required"><label class="col-md-3 control-label">Keywords</label><div class="col-md-7"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Maturity Level</label><div class="col-md-7"><input list=maturity_options class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text"/></div></div>
+<div class="form-group required"><label class="col-md-3 control-label">Maturity Level</label><div class="col-md-7"><select class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text"/>
+   <option value="{{tool['maturity']}}">{{tool['maturity']}}</option>
+   <option> <50% complete </option>
+   <option> 50%~100% complete </option>
+   <option value="Ship < 1 year"> Ship < 1 year </option>
+   <option value="Ship > 1 year"> Ship > 1 year </option>
+</select>
+</div>
+</div>
+
 <div class="form-group required"><label class="col-md-3 control-label">Source</label><div class="col-md-7"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Where is this tool coming from?" required="required" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-3 control-label control-label2">Website URL</label><div class="col-md-7"><input class="form-control" id="id_url" value="{{tool['url']}}" name="url" placeholder="Website URL" title="" type="text" /></div></div>
 <div class="form-group required"><label class="col-md-3 control-label control-label2">Wiki URL</label><div class="col-md-7"><input class="form-control" id="id_wiki" value="{{tool['wiki']}}" name="wiki" placeholder="Wiki URL" title="" type="text" /></div></div>
@@ -27,13 +36,8 @@
 
 <input type=hidden id="hidden_tool_origin_name" name="original_name" value="{{tool['tool_name']}}">
 <input type=hidden id="hidden_tool_origin_id" name="id" value="{{tool['tool_id']}}">
-<datalist id=maturity_options >
-    <option> <50% complete 
-    <option> 50%~100% complete 
-    <option> Ship < 1 year
-    <option> Ship > 1 year
-</datalist>
-
+<input type=hidden id="hidden_tool_origin_maturity" name="original_maturity" value="{{tool['maturity']}}">
+<input type=hidden id="hidden_tool_origin_active" name="original_active" value="{{active}}">
 <datalist id=source_options >
     <option> CPD
     <option> GSS
@@ -41,8 +45,6 @@
     <option> Internal Other
     <option> External
 </datalist>
-
-
 
     <div class="form-group">
     <label class="col-md-3 control-label"></label>

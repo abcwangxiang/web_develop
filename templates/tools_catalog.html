@@ -68,7 +68,43 @@ var fnBuild = function (){
             null,
             null,
             null,
-            { "orderDataType": "dom-text-numeric" }
+            { "orderDataType": "dom-text-numeric" },
+        ]
+    });
+} 
+</script>
+
+<!--for active table tab special case-->
+<script>
+var fnBuild_active = function (){
+    var CPDtools_table = $('#Table_CPDtools').DataTable({
+        dom: 'lfrtip',
+        //scrollY:        true,
+        //scrollX:        true,
+        paging:         false,
+        autoWidth:      false,
+        //"aoColumns": [ 
+        //    {"bVisible":true},  
+        //]
+        //columnDefs: [ {
+        //    "type": "dom-text-numeric",
+        //    "targets": -1
+        //} ]
+
+        "columns": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            { "orderDataType": "dom-text-numeric" },
         ]
     });
 } 
@@ -165,7 +201,8 @@ function query_tool_likes(id) {
     <ul class="nav nav-tabs" role="tablist" id="tools_tab">
       <li class="active"><a href="" id="tools_tab_all" data-toggle="tab">All</a></li>
       <li><a href="" id="tools_tab_100_m" data-toggle="tab">100% Maturity</a></li>
-      <li><a href=""></a></li>
+      <li><a href="" id="active" data-toggle="tab">Active</a></li>
+      <li><a href="" id="backlog" data-toggle="tab">Backlog</a></li>
     </ul>
     <div id='checkbox_div'>
         <!--placeholder for multi checkbox-->
@@ -179,7 +216,7 @@ function query_tool_likes(id) {
             <tr>
                 <th>Tool's Name</th>
                 <th>Owner</th>
-                <th>Team</th>
+                <th>Product/Component</th>
                 <th>Keywords</th>
                 <th>Maturity Level</th>
                 <th>APP URL</th>
@@ -256,7 +293,12 @@ function query_tab_table(id) {
         success:function(res){
             if(res.res=="success"){
                 document.getElementById("table_place_holder").innerHTML = res.data;
-                fnBuild(); 
+                if(res.spec=="active"){
+                    fnBuild_active(); 
+                }
+                else{
+                    fnBuild();
+                }
                 bind_like();
                 initialize_activity();
                 $('#Table_CPDtools > tbody > tr > td > div[id^=hidden]').each(function(){
@@ -277,7 +319,78 @@ function query_tab_table(id) {
 </ul>
 </form>
 
+<!--
+<a id="stats" href="#" tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" title="Statistics" data-placement="left">Stats</a>
+-->
+<div class="popover fade left in" style="top: 65%; left: 1px; display: block;"><h3 class="popover-title">Statistics</h3><div class="popover-content">
+<div id="statws">
+</div>
+</div></div>
+
+<style>
+#stats {
+    position: fixed;
+    top: 80px;
+    right:0;
+    width: 40px;
+    height: 60px;
+    text-align: left;
+    padding: 19px 2px;
+    font-size: 15px;
+}
+</style>
+
 <script>
 initialize_activity();
+
+/* we do not need hover popover now
+var originalLeave = $.fn.popover.Constructor.prototype.leave;
+$.fn.popover.Constructor.prototype.leave = function(obj){
+  var self = obj instanceof this.constructor ?
+    obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
+  var container, timeout;
+
+  originalLeave.call(this, obj);
+
+  if(obj.currentTarget) {
+    container = $(obj.currentTarget).siblings('.popover')
+    timeout = self.timeout;
+    container.one('mouseenter', function(){
+      //We entered the actual popover  call off the dogs
+      clearTimeout(timeout);
+      //Let's monitor popover content instead
+      container.one('mouseleave', function(){
+        $.fn.popover.Constructor.prototype.leave.call(self, self);
+      });
+    })
+  }
+};
+
+$('#stats').popover({
+        trigger:"click hover", 
+        delay: {show: 50, hide: 40000},
+        html : true,
+        content: function() {
+          return $('#popover_content_wrapper').html();
+        },
+});
+*/
+
+update_stats();
+function update_stats(){
+   $.ajax({
+      type:"GET",
+      url:"/Tools_Stats",
+      cache:false, //......
+      success:function(res){
+          if(res.res=="success"){
+              document.getElementById("statws").innerHTML = res.data;
+          }
+          else{
+              alert(res.res);
+          }
+      }
+   });
+}
 </script>
 {% endblock %}

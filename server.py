@@ -170,31 +170,41 @@ def Tools_Catalog_Query():
     res['res'] = 'internal error'
     para = request.args
     tool_tab_id = para.get('id', '').strip()
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    cursor = conn.cursor()
+
+    template = "tools_catalog_table_frag.html"
     if tool_tab_id == '100_m':
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         sql="""
             SELECT *
             from tools
             where
             maturity like 'Ship%'
             """
-        cursor = conn.cursor()
-        cursor.execute(sql)
-        columns = [column[0] for column in cursor.description]
-        impure_results = []
-        for row in cursor.fetchall():
-            impure_results.append(dict(zip(columns, row)))
-        #print impure_results[0]
-        data = impure_results
-        res['res'] = 'success'
-        res['data'] = render_template("tools_catalog_table_frag.html", tools=impure_results)
     elif tool_tab_id == "all":
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         sql="""
             SELECT *
             from tools
             """
-        cursor = conn.cursor()
+    elif tool_tab_id == "active":
+        sql="""
+            select tools.*, active_tools.*
+            from tools
+            INNER JOIN active_tools
+            on tools.tool_id = active_tools.tool_id
+            where active_tools.flag=1
+            """
+        template = "tools_active_table_frag.html"
+        res['spec'] = "active"
+    elif tool_tab_id == "backlog":
+        sql="""
+            select tools.*, active_tools.*
+            from tools
+            INNER JOIN active_tools
+            on tools.tool_id = active_tools.tool_id
+            where active_tools.flag=0
+            """
+    if sql:
         cursor.execute(sql)
         columns = [column[0] for column in cursor.description]
         impure_results = []
@@ -203,17 +213,19 @@ def Tools_Catalog_Query():
         #print impure_results[0]
         data = impure_results
         res['res'] = 'success'
-        res['data'] = render_template("tools_catalog_table_frag.html", tools=impure_results)
-
+        res['data'] = render_template(template, tools=impure_results)
+           
+    cursor.close()
+    conn.commit()
+    conn.close()
     return jsonify(res)
  
-
-
 @app.route('/Tools_Catalog')
 def Tools_Catalog():
     """
     This should be modified to match the database
     """
+
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
         
     sql = """SELECT * from tools"""
@@ -259,7 +271,202 @@ def Register_Tool():
         conn.commit()
         conn.close()
         return Tools_Catalog()
-       
+
+@app.route('/Tools_Stats')
+def Tools_Stats():
+    res = dict()
+    stats = dict()
+    stats['visited'] = os.popen('cat /etc/httpd/logs/access* | grep "GET / " | wc -l').read()
+
+    log_file = os.path.join(SCRIPTS_DIR, 'log/query_and_logging.log')
+    stats['user'] = os.popen('cat %s| grep "login into" | grep "successfully" | cut -d" " -f 8 | sort -u | wc -l'%log_file).read()
+
+    stats['app'], stats['wiki'] = get_stats_on_app_wiki()
+    res['res'] = 'success'
+    res['data'] = render_template('tools_catalog_stats_popover_table.html', stats=stats)
+    
+    return jsonify(res)
+
+def get_stats_on_app_wiki():
+
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+    sql = """
+          SELECT
+            SUM(activity= 'app') AS app,
+            SUM(activity = 'wiki') AS wiki
+          FROM activity 
+          """
+    cursor.execute(sql)
+
+
+    row = cursor.fetchone()
+    print row
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return row[0], row[1]
+
+@app.route('/Tool_Activate')
+def Tool_Activate():
+    res = {}
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please Login before activate/edit'
+    else:
+        para = request.args
+        tool_id = int(para.get('id', '').strip())
+        active_info = check_tool_actvie(tool_id, force=True) 
+        if not active_info:
+            active_info = dict()
+            active_info['tool_id'] = tool_id
+        res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info)
+        res['res'] = 'success'
+        try:
+            logging.warning("user: %s activated tool: %s."%(session['username'], tool_id))
+        except:
+            pass
+    return jsonify(res)
+
+@app.route('/Tool_Deactivate')
+def Tool_Deactivate():
+    res = {}
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please Login before this operation'
+    else:
+        para = request.args
+        tool_id = int(para.get('id', '').strip())
+        active_info = check_tool_actvie(tool_id) 
+        if active_info:
+            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+            cursor = conn.cursor()
+            sql = """update active_tools
+                     set `flag`=0
+                     where tool_id = %(tool_id)s
+                  """
+            cursor.execute(sql, {"tool_id":tool_id})
+
+            cursor.close()
+            conn.commit()
+            conn.close()
+            try:
+                logging.warning("user: %s deactivated tool: %s."%(session['username'], tool_id))
+            except:
+                pass
+
+        res['res'] = 'success'
+    return jsonify(res)
+
+@app.route('/Tool_Active_Info_Edit', methods=['GET', 'POST'])
+def Tool_Active_Info_Edit():
+    res = {}
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please Login before edit'
+    else:
+        tool_id = str(request.form["id"])
+        progress = str(request.form["progress"])
+        update = request.form["update"]
+        master_pr = request.form["master_pr"]
+        e_return = request.form["e_return"]
+        e_resource = request.form["e_resource"]
+        e_timeline = request.form["e_timeline"]
+        deliverables = request.form["deliverables"]
+        flag = '1'
+    
+        if "backlog_check" in request.form.keys():
+            backlog = True
+            flag = '0'
+        else:
+            backlog = False
+
+        if not backlog and not all([master_pr, e_return, e_resource, e_timeline, deliverables]):
+            res['res'] = 'Missing one or more mandatory fields'
+            return jsonify(res)
+
+        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        cursor = conn.cursor()
+
+        #sql="""
+        #    DELETE FROM tools
+        #    WHERE tool_id=%(tool_id)s
+        #    """
+        #cursor.execute(sql, {"tool_id":tool_id})
+
+        sql="""
+            INSERT INTO active_tools
+            (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
+            VALUES
+            (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s
+            """
+
+        cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
+
+        if update:
+            username = session['username']
+            new_progress = progress
+            date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+            sql="""
+                    insert into active_track
+                    (tool_id,username,date,`update`,new_progress)
+                    values
+                    (%s,%s,%s,%s,%s)
+                """
+            cursor.execute(sql,(tool_id, username, date, update, new_progress))
+            res['res'] = 'success'
+        elif progress!=str(request.form["original_progress"]):
+            res['res'] = 'Please leave some update on this progress change'
+        else:
+            res['res'] = 'success'
+
+        try:
+            logging.warning("user: %s modified active tool: %s."%(session['username'], tool_id))
+        except:
+            pass
+
+        cursor.close()
+        conn.commit()
+        conn.close()
+    return jsonify(res) 
+
+def check_tool_actvie(tool_id, force=False):
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+    sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
+    if not force:
+        sql += " and flag = 1"""
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    row = cursor.fetchone()
+    if row:
+        res = dict(zip(columns, row))
+    else:
+        res = ""
+    cursor.close()
+    conn.commit()
+    conn.close()
+    #print res
+    return res
+
+def get_active_progress_info(tool_id):
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+    sql = """SELECT * from active_track where tool_id = %(tool_id)s
+             ORDER BY id DESC"""
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    progress_results = []
+    for row in cursor.fetchall():
+        progress_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    print progress_results
+    return progress_results
+    
 @app.route("/Tool_Edit_Frag", methods=['GET', 'POST'])
 def Tool_Edit_Frag():
     res = {}
@@ -278,11 +485,22 @@ def Tool_Edit_Frag():
             for row in cursor.fetchall():
                 impure_results.append(dict(zip(columns, row)))
             #print impure_results[0]
-            res['data'] = render_template('tools_edit_form.html', tool=impure_results[0], catalog=1)
+            
+            #if it is active tool
+            active = 0
+            sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
+            cursor.execute(sql, {"tool_id":tool_id})
+            if cursor.fetchone():
+                active = 1
+            res['data'] = render_template('tools_edit_form.html', tool=impure_results[0], catalog=1, active=active)
+            res['res'] = 'success'
         else:
-            tool_item = edit_tool_details()
-            res['data'] = render_template('tools_detail_form.html', tool=tool_item, catalog=1)
-        res['res'] = 'success'
+            success, tool_item, message = edit_tool_details()
+            if success:
+                res['data'] = render_template('tools_detail_form.html', tool=tool_item, catalog=1)
+                res['res'] = 'success'
+            else:
+                res['res'] = message
     return jsonify(res)
 
 def edit_tool_details():
@@ -319,8 +537,22 @@ def edit_tool_details():
 
     cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
 
+    #edit active tool table, we don't need it here anymore
+    #if update:
+    #    username = session['username']
+    #    new_progress = maturity
+    #    date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+    #    sql="""
+    #            insert into active_track
+    #            (tool_id,username,date,`update`,new_progress)
+    #            values
+    #            (%s,%s,%s,%s,%s)
+    #        """
+    #    cursor.execute(sql,(tool_id, username, date, update, new_progress))
+    #elif str(request.form["original_active"])=="1" and maturity!=str(request.form["original_maturity"]):
+    #    return False, "", "please leave some progress update"
+
     sql = """SELECT * from tools where tool_id = %(tool_id)s"""
-    cursor = conn.cursor()
     cursor.execute(sql, {"tool_id": tool_id})
     columns = [column[0] for column in cursor.description]
     impure_results = []
@@ -332,7 +564,7 @@ def edit_tool_details():
     conn.commit()
     conn.close()
 
-    return impure_results[0]
+    return True, impure_results[0], ""
     
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
 def Edit_Tool_Details():
@@ -351,7 +583,14 @@ def Edit_Tool_Details():
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
         #print impure_results[0]
-        return render_template('tools_edit.html', tool=impure_results[0], catalog=1)
+
+        #if it is active tool
+        active = 0
+        sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
+        cursor.execute(sql, {"tool_id":tool_id})
+        if cursor.fetchone():
+            active = 1
+        return render_template('tools_edit.html', tool=impure_results[0], catalog=1, active=active)
     elif request.method == 'POST':
         tool_name = str(request.form["tool_name"]) 
         authors = str(request.form["authors"]) 
@@ -407,6 +646,26 @@ def Show_Tool_Details():
 
     return render_template('tools_detail.html', tool=impure_results[0], catalog=1)
 
+@app.route('/Tool_Active_Info_Frag')
+def Tool_Active_Info_Frag():
+    res = {}
+    para = request.args
+    tool_id = int(para.get('id', '').strip())
+    active_flag = False
+    active_progress_info = []
+    active_info = check_tool_actvie(tool_id)
+    if active_info:
+        active_flag = True
+        active_progress_info = get_active_progress_info(tool_id)
+        for progress in active_progress_info:
+            progress['username'] = get_realname(progress['username'])
+
+    res['data'] = render_template('tools_active_info_frag.html', 
+                            active_flag=active_flag, active_info=active_info,
+                            active_progress_info=active_progress_info)
+    res['res'] = 'success'
+    return jsonify(res)
+   
 
 @app.route('/Tool_Like', methods=['GET', 'POST'])
 def Tool_Like():
