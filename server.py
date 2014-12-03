@@ -170,7 +170,7 @@ def Tools_Catalog_Query():
     res['res'] = 'internal error'
     para = request.args
     tool_tab_id = para.get('id', '').strip()
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     cursor = conn.cursor()
 
     template = "tools_catalog_table_frag.html"
@@ -226,7 +226,7 @@ def Tools_Catalog():
     This should be modified to match the database
     """
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         
     sql = """SELECT * from tools"""
     
@@ -276,7 +276,7 @@ def Register_Tool():
 def Tools_Stats():
     res = dict()
     stats = dict()
-    stats['visited'] = os.popen('cat /etc/httpd/logs/access* | grep "GET / " | wc -l').read()
+    stats['visited'] = int(os.popen('cat /etc/httpd/logs/access* | grep "GET / " | wc -l').read())+769
 
     log_file = os.path.join(SCRIPTS_DIR, 'log/query_and_logging.log')
     stats['user'] = os.popen('cat %s| grep "login into" | grep "successfully" | cut -d" " -f 8 | sort -u | wc -l'%log_file).read()

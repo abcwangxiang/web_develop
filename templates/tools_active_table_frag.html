@@ -8,7 +8,7 @@
                 <th>Maturity Level</th>
                 <th>APP URL</th>
                 <th>Wiki</th>
-                <th>Estimated Resource</th>
+                <th>Estimated Resource<br>(Man*Week)</th>
                 <th>Plan<br>Progess</th>
                 <th>Estimated Return</th>
                 <th>Deliverables</th>
@@ -31,8 +31,8 @@
                 <script>
                     //query_tool_likes({{tool['tool_id']}})
                 </script>
-                <td>{{tool['return']}}</td>
-                <td>{{tool['deliverables']}}</td>
+                <td>{{tool['return'][0:60]}}...</td>
+                <td>{{tool['deliverables'][0:60]}}...</td>
                 <td>{{tool['master_pr']}}</td>
                 <td>{{tool['eta']}}</td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>

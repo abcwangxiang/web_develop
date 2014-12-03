@@ -451,33 +451,36 @@ function bind_activate_button() {
     var btn = $( "#tool_activate" );
     if(btn){
         btn.click(function() {
-            document.getElementById("tool_active_info").innerHTML = "Loading...";
-            $.ajax(
-            {
-                url : "/Tool_Activate",
-                type: "GET",
-                data:"id="+{{tool['tool_id']}},
-                cache:false, //......
-                success:function(data, textStatus, jqXHR)
+            var op = $( "#tool_activate" )[0].innerHTML=="Edit"?"edit":"activate"
+            if (confirm('Please make sure from this tool\'s owner that you can '+op+' this tool. Confirm?')){
+                document.getElementById("tool_active_info").innerHTML = "Loading...";
+                $.ajax(
                 {
-                    if(data.res=='success'){
-                        document.getElementById("tool_active_info").innerHTML = data.data;
-                        bind_edit_active_info_submit();
-                        bind_edit_active_info_cancel();
-                        active_info_edit_table_init();
-                    }
-                    else {
-                        alert(data.res);
+                    url : "/Tool_Activate",
+                    type: "GET",
+                    data:"id="+{{tool['tool_id']}},
+                    cache:false, //......
+                    success:function(data, textStatus, jqXHR)
+                    {
+                        if(data.res=='success'){
+                            document.getElementById("tool_active_info").innerHTML = data.data;
+                            bind_edit_active_info_submit();
+                            bind_edit_active_info_cancel();
+                            active_info_edit_table_init();
+                        }
+                        else {
+                            alert(data.res);
+                            update_active_tool_info({{tool['tool_id']}});
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown)
+                    {
+                        alert("There is one internal error.");
                         update_active_tool_info({{tool['tool_id']}});
                     }
-                },
-                error: function(jqXHR, textStatus, errorThrown)
-                {
-                    alert("There is one internal error.");
-                    update_active_tool_info({{tool['tool_id']}});
-                }
-            });
-            //rebind_edit_button();
+                });
+                //rebind_edit_button();
+            }
         });
     }
 }
@@ -526,27 +529,30 @@ function bind_deactive_button(){
     var btn = $( "#tool_deactivate" );
     if(btn){
         btn.click(function() {
-            $.ajax(
-            {
-                url : "/Tool_Deactivate",
-                type: "GET",
-                data:"id="+{{tool['tool_id']}},
-                cache:false, //......
-                success:function(data, textStatus, jqXHR)
+            var op = "deactivate";
+            if (confirm('Please make sure from this tool\'s owner that you can '+op+' this tool. Confirm?')){
+                $.ajax(
                 {
-                    if(data.res=='success'){
-                        alert("Successfully deactivated this tool")
+                    url : "/Tool_Deactivate",
+                    type: "GET",
+                    data:"id="+{{tool['tool_id']}},
+                    cache:false, //......
+                    success:function(data, textStatus, jqXHR)
+                    {
+                        if(data.res=='success'){
+                            alert("Successfully deactivated this tool")
+                        }
+                        else {
+                            alert(data.res);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown)
+                    {
+                        alert("There is one internal error.");
                     }
-                    else {
-                        alert(data.res);
-                    }
-                },
-                error: function(jqXHR, textStatus, errorThrown)
-                {
-                    alert("There is one internal error.");
-                }
-            });
-            update_active_tool_info({{tool['tool_id']}});
+                });
+                update_active_tool_info({{tool['tool_id']}});
+            }
         });
     }
 }
