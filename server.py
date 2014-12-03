@@ -564,6 +564,8 @@ def edit_tool_details():
     conn.commit()
     conn.close()
 
+    logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
+
     return True, impure_results[0], ""
     
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
@@ -628,6 +630,9 @@ def Edit_Tool_Details():
         cursor.close()
         conn.commit()
         conn.close()
+
+        logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
+
         return Tools_Catalog()
        
 @app.route("/Show_Tool_Details")
