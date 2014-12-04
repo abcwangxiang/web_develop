@@ -671,6 +671,43 @@ def Tool_Active_Info_Frag():
     res['res'] = 'success'
     return jsonify(res)
    
+@app.route('/Tool_Active_Lasr_Query')
+def Tool_Active_Lasr_Query():
+    res = {}
+    para = request.args
+    tool_id = int(para.get('id', '').strip())
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from active_track 
+             where tool_id = %(tool_id)s
+             ORDER BY id DESC
+             LIMIT 1
+          """
+    cursor.execute(sql, {"tool_id": tool_id})
+    columns = [column[0] for column in cursor.description]
+    row = cursor.fetchone()
+    if row:
+        track = dict(zip(columns, row))
+        res['data'] = track['date']
+        date = datetime.strptime(track['date'],"%Y-%m-%d, %H:%M:%S PST")
+        now = datetime.now()
+        print (now - date).days
+        if (now - date).days >= 7:
+            print "hit"
+            res['flag'] = 1
+        else:
+            res['flag'] = 0
+    else:
+        res['data'] = 'N/A'
+        res['flag'] = 1
+
+    res['res'] = 'success'
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+    return jsonify(res)
+
 
 @app.route('/Tool_Like', methods=['GET', 'POST'])
 def Tool_Like():

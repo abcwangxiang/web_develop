@@ -14,12 +14,13 @@
                 <th>Deliverables</th>
                 <th>Master PR</th>
                 <th>ETA</th>
+                <th>Last Update</th>
                 <th>Likes</th>
             </tr>
         </thead>
         <tbody>
         {% for tool in tools %}
-            <tr>
+            <tr id="tr_{{tool['tool_id']}}">
                 <td><a href='{{url_for("Show_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}'>{{tool['tool_name']}}</a></td>
                 <td>{{tool['authors']}}</td>
                 <td>{{tool['team']}}</td>
@@ -35,6 +36,7 @@
                 <td>{{tool['deliverables'][0:60]}}...</td>
                 <td>{{tool['master_pr']}}</td>
                 <td>{{tool['eta']}}</td>
+                <td><div style="display:none;" id='hidden_last_{{tool['tool_id']}}'></div><div id='last_{{tool['tool_id']}}'>N/A</div></td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <style>
                     #img_div a {
