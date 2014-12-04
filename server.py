@@ -101,6 +101,9 @@ with app.test_request_context('/hello', method='POST'):
 
 @app.route('/')
 def index():
+    
+    visited_file = os.path.join(SCRIPTS_DIR, 'log/visited.log')
+    new = os.popen('touch %s; echo 1 >> %s'%(visited_file, visited_file)).read()
     return Tools_Catalog()
 
 @app.route('/Login', methods=['GET', 'POST'])
@@ -276,7 +279,10 @@ def Register_Tool():
 def Tools_Stats():
     res = dict()
     stats = dict()
-    stats['visited'] = int(os.popen('cat /etc/httpd/logs/access* | grep "GET / " | wc -l').read())+1769
+    #stats['visited'] = int(os.popen('cat /etc/httpd/logs/access* | grep "GET / " | wc -l').read())+1769
+    visited_file = os.path.join(SCRIPTS_DIR, 'log/visited.log')
+    stats['visited'] = os.popen('cat %s'%visited_file).read().split('\n')
+    stats['visited'] = str(sum(map(int, filter(None, stats['visited']))))
 
     log_file = os.path.join(SCRIPTS_DIR, 'log/query_and_logging.log')
     stats['user'] = os.popen('cat %s| grep "login into" | grep "successfully" | cut -d" " -f 8 | sort -u | wc -l'%log_file).read()
