@@ -242,7 +242,7 @@ function query_tool_likes(id) {
     <ul class="nav nav-tabs" role="tablist" id="tools_tab">
       <li class="active"><a href="" id="tools_tab_all" data-toggle="tab">All</a></li>
       <li><a href="" id="tools_tab_100_m" data-toggle="tab">100% Maturity</a></li>
-      <li><a href="" id="active" data-toggle="tab">Active</a></li>
+      <li><a href="Active_Tools" id="active" data-toggle="tab">Active</a></li>
       <li><a href="" id="backlog" data-toggle="tab">Backlog</a></li>
     </ul>
     <div id='checkbox_div'>
@@ -352,6 +352,10 @@ function query_tab_table(id) {
         }
     });
 }
+
+{%if active_view%}
+    $('#active').click()
+{%endif%}
 </script>
 
 

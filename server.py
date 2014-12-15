@@ -224,7 +224,7 @@ def Tools_Catalog_Query():
     return jsonify(res)
  
 @app.route('/Tools_Catalog')
-def Tools_Catalog():
+def Tools_Catalog(active_view=False):
     """
     This should be modified to match the database
     """
@@ -239,7 +239,7 @@ def Tools_Catalog():
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-    return render_template('tools_catalog.html', tools=impure_results, catalog=1)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=1, active_view=active_view)
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
@@ -274,6 +274,10 @@ def Register_Tool():
         conn.commit()
         conn.close()
         return Tools_Catalog()
+
+@app.route('/Active_Tools')
+def Tools_Active_Tools():
+    return Tools_Catalog(active_view=True)
 
 @app.route('/Tools_Stats')
 def Tools_Stats():

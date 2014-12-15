@@ -1,20 +1,20 @@
     {%if not tools==[]%}
-    <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
+    <table id="Table_CPDtools" class="display" cellspacing="0">
         <thead>
             <tr>
-                <th>Tool's Name</th>
+                <th>Tool Name</th>
                 <th>Owner</th>
                 <th>Product/<br>Component</th>
                 <th>Maturity Level</th>
                 <th>APP URL</th>
                 <th>Wiki</th>
+                <th>ETA</th>
+                <th>Last Update</th>
                 <th>Estimated Resource<br>(Man*Week)</th>
                 <th>Plan<br>Progess</th>
                 <th>Estimated Return</th>
                 <th>Deliverables</th>
                 <th>Master PR</th>
-                <th>ETA</th>
-                <th>Last Update</th>
                 <th>Likes</th>
             </tr>
         </thead>
@@ -27,6 +27,8 @@
                 <td>{{tool['maturity']}}</td>
                 <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank" id='tool_activity_app_{{tool['tool_id']}}'>Launch</a>{%endif%}</td>
                 <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank" id='tool_activity_wiki_{{tool['tool_id']}}'>Open</a>{%endif%}</td>
+                <td>{{tool['eta']}}</td>
+                <td><div style="display:none;" id='hidden_last_{{tool['tool_id']}}'></div><div id='last_{{tool['tool_id']}}'>N/A</div></td>
                 <td>{{tool['resource']}}</td>
                 <td>{{tool['progress']}}</td>
                 <script>
@@ -35,8 +37,6 @@
                 <td>{{tool['return'][0:60]}}...</td>
                 <td>{{tool['deliverables'][0:60]}}...</td>
                 <td>{{tool['master_pr']}}</td>
-                <td>{{tool['eta']}}</td>
-                <td><div style="display:none;" id='hidden_last_{{tool['tool_id']}}'></div><div id='last_{{tool['tool_id']}}'>N/A</div></td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <style>
                     #img_div a {
