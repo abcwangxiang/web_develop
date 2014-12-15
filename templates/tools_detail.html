@@ -452,7 +452,7 @@ function bind_activate_button() {
     if(btn){
         btn.click(function() {
             var op = $( "#tool_activate" )[0].innerHTML=="Edit"?"edit":"activate"
-            if (confirm('Please make sure from this tool\'s owner that you can '+op+' this tool. Confirm?')){
+            if (confirm('Before '+op+', please be sure it is agreed by tool Champion geo lead. Confirm?')){
                 document.getElementById("tool_active_info").innerHTML = "Loading...";
                 $.ajax(
                 {
@@ -530,7 +530,7 @@ function bind_deactive_button(){
     if(btn){
         btn.click(function() {
             var op = "deactivate";
-            if (confirm('Please make sure from this tool\'s owner that you can '+op+' this tool. Confirm?')){
+            if (confirm('Before '+op+', please be sure it is agreed by tool Champion Geoleads. Confirm?')){
                 $.ajax(
                 {
                     url : "/Tool_Deactivate",
