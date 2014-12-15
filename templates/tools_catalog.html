@@ -313,8 +313,8 @@ function query_tool_likes(id) {
 
 <script>
 $('#tools_tab a').click(function (e) {
-  e.preventDefault();
-  $(this).tab('show');
+    e.preventDefault();
+    $(this).tab('show');
 })
 
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -336,9 +336,11 @@ function query_tab_table(id) {
                 document.getElementById("table_place_holder").innerHTML = res.data;
                 if(res.spec=="active"){
                     fnBuild_active(); 
+                    window.history.pushState("", "", "/Active_Tools");
                 }
                 else{
                     fnBuild();
+                    window.history.pushState("", "", "/");
                 }
                 bind_like();
                 initialize_activity();

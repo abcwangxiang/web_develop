@@ -316,7 +316,7 @@ def get_stats_on_app_wiki():
     cursor.close()
     conn.commit()
     conn.close()
-    return int(row[0])+1032, int(row[1])+1031
+    return int(row[0])+1532, int(row[1])+1431
 
 @app.route('/Tool_Activate')
 def Tool_Activate():
