@@ -141,6 +141,11 @@ function query_active_tool_last(id){
                        this.style.background="#ffaaaa";
                    });
                 }
+                else if(res.flag==2){
+                   $("#tr_"+id).find('td').each(function(){
+                       this.style.background="#FF8000";
+                   });
+                }
             }
             else{
                 alert(res.res);

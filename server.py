@@ -701,10 +701,12 @@ def Tool_Active_Lasr_Query():
         res['data'] = track['date']
         date = datetime.strptime(track['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
-        print (now - date).days
-        if (now - date).days >= 7:
-            print "hit"
+        #print (now - date).days
+        if (now - date).days >= 14:
+            #print "hit"
             res['flag'] = 1
+        elif (now - date).days >= 7:
+            res['flag'] = 2
         else:
             res['flag'] = 0
     else:
