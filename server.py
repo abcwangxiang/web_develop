@@ -51,7 +51,7 @@ PATCHTOOL_DATABASE_PORT = 3306
 PATCHTOOL_DATABASE_USER = "read"
 PATCHTOOL_DATABASE_PW = "read"
 PATCHTOOL_DATABASE_DATABASE = "rmtool"
-pttl_conn = MySQLdb.connect(host=PATCHTOOL_DATABASE_HOST, port=PATCHTOOL_DATABASE_PORT, user=PATCHTOOL_DATABASE_USER, passwd=PATCHTOOL_DATABASE_PW, db=PATCHTOOL_DATABASE_DATABASE)
+#pttl_conn = MySQLdb.connect(host=PATCHTOOL_DATABASE_HOST, port=PATCHTOOL_DATABASE_PORT, user=PATCHTOOL_DATABASE_USER, passwd=PATCHTOOL_DATABASE_PW, db=PATCHTOOL_DATABASE_DATABASE)
 
 app = Flask(__name__)
 app.secret_key = 'B1Z298g/3y2 R~lHHbjaN]LWX/,?RT'
@@ -3426,8 +3426,8 @@ def internal_error(error):
     try:
         from_addr = session["username"] + "@vmware.com"
     except:
-        from_addr = "fangchiw@vmware.com"
-    to_addr = "fangchiw@vmware.com"
+        from_addr = "xiangw@vmware.com"
+    to_addr = "xiangw@vmware.com"
     subject = """[TriageRobot Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'

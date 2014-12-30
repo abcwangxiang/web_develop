@@ -427,23 +427,33 @@ query_comments({{tool['tool_id']}})
 
 
 <!--Update matuirty for active tools-->
+
+<script>
+function update_maturity_wx(){
+        if ($('.content-pro')[0].style.display == "none"){
+            $('.content-pro').slideToggle('slow');
+        }
+}
+</script>
+
 <script>
 function update_maturity(){
     var elem = document.getElementById("id_progress");
     new_value = elem.options[elem.selectedIndex].value;
     if (new_value != $("#hidden_tool_origin_progress")[0].value){
         //alert(new_value);
-        if ($('.content-one')[0].style.display == "none"){
-            $('.content-one').slideToggle('slow');
+        if ($('.content-pro')[0].style.display == "none"){
+            $('.content-pro').slideToggle('slow');
         }
     }
     else{
-        if ($('.content-one')[0].style.display != "none"){
-            $('.content-one').slideToggle('slow');
+        if ($('.content-pro')[0].style.display != "none"){
+            $('.content-pro').slideToggle('slow');
         }
     }
 }
 </script>
+
 
 <!--bind activate button-->
 <script>

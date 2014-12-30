@@ -18,25 +18,37 @@
 <input type=checkbox id ="id_backlog_check" name="backlog_check" value="1" class="checkbox">
 </div></div>
 
-<div class="form-group required"><label class="col-md-3 control-label control-label3">Master PR</label><div class="col-md-7"><input class="form-control" id="id_master_pr" value="{{active_info['master_pr']}}" name="master_pr" placeholder="PR # for tracking this tool" required="required" title="" type="text"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label control-label3">Estimated Timeline</label><div class="col-md-7"><input class="form-control" id="id_e_timeline_cal" value="{{active_info['eta']}}" name="e_timeline_cal" placeholder="ETA" required="required" title="" type="text" /></div></div>
+
+<div class="form-group required"><label class="col-md-3 control-label control-label3">Master PR</label><div class="col-md-7"><input class="form-control" id="id_master_pr" value="{{active_info['master_pr']}}" name="master_pr" placeholder="PR # for tracking this tool" required="required" title="" type="text" onchange="update_maturity_wx();"/></div></div>
+
+
+<div class="form-group required"><label class="col-md-3 control-label control-label3">Estimated Timeline</label><div class="col-md-7"><input class="form-control" id="id_e_timeline_cal" value="{{active_info['eta']}}" name="e_timeline_cal" placeholder="ETA" required="required" title="" type="text" onchange="update_maturity_wx();" /></div></div>
 <div class="form-group required" style="display: none;"><label class="col-md-3 control-label control-label3">Estimated Timeline</label><div class="col-md-7"><input class="form-control" id="id_e_timeline" value="{{active_info['eta']}}" name="e_timeline" placeholder="ETA" required="required" title="" type="text" /></div></div>
-<div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Estimated Resource (Man*Week against this timeline)</label><div class="col-md-7"><input class="form-control" id="id_resource" value="{{active_info['resource']}}" name="e_resource" placeholder="Estimated Resource" required="required" title="" type="text"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Progress (against this timeline)</label><div class="col-md-7"><select class="form-control" id="id_progress" value="{{active_info['progress']}}" name="progress" placeholder="Progress in current phase" required="required" title="" type="text" onchange="update_maturity();"/>
-    <option value="{{active_info['progress']}}">{{active_info['progress']}}</option>
+
+<div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Estimated Resource (Man*Week against this timeline)</label><div class="col-md-7"><input class="form-control" id="id_resource" value="{{active_info['resource']}}" name="e_resource" placeholder="Estimated Resource" required="required" title="" type="text" onchange="update_maturity_wx();"/></div></div>
+
+
+<div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Progress (against this timeline)</label>
+    <div class="col-md-7">
+    <select class="form-control" id="id_progress" value="{{active_info['progress']}}" name="progress" placeholder="Progress in current phase" required="required" title="" type="text" onchange="update_maturity_wx();"/>
+        <option value="{{active_info['progress']}}">{{active_info['progress']}}</option>
 {% for prog in range(10,101) if prog%10==0 %}
     {% if not prog|string+"%"==active_info['progress']%}
-    <option value="{{prog}}%">{{prog}}%</option>
+        <option value="{{prog}}%">{{prog}}%</option>
     {% endif%}
 {% endfor%}
-</select>
-</div>
+    </select>
+    </div>
 </div>
 
-<div class="form-group required content-one" style="display: none;"><label class="col-md-3 control-label control-label3">Update Info</label><div class="col-md-7"><textarea class="form-control" name = update cols="30" rows="5" placeholder="You've changed tool's progress, please leave some update on this change" required="required"></textarea></div></div>
 
-<div class="form-group required"><label class="col-md-3 control-label control-label3">Estimated Return</label><div class="col-md-7"><textarea class="form-control" name = 'e_return' cols="30" rows="5" placeholder="Describe what we can expect from this tool">{{active_info['return']}}</textarea></div></div>
-<div class="form-group required"><label class="col-md-3 control-label control-label3">Deliverables</label><div class="col-md-7"><textarea class="form-control" name = 'deliverables' cols="30" rows="5" placeholder="What will be dilivered to the users">{{active_info['deliverables']}}</textarea></div></div>
+<div class="form-group required"><label class="col-md-3 control-label control-label3">Estimated Return</label><div class="col-md-7"><textarea class="form-control" name = 'e_return' cols="30" rows="5" onchange="update_maturity_wx();"  placeholder="Describe what we can expect from this tool">{{active_info['return']}}</textarea></div></div>
+
+
+<div class="form-group required"><label class="col-md-3 control-label control-label3">Deliverables</label><div class="col-md-7"><textarea class="form-control" name = 'deliverables' cols="30" rows="5" onchange="update_maturity_wx();" placeholder="What will be dilivered to the users">{{active_info['deliverables']}}</textarea></div></div>
+
+
+<div class="form-group required content-pro" style="display: none;"><label class="col-md-3 control-label control-label3">Modify Update Info</label><div class="col-md-7"><textarea class="form-control" name = update cols="30" rows="5" placeholder="You've changed tool's progress, please leave some update on this change" required="required"></textarea></div></div>
 
 <input type=hidden id="hidden_tool_origin_id" name="id" value="{{active_info['tool_id']}}">
 <input type=hidden id="hidden_tool_origin_progress" name="original_progress" value="{{active_info['progress']}}">
