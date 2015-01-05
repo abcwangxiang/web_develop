@@ -28,7 +28,11 @@
                 <td>{%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank" id='tool_activity_app_{{tool['tool_id']}}'>Launch</a>{%endif%}</td>
                 <td>{%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank" id='tool_activity_wiki_{{tool['tool_id']}}'>Open</a>{%endif%}</td>
                 <td>{{tool['eta']}}</td>
-                <td><div style="display:none;" id='hidden_last_{{tool['tool_id']}}'></div><div id='last_{{tool['tool_id']}}'>N/A</div></td>
+                <td><div style="display:none;" id='hidden_last_{{tool['tool_id']}}'>
+                    </div>
+                    <div id='last_{{tool['tool_id']}}'>N/A
+                    </div>
+                </td>
                 <td>{{tool['resource']}}</td>
                 <td>{{tool['progress']}}</td>
                 <script>

@@ -418,12 +418,12 @@ def Tool_Active_Info_Edit():
             new_progress = progress
             date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
             sql="""
-                    insert into active_track
-                    (tool_id,username,date,`update`,new_progress)
-                    values
-                    (%s,%s,%s,%s,%s)
+                   INSERT INTO active_track
+                    (`tool_id`, `username`, `date`, `update`, `new_progress`, `master_pr`, `eta`, `resource`, `return`, `deliverables`)
+                    VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
-            cursor.execute(sql,(tool_id, username, date, update, new_progress))
+            cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
             res['res'] = 'success'
         elif progress!=str(request.form["original_progress"]):
             res['res'] = 'Please leave some update on this progress change'

@@ -67,18 +67,28 @@
         <thead>
             <tr>
                 <th>Progress</th>
+                <th>Update Date</th>
+                <th>Estimated Deadline</th>
+                <th>Estimated Resource</th>
+                <th>Estimated Return</th>
+                <th>Deliverables</th>
                 <th>User</th>
-                <th>Date</th>
-                <th>Update</th>
+                <th>Master PR</th>
+                <th>Update Info</th>
             </tr>
         </thead>
         <tbody>
         {% for progress in active_progress_info %}
             <tr>
                 <td>{{progress['new_progress']}}</td>
-                <td>{{progress['username']}}</td>
                 <td>{{progress['date']}}</td>
-                <td>{{progress['update']}}</td>
+                <td>{{progress['eta']}}</td>
+                <td>{{progress['resource']}}</td>
+                <td>{{progress['return'][0:20]}}...</td>
+                <td>{{progress['deliverables'][0:20]}}...</td>
+                <td>{{progress['username']}}</td>
+                <td>{{progress['master_pr']}}</td>
+                <td>{{progress['update'][0:20]}}...</td>
             </tr>
         {% endfor %}
         </tbody>
