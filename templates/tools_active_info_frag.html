@@ -80,7 +80,8 @@
         <tbody>
         {% for progress in active_progress_info %}
             <tr>
-                <td>{{progress['new_progress']}}</td>
+                <td>{{progress['new_progress']}}
+                </td>
                 <td>{{progress['date']}}</td>
                 <td>{{progress['eta']}}</td>
                 <td>{{progress['resource']}}</td>
@@ -88,7 +89,7 @@
                 <td>{{progress['deliverables'][0:20]}}...</td>
                 <td>{{progress['username']}}</td>
                 <td>{{progress['master_pr']}}</td>
-                <td>{{progress['update'][0:20]}}...</td>
+                <td>{{progress['update']}}</td>
             </tr>
         {% endfor %}
         </tbody>

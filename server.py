@@ -426,7 +426,7 @@ def Tool_Active_Info_Edit():
             cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
             res['res'] = 'success'
         elif progress!=str(request.form["original_progress"]):
-            res['res'] = 'Please leave some update on this progress change'
+            res['res'] = 'Please leave some update on this INFO change'
         else:
             res['res'] = 'success'
 
@@ -460,7 +460,7 @@ def check_tool_actvie(tool_id, force=False):
     #print res
     return res
 
-def get_active_progress_info(tool_id):
+def get_act_pro_info(tool_id):
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     cursor = conn.cursor()
     sql = """SELECT * from active_track where tool_id = %(tool_id)s
@@ -667,17 +667,17 @@ def Tool_Active_Info_Frag():
     para = request.args
     tool_id = int(para.get('id', '').strip())
     active_flag = False
-    active_progress_info = []
+    act_pro_info = []
     active_info = check_tool_actvie(tool_id)
     if active_info:
         active_flag = True
-        active_progress_info = get_active_progress_info(tool_id)
-        for progress in active_progress_info:
+        act_pro_info = get_act_pro_info(tool_id)
+        for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
 
     res['data'] = render_template('tools_active_info_frag.html', 
                             active_flag=active_flag, active_info=active_info,
-                            active_progress_info=active_progress_info)
+                            active_progress_info=act_pro_info)
     res['res'] = 'success'
     return jsonify(res)
    

@@ -173,34 +173,20 @@ function update_active_tool_info(id){
                 document.getElementById("tool_active_info").innerHTML = res.data;
                 var Progress_table = $('#Table_Active_Progress').DataTable({
                     dom: 't',
-                    //scrollY:        true,
-                    //scrollX:        true,
                     paging:         false,
                     autoWidth:      false,
-                    //"aoColumns": [ 
-                    //    {"bVisible":true},  
-                    //]
-                    //columnDefs: [ {
-                    //    "type": "dom-text-numeric",
-                    //    "targets": -1
-                    //} ]
                     "order": [[ 2, "desc" ]]
                 });
-
-                var Track_table = $('#Table_Active_Track').DataTable({
+              /*  $('#Table_Active_Progress > tbody > tr > td').each(function(){
+                    active_progress_highlight(this.id);
+                })
+               */
+                 var Track_table = $('#Table_Active_Track').DataTable({
                     dom: 't',
                     //scrollY:        true,
                     //scrollX:        true,
                     paging:         false,
                     autoWidth:      false,
-                    //"aoColumns": [ 
-                    //    {"bVisible":true},  
-                    //]
-                    //columnDefs: [ {
-                    //    "type": "dom-text-numeric",
-                    //    "targets": -1
-                    //} ]
-                    //"order": [[ 2, "desc" ]]
                 });
                 bind_activate_button();
                 bind_deactive_button();
@@ -211,6 +197,30 @@ function update_active_tool_info(id){
         }
     });
 }
+/*
+function active_progress_highlight(id){
+    $.ajax({
+        type:"GET",
+        url:"/Tool_Active_Highlight_Query",
+        data:"id="+id,
+        cache:false, //......
+        success:function(res){
+            if(res.res=="success"){
+                if(res.flag == 1){
+                   $("#tr"+id).each(function(){
+                    this.style.background = "#ffaaaa";
+                    }); 
+                }
+
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+
+}
+*/
 </script>
 
 <script>
