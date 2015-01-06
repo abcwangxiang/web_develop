@@ -474,6 +474,10 @@ def get_active_progress_info(tool_id):
     cursor.close()
     conn.commit()
     conn.close()
+    for row in progress_results:
+        for key in row:
+            if row[key] is None:
+                row[key] = ''
     print progress_results
     return progress_results
     

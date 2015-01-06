@@ -430,9 +430,6 @@ query_comments({{tool['tool_id']}})
 
 <script>
 function update_maturity_wx(){
-        if ($('.content-pro')[0].style.display == "none"){
-            $('.content-pro').slideToggle('slow');
-        }
 }
 </script>
 
@@ -611,6 +608,11 @@ function active_info_edit_table_init(){
 
     }); 
     
+    $(".cpdtools_need_update").bind('input',function(){
+        if ($('.content-pro')[0].style.display == "none"){
+            $('.content-pro').slideToggle('slow');
+        }
+    });
 
 }
 </script>
