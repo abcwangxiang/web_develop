@@ -28,7 +28,7 @@
 <div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Estimated Resource (Man*Week against this timeline)</label><div class="col-md-7"><input class="form-control cpdtools_need_update" id="id_resource" value="{{active_info['resource']}}" name="e_resource" placeholder="Estimated Resource" required="required" title="" type="text" onchange="update_maturity_wx();"/></div></div>
 
 
-<div class="form-group required"><label class="col-md-3 control-label control-label3">Progress (against this timeline)</label>
+<div class="form-group required"><label class="col-md-3 control-label control-label3 cpdtools_timeline_change">Progress (against this timeline)</label>
     <div class="col-md-7">
     <select class="form-control cpdtools_need_update" id="id_progress" value="{{active_info['progress']}}" name="progress" placeholder="Progress in current phase" required="required" title="" type="text" onchange="update_maturity_wx();"/>
         <option value="{{active_info['progress']}}">{{active_info['progress']}}</option>
