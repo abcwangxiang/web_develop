@@ -393,6 +393,25 @@ def Tool_Active_Info_Edit():
             res['res'] = 'Missing one or more mandatory fields'
             return jsonify(res)
 
+        def has_changed():
+            current_info = check_tool_actvie(tool_id)
+            if current_info:
+                if progress!=current_info['progress']:
+                    return True
+                if master_pr!=current_info['master_pr']:
+                    return True
+                if e_return!=current_info['return']:
+                    return True
+                if e_timeline!=current_info['eta']:
+                    return True
+                if e_resource!=current_info['resource']:
+                    return True
+                if deliverables!=current_info['deliverables']:
+                    return True
+            return False
+
+        v_has_changed = has_changed()
+ 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         cursor = conn.cursor()
 
@@ -413,6 +432,7 @@ def Tool_Active_Info_Edit():
 
         cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
 
+               
         if update:
             username = session['username']
             new_progress = progress
@@ -425,7 +445,7 @@ def Tool_Active_Info_Edit():
                 """
             cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
             res['res'] = 'success'
-        elif progress!=str(request.form["original_progress"]):
+        elif v_has_changed:
             res['res'] = 'Please leave some update on this INFO change'
         else:
             res['res'] = 'success'

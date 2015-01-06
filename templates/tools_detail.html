@@ -175,13 +175,13 @@ function update_active_tool_info(id){
                     dom: 't',
                     paging:         false,
                     autoWidth:      false,
-                    "order": [[ 2, "desc" ]]
+                    "order": [[ 1, "desc" ]]
                 });
               /*  $('#Table_Active_Progress > tbody > tr > td').each(function(){
                     active_progress_highlight(this.id);
                 })
                */
-                 var Track_table = $('#Table_Active_Track').DataTable({
+                var Track_table = $('#Table_Active_Track').DataTable({
                     dom: 't',
                     //scrollY:        true,
                     //scrollX:        true,
@@ -440,6 +440,9 @@ query_comments({{tool['tool_id']}})
 
 <script>
 function update_maturity_wx(){
+    if ($('.content-pro')[0].style.display == "none"){
+        $('.content-pro').slideToggle('slow');
+    }
 }
 </script>
 
