@@ -1,26 +1,6 @@
 {% if active_flag==True %}
     <a id="tool_activate" class="btn btn-danger" style="width: 100px;">Edit</a>
     <a id="tool_deactivate" class="btn btn-info" style="width: 100px;">Deactivate</a>
-    <!--
-    <table id="Table_Active_Track" class="display" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th>Estimated Resource</th>
-                <th>ETA</th>
-                <th>Estimated Return</th>
-                <th>Master PR</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{active_info['resource']}}</td>
-                <td>{{active_info['eta']}}</td>
-                <td>{{active_info['return']}}</td>
-                <td>{{active_info['master_pr']}}</td>
-            </tr>
-        </tbody>
-    </table> -->
-
     <hr>
 <form action="{{ url_for('Tool_Active_Info_Edit') }}" method=post class="form-horizontal" id="tool_active_info_edit_form">
 
@@ -35,6 +15,13 @@
 .form-group.required .control-label2:after { 
    content:"";
    color:gray;
+}
+</style>
+
+<style>
+.td-bg-yellow{
+    color:red;
+    font-weight:bold;
 }
 </style>
 
@@ -80,15 +67,45 @@
         <tbody>
         {% for progress in active_progress_info %}
             <tr>
-                <td>{{progress['new_progress']}}</td>
-                <td>{{progress['date']}}</td>
-                <td>{{progress['master_pr']}}</td>
-                <td>{{progress['eta']}}</td>
-                <td>{{progress['resource']}}</td>
-                <td>{{progress['return'][0:20]}}...</td>
-                <td>{{progress['deliverables'][0:20]}}...</td>
-                <td>{{progress['username']}}</td>
-                <td>{{progress['update']}}</td>
+                <td {%if progress['new_progress_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['new_progress']}}
+                </td>
+                <td>
+                    {{progress['date']}}
+                </td>
+                <td {%if progress['master_pr_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['new_progress']}}
+                </td>
+                <td {%if progress['eta_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['eta']}}
+                </td>
+                <td {%if progress['resource_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['resource']}}
+                </td>
+                <td {%if progress['return_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['return']}}
+                </td>
+                <td {%if progress['deliverables_f'] %} 
+                    class="td-bg-yellow" 
+                    {% endif %}>
+                    {{progress['deliverables']}}
+                </td>
+                <td>
+                    {{progress['username']}}
+                </td>
+                <td>
+                    {{progress['update']}}
+                </td>
             </tr>
         {% endfor %}
         </tbody>

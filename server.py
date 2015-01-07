@@ -699,6 +699,24 @@ def Tool_Active_Info_Frag():
         for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
 
+            #progress['new_progress_f'] = 0
+            #progress['date_f'] = 0
+            #progress['master_pr_f'] = 0
+            #progress['eta_f'] = 0
+            #progress['resource_f'] = 0
+            #progress['return_f'] = 0
+            #progress['deliverables_f'] = 0
+            #progress['username_f'] = 0
+            #progress['update_f'] = 0
+
+        for i in range(len(act_pro_info) - 1):
+            keys = act_pro_info[i].keys()
+            for key in keys:
+                if act_pro_info[i][key] != act_pro_info[i+1][key]:
+                    act_pro_info[i][str(key)+'_f'] = 1
+                else:
+                    act_pro_info[i][str(key)+'_f'] = 0
+     
     res['data'] = render_template('tools_active_info_frag.html', 
                             active_flag=active_flag, active_info=active_info,
                             active_progress_info=act_pro_info)
