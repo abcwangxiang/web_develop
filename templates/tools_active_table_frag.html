@@ -1,9 +1,15 @@
     {%if not tools==[]%}
-    
+    <style>
+     .ss-select-style {
+        width: 100px;
+        padding: 4px;
+        font-size: 16px;
+    }
+    </style> 
     <div class = ""> <!-- the snapshots select-->
-        <label class = ""> Snapshots </label> 
+        <label class = "">Snapshots</label> 
         <div class = "">
-        <select class = ""  name = "snapshots" id = "snapshots" onchange = "ss_change();">
+        <select class = "ss-select-style"  name = "snapshots" id = "snapshots" onchange = "ss_change();">
             <option value= {{ss_month_ret}}>{{ss_month_ret}}</option>
             {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
             <option value="NOW">NOW</option>

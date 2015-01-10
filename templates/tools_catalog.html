@@ -134,8 +134,10 @@ function query_active_tool_last(id){
         cache:false, //......
         success:function(res){
             if(res.res=="success"){
-                document.getElementById("last_"+id).innerHTML = res.data;
-                document.getElementById("hidden_last_"+id).innerHTML = res.data;
+                //document.getElementById("last_"+id).innerHTML = res.data;
+                //document.getElementById("hidden_last_"+id).innerHTML = res.data;
+                $('#last_'+id).html(res.data);
+                $('#hidden_last_'+id).html(res.data);
                 if(res.flag==1){
                    $("#tr_"+id).find('td').each(function(){
                        this.style.background="#ffaaaa";
