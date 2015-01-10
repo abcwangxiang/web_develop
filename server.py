@@ -522,7 +522,7 @@ def Tool_Active_Info_Edit():
             date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
             sql="""
                    INSERT INTO active_track
-                    (`tool_id`, `username`, `date`, `update`, `new_progress`, `master_pr`, `eta`, `resource`, `return`, `deliverables`)
+                    (`tool_id`, `username`, `date`, `update`, `progress`, `master_pr`, `eta`, `resource`, `return`, `deliverables`)
                     VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """

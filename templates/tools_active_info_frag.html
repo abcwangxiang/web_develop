@@ -67,10 +67,10 @@
         <tbody>
         {% for progress in active_progress_info %}
             <tr>
-                <td {%if progress['new_progress_f'] %} 
+                <td {%if progress['progress_f'] %} 
                     class="td-bg-yellow" 
                     {% endif %}>
-                    {{progress['new_progress']}}
+                    {{progress['progress']}}
                 </td>
                 <td>
                     {{progress['date']}}
@@ -78,7 +78,7 @@
                 <td {%if progress['master_pr_f'] %} 
                     class="td-bg-yellow" 
                     {% endif %}>
-                    {{progress['new_progress']}}
+                    {{progress['master_pr']}}
                 </td>
                 <td {%if progress['eta_f'] %} 
                     class="td-bg-yellow" 
