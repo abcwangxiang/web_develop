@@ -1,4 +1,20 @@
     {%if not tools==[]%}
+    
+    <div class = ""> <!-- the snapshots select-->
+        <label class = ""> Snapshots </label> 
+        <div class = "">
+        <select class = ""  name = "snapshots" id = "snapshots" onchange = "ss_change();">
+            <option value= {{ss_month_ret}}>{{ss_month_ret}}</option>
+            {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
+            <option value="NOW">NOW</option>
+            {% endif %}
+            <option value="201411">201411</option>
+            <option value="201412">201412</option>
+            <option value="201501">201501</option>
+            <option value="201502">201502</option>
+        </select>
+        </div>
+    </div>
     <table id="Table_CPDtools" class="display" cellspacing="0">
         <thead>
             <tr>
@@ -69,4 +85,3 @@
     {%else%}
     N/A
     {%endif%}
-

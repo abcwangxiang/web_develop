@@ -255,6 +255,7 @@ function query_tool_likes(id) {
         
     </div> <!--checkbox div-->
     <br>
+    
     <div id='table_place_holder'>
     {%if not tools==[]%}
     <table id="Table_CPDtools" class="display" cellspacing="0" width="100%">
@@ -329,6 +330,44 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   //e.relatedTarget // previous tab
 })
 
+function ss_change(){
+    var ss_month = 0;
+    ss_month = $("#snapshots").val();
+    if(ss_month == "NOW"){
+        query_tab_table("active"); //if the select is 'NOW', show the active TAB, tools_active_table_frag.html 
+        return; 
+    }
+    $.ajax({
+        type: "GET",
+        url: "/Tools_Active_Snapshots",
+        data: "ss_month="+ss_month,
+        cache: false, //......
+        success: function(res){
+            if(res.res=="success"){
+                //document.getElementById("table_place_holder").innerHTML = res.data;
+                //this style for element can execute the javascript 
+                $('#table_place_holder').html(res.data); //this style for element can execute the javascript
+                if(res.spec=="active"){
+                    fnBuild_active(); 
+                    window.history.pushState("", "", "/Active_Tools");
+                }
+                else{
+                    fnBuild();
+                    window.history.pushState("", "", "/");
+                }
+                bind_like();
+                initialize_activity();
+                $('#Table_CPDtools > tbody > tr > td > div[id^=hidden_likes]').each(function(){
+                    query_tool_likes(this.id.replace('hidden_likes_',""));
+                });
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+}
+
 function query_tab_table(id) {
     document.getElementById("table_place_holder").innerHTML = 'Loading...';
     $.ajax({
@@ -338,7 +377,8 @@ function query_tab_table(id) {
         cache:false, //......
         success:function(res){
             if(res.res=="success"){
-                document.getElementById("table_place_holder").innerHTML = res.data;
+                //document.getElementById("table_place_holder").innerHTML = res.data;
+                $('#table_place_holder').html(res.data);
                 if(res.spec=="active"){
                     fnBuild_active(); 
                     window.history.pushState("", "", "/Active_Tools");

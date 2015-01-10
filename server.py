@@ -19,6 +19,7 @@ import os
 import time
 import logging
 import traceback
+import string
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from collections import OrderedDict
@@ -104,7 +105,7 @@ def index():
     
     visited_file = os.path.join(SCRIPTS_DIR, 'log/visited.log')
     new = os.popen('touch %s; echo 1 >> %s'%(visited_file, visited_file)).read()
-    return Tools_Catalog()
+    return Tools_Catalog(0)
 
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
@@ -175,7 +176,7 @@ def Tools_Catalog_Query():
     tool_tab_id = para.get('id', '').strip()
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     cursor = conn.cursor()
-
+    ss_month = ''
     template = "tools_catalog_table_frag.html"
     if tool_tab_id == '100_m':
         sql="""
@@ -199,6 +200,7 @@ def Tools_Catalog_Query():
             """
         template = "tools_active_table_frag.html"
         res['spec'] = "active"
+        ss_month = 'NOW'
     elif tool_tab_id == "backlog":
         sql="""
             select tools.*, active_tools.*
@@ -216,7 +218,7 @@ def Tools_Catalog_Query():
         #print impure_results[0]
         data = impure_results
         res['res'] = 'success'
-        res['data'] = render_template(template, tools=impure_results)
+        res['data'] = render_template(template, tools=impure_results, ss_month_ret = ss_month)
            
     cursor.close()
     conn.commit()
@@ -224,7 +226,7 @@ def Tools_Catalog_Query():
     return jsonify(res)
  
 @app.route('/Tools_Catalog')
-def Tools_Catalog(active_view=False):
+def Tools_Catalog(active_view = 0):
     """
     This should be modified to match the database
     """
@@ -277,7 +279,88 @@ def Register_Tool():
 
 @app.route('/Active_Tools')
 def Tools_Active_Tools():
-    return Tools_Catalog(active_view=True)
+    return Tools_Catalog(1)
+
+
+@app.route('/Tools_Active_Snapshots')
+def Tools_Active_Snapshots():
+    res = {}
+    res['res'] = 'internal error'
+    para = request.args
+    ss_month = para.get('ss_month', '').strip()
+    
+    # change the ss_month to ss_date for complare, such as :
+    # 201411 to 20141132
+    # 201412 to 20141232
+    # 201501 to 20150132 
+    ss_date = ss_month + '32' 
+    
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+
+    template = "tools_active_table_frag.html"
+    sql="""
+        select tools.*, active_track.*
+        from 
+            tools
+                INNER JOIN 
+            active_tools
+            on tools.tool_id = active_tools.tool_id
+                INNER JOIN
+            active_track
+            on active_tools.tool_id = active_track.tool_id
+            where active_tools.flag = 1 
+        """
+    if sql:
+        cursor.execute(sql)
+        columns = [column[0] for column in cursor.description]
+        impure_results = []
+        snap_res = []
+        for row in cursor.fetchall():
+            impure_results.append(dict(zip(columns, row)))
+        all_id = get_active_tools_all_id() 
+       
+        for act_tool_id in all_id:
+            temp = {}
+            last_act_eta = ''
+            for row in impure_results:
+                if row['tool_id'] == act_tool_id:
+                    act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:]
+                    #cut the eta: '2014-12-12,...'
+                    if act_eta < ss_date:  
+                    #filter the eta > ss_date
+                        if act_eta >= last_act_eta:
+                        #find the the last change before ss_date 
+                            temp = row
+                            last_act_eta = act_eta 
+            if len(temp) != 0:
+                snap_res.append(temp)            
+                       
+        data = snap_res
+        res['res'] = 'success'
+        res['data'] = render_template(template, tools=snap_res, ss_month_ret=ss_month)
+           
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return jsonify(res)
+
+def get_active_tools_all_id():
+    
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        
+    sql = """SELECT * from active_tools"""
+    
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+    all_id = []
+    for data in impure_results:
+        all_id.append(data['tool_id'])
+    return all_id
 
 @app.route('/Tools_Stats')
 def Tools_Stats():
@@ -311,7 +394,7 @@ def get_stats_on_app_wiki():
 
 
     row = cursor.fetchone()
-    print row
+    #print row
 
     cursor.close()
     conn.commit()
@@ -667,7 +750,7 @@ def Edit_Tool_Details():
 
         logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
 
-        return Tools_Catalog()
+        return Tools_Catalog(0)
        
 @app.route("/Show_Tool_Details")
 def Show_Tool_Details():
@@ -698,21 +781,12 @@ def Tool_Active_Info_Frag():
         act_pro_info = get_act_pro_info(tool_id)
         for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
-
-            #progress['new_progress_f'] = 0
-            #progress['date_f'] = 0
-            #progress['master_pr_f'] = 0
-            #progress['eta_f'] = 0
-            #progress['resource_f'] = 0
-            #progress['return_f'] = 0
-            #progress['deliverables_f'] = 0
-            #progress['username_f'] = 0
-            #progress['update_f'] = 0
-
+        
         for i in range(len(act_pro_info) - 1):
             keys = act_pro_info[i].keys()
             for key in keys:
-                if act_pro_info[i][key] != act_pro_info[i+1][key]:
+                if act_pro_info[i][key] != act_pro_info[i+1][key]: 
+                    #mark the modified item in active_track and highlight it
                     act_pro_info[i][str(key)+'_f'] = 1
                 else:
                     act_pro_info[i][str(key)+'_f'] = 0
@@ -1028,7 +1102,7 @@ def Logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     session.pop('admin', None)
-    return Tools_Catalog()
+    return Tools_Catalog(0)
     #return render_template('tools_catalog.html', message = 'You were logged out')
 
 
