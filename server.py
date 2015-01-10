@@ -325,6 +325,9 @@ def Tools_Active_Snapshots():
             last_act_eta = ''
             for row in impure_results:
                 if row['tool_id'] == act_tool_id:
+                    row['progress'] = row['new_progress']
+                    if not row['eta']:
+                        continue
                     act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:]
                     #cut the eta: '2014-12-12,...'
                     if act_eta < ss_date:  
@@ -339,6 +342,7 @@ def Tools_Active_Snapshots():
         data = snap_res
         res['res'] = 'success'
         res['data'] = render_template(template, tools=snap_res, ss_month_ret=ss_month)
+        res['spec'] = "active"
            
     cursor.close()
     conn.commit()
@@ -3542,8 +3546,8 @@ def internal_error(error):
     try:
         from_addr = session["username"] + "@vmware.com"
     except:
-        from_addr = "xiangw@vmware.com"
-    to_addr = "xiangw@vmware.com"
+        from_addr = "fangchiw@vmware.com"
+    to_addr = "fangchiw@vmware.com"
     subject = """[TriageRobot Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'
