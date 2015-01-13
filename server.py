@@ -241,7 +241,7 @@ def Tools_Catalog(active_view = 0):
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-    return render_template('tools_catalog.html', tools=impure_results, catalog=1, active_view=active_view)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=2, active_view=active_view)
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
@@ -323,24 +323,39 @@ def Tools_Active_Snapshots():
         for act_tool_id in all_id:
             temp = {}
             last_act_eta = ''
+            last_act_date = ''
             for row in impure_results:
                 if row['tool_id'] == act_tool_id:
                     row['progress'] = row['new_progress']
-                    if not row['eta']:
-                        continue
-                    act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:]
-                    #cut the eta: '2014-12-12,...'
-                    if act_eta < ss_date:  
-                    #filter the eta > ss_date
-                        if act_eta >= last_act_eta:
-                        #find the the last change before ss_date 
-                            temp = row
-                            last_act_eta = act_eta 
+                    if row['eta']:
+                        act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:10]
+                        #cut the eta: '2014-12-12,...'
+                        if act_eta < ss_date:  
+                        #filter the eta > ss_date
+                            if act_eta >= last_act_eta:
+                            #find the the last change before ss_date 
+                                temp = row
+                                last_act_eta = act_eta 
+            if len(temp) == 0:
+                for row in impure_results:
+                    if row['tool_id'] == act_tool_id:
+                        row['progress'] = row['new_progress']
+                        if not row['date']:
+                            continue
+                        act_date = row['date'][0:4] + row['date'][5:7] + row['date'][8:10]
+                        #cut the date: '2014-12-12,...'
+                        if act_date < ss_date:  
+                        #filter the date > ss_date
+                            if act_date >= last_act_date:
+                            #find the the last change before ss_date 
+                                temp = row
+                                last_act_date = act_date 
             if len(temp) != 0:
                 snap_res.append(temp)            
                        
         data = snap_res
         res['res'] = 'success'
+        print snap_res
         res['data'] = render_template(template, tools=snap_res, ss_month_ret=ss_month)
         res['spec'] = "active"
            
@@ -581,11 +596,11 @@ def get_act_pro_info(tool_id):
     cursor.close()
     conn.commit()
     conn.close()
-    for row in progress_results:
-        for key in row:
-            if row[key] is None:
-                row[key] = ''
-    print progress_results
+    #for row in progress_results:
+    #    for key in row:
+    #        if row[key] is None:
+    #            row[key] = ''
+    #print progress_results
     return progress_results
     
 @app.route("/Tool_Edit_Frag", methods=['GET', 'POST'])
@@ -3546,8 +3561,8 @@ def internal_error(error):
     try:
         from_addr = session["username"] + "@vmware.com"
     except:
-        from_addr = "fangchiw@vmware.com"
-    to_addr = "fangchiw@vmware.com"
+        from_addr = "xiangw@vmware.com"
+    to_addr = "xiangw@vmware.com"
     subject = """[TriageRobot Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'

@@ -89,7 +89,7 @@ var fnBuild = function (){
 
 <!--for active table tab special case-->
 <script>
-var fnBuild_active = function (){
+var fnBuild_active = function (query_last){
     var CPDtools_table = $('#Table_CPDtools').DataTable({
         dom: 'lfrtip',
         //scrollY:        true,
@@ -119,11 +119,15 @@ var fnBuild_active = function (){
             null,
             null,
             { "orderDataType": "dom-text-numeric" },
-        ]
+        ],
+        "order": [[ 9, "desc" ]],
     });
-    $('#Table_CPDtools > tbody > tr > td > div[id^=hidden_last]').each(function(){
-        query_active_tool_last(this.id.replace('hidden_last_',""));
-    });
+    //only query last update when we view the active tab in "NOW" status
+    if(query_last){
+        $('#Table_CPDtools > tbody > tr > td > div[id^=hidden_last]').each(function(){
+            query_active_tool_last(this.id.replace('hidden_last_',""));
+        });
+    }
 } 
 
 function query_active_tool_last(id){
@@ -154,7 +158,6 @@ function query_active_tool_last(id){
             }
         }
     });
-
 }
 </script>
 
@@ -287,7 +290,9 @@ function query_tool_likes(id) {
                 <td><a href='{{url_for("Edit_Tool_Details")}}?name={{tool['tool_name']}}&id={{tool['tool_id']}}' class="btn btn-danger">Edit</a></td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <script>
-                    query_tool_likes({{tool['tool_id']}})
+                    {%if not active_view%}
+                        query_tool_likes({{tool['tool_id']}})
+                    {%endif%}
                 </script>
                 <style>
                     #img_div a {
@@ -350,7 +355,7 @@ function ss_change(){
                 //this style for element can execute the javascript 
                 $('#table_place_holder').html(res.data); //this style for element can execute the javascript
                 if(res.spec=="active"){
-                    fnBuild_active(); 
+                    fnBuild_active(false); 
                     window.history.pushState("", "", "/Active_Tools");
                 }
                 else{
@@ -382,7 +387,7 @@ function query_tab_table(id) {
                 //document.getElementById("table_place_holder").innerHTML = res.data;
                 $('#table_place_holder').html(res.data);
                 if(res.spec=="active"){
-                    fnBuild_active(); 
+                    fnBuild_active(true); 
                     window.history.pushState("", "", "/Active_Tools");
                 }
                 else{

@@ -98,13 +98,13 @@
                 <td {%if progress['deliverables_f'] %} 
                     class="td-bg-yellow" 
                     {% endif %}>
-                    {{progress['deliverables']}}
+                    {{progress['deliverables'][0:60]}}...
                 </td>
                 <td>
                     {{progress['username']}}
                 </td>
                 <td>
-                    {{progress['update']}}
+                    {{progress['update'][0:60]}}...
                 </td>
             </tr>
         {% endfor %}
