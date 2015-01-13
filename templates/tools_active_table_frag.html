@@ -10,24 +10,43 @@
         <label class = "">Snapshots</label> 
         <div class = "">
         <select class = "ss-select-style"  name = "snapshots" id = "snapshots" onchange = "ss_change();">
-            <option value= {{ss_month_ret}}>{{ss_month_ret}}</option>
+            <option value= {{ss_month_ret}}>
+                {% if ss_month_ret == 'NOW' %} 
+                    NOW
+                {% endif %}
+                {% if ss_month_ret == '201411' %} 
+                    Nov. 2014
+                {% endif %}
+                {% if ss_month_ret == '201412' %} 
+                    Dec. 2014
+                {% endif %}
+                {% if ss_month_ret == '201501' %} 
+                    Jan. 2015
+                {% endif %}
+                {% if ss_month_ret == '201502' %} 
+                    Feb. 2015
+                {% endif %}
+                {% if ss_month_ret == '201503' %} 
+                    Mar. 2015
+                {% endif %}
+            </option>
             {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
             <option value="NOW">NOW</option>
             {% endif %}
             {% if not ss_month_ret == '201411' %}  <!-- avoid the option show twice--> 
-            <option value="201411">201411</option>
+            <option value="201411">Nov. 2014</option>
             {% endif %}
             {% if not ss_month_ret == '201412' %}  <!-- avoid the option show twice--> 
-            <option value="201412">201412</option>
+            <option value="201412">Dec. 2014</option>
             {% endif %}
             {% if not ss_month_ret == '201501' %}  <!-- avoid the option show twice--> 
-            <option value="201501">201501</option>
+            <option value="201501">Jan. 2015</option>
             {% endif %}
             {% if not ss_month_ret == '201502' %}  <!-- avoid the option show twice--> 
-            <option value="201502">201502</option>
+            <option value="201502">Feb. 2015</option>
             {% endif %}
             {% if not ss_month_ret == '201503' %}  <!-- avoid the option show twice--> 
-            <option value="201503">201503</option>
+            <option value="201503">Mar. 2015</option>
             {% endif %}
         </select>
         </div>
