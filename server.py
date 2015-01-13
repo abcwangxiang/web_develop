@@ -3561,8 +3561,8 @@ def internal_error(error):
     try:
         from_addr = session["username"] + "@vmware.com"
     except:
-        from_addr = "xiangw@vmware.com"
-    to_addr = "xiangw@vmware.com"
+        from_addr = "fangchiw@vmware.com"
+    to_addr = "fangchiw@vmware.com"
     subject = """[TriageRobot Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'
