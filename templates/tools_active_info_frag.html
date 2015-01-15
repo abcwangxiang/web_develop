@@ -1,51 +1,158 @@
+
+<style>
+    .form-group.required .control-label:after { 
+        content:"";
+        color:red;
+    }
+</style>
+
+<style>
+    .form-group.required .control-label2:after { 
+        content:"";
+        color:gray;
+    }
+</style>
+
+<style>
+    .td-bg-yellow{
+        color:red;
+        font-weight:bold;
+    }
+</style>
+
 {% if active_flag==True %}
-    <a id="tool_activate" class="btn btn-danger" style="width: 100px;">Edit</a>
-    <a id="tool_deactivate" class="btn btn-info" style="width: 100px;">Deactivate</a>
+    <a id="tool_activate" class="btn btn-danger" style="width: 100px;">
+        Edit
+    </a>
+    <a id="tool_deactivate" class="btn btn-info" style="width: 100px;">
+        Deactivate
+    </a>
     <hr>
+
 <form action="{{ url_for('Tool_Active_Info_Edit') }}" method=post class="form-horizontal" id="tool_active_info_edit_form">
 
-<style>
-.form-group.required .control-label:after { 
-   content:"";
-   color:red;
-}
-</style>
 
-<style>
-.form-group.required .control-label2:after { 
-   content:"";
-   color:gray;
-}
-</style>
+    <div class="form-group required">
+        <label class="col-md-3 control-label">
+            Master PR
+        </label>
+        <div class="col-md-7">
+            <input  class="form-control" 
+                    id="id_master_pr" 
+                    value="{{active_info['master_pr']}}" 
+                    name="master_pr" 
+                    placeholder="PR # for tracking this tool" 
+                    required="required" 
+                    title="" 
+                    type="text" 
+                    readonly="readonly"
+           />
+        </div>
+    </div>
+    <div class="form-group required">
+        <label class="col-md-3 control-label">
+            Estimated Timeline
+        </label>
+        <div class="col-md-7">
+            <input  class="form-control" 
+                    id="id_e_timeline" 
+                    value="{{active_info['eta']}}" 
+                    name="e_timeline" 
+                    placeholder="ETA" 
+                    required="required" 
+                    title="" 
+                    type="text" 
+                    readonly="readonly" 
+            />
+        </div>
+    </div>
+    <div class="form-group required">
+        <label class="col-md-3 control-label">
+            Estimated Resource (Man*Week against {{active_info['eta']}})
+        </label>
+        <div class="col-md-7 control-label">
+            <input  class="form-control" 
+                    id="id_resource" 
+                    value="{{active_info['resource']}}" 
+                    name="e_resource" 
+                    placeholder="Estimated Resource" 
+                    required="required" 
+                    title="" 
+                    type="text" 
+                    readonly="readonly"
+            />
+        </div>
+    </div>
+    <div class="form-group required">
+        <label class="col-md-3 control-label">
+            Progress (against {{active_info['eta']}})
+        </label>
+        <div class="col-md-7 control-label">
+            <input class="form-control" 
+                   id="id_progress" 
+                    value="{{active_info['progress']}}" 
+                    name="progress" 
+                    placeholder="Progress in current phase" 
+                    required="required" 
+                    title="" 
+                    type="text" 
+                    readonly="readonly"
+        />
+        </div>
+    </div>
 
-<style>
-.td-bg-yellow{
-    color:red;
-    font-weight:bold;
-}
-</style>
+    <div class="form-group required content-one" style="display: none;">
+        <label class="col-md-3 control-label">
+            Update Info
+        </label>
+        <div class="col-md-7">
+            <textarea   class="form-control" 
+                        name = update 
+                        cols="30" 
+                        rows="5" 
+                        placeholder="You've changed tool's progress, please leave some update on this change" 
+                        required="required" 
+                        readonly="readonly">
+            </textarea>
+        </div>
+    </div>
 
-<div class="form-group required"><label class="col-md-3 control-label">Master PR</label><div class="col-md-7"><input class="form-control" id="id_master_pr" value="{{active_info['master_pr']}}" name="master_pr" placeholder="PR # for tracking this tool" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Estimated Timeline</label><div class="col-md-7"><input class="form-control" id="id_e_timeline" value="{{active_info['eta']}}" name="e_timeline" placeholder="ETA" required="required" title="" type="text" readonly="readonly" /></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Estimated Resource (Man*Week against {{active_info['eta']}})</label><div class="col-md-7 control-label"><input class="form-control" id="id_resource" value="{{active_info['resource']}}" name="e_resource" placeholder="Estimated Resource" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Progress (against {{active_info['eta']}})</label><div class="col-md-7 control-label"><input class="form-control" id="id_progress" value="{{active_info['progress']}}" name="progress" placeholder="Progress in current phase" required="required" title="" type="text" readonly="readonly"/>
-</select>
-</div>
-</div>
+    <div class="form-group required">   
+        <label class="col-md-3 control-label">
+            Estimated Return
+        </label>
+        <div class="col-md-7">
+            <textarea   class="form-control" 
+                        name = 'e_return' 
+                        cols="30" 
+                        rows="5" 
+                        placeholder="Describe what we can expect from this tool" 
+                        readonly="readonly">{{active_info['return']}}</textarea>
+        </div>
+    </div>
+    <div class="form-group required">
+        <label class="col-md-3 control-label">
+            Deliverables
+        </label>
+        <div class="col-md-7">
+            <textarea   class="form-control" 
+                        name = 'deliverables' 
+                        cols="30" 
+                        rows="5" 
+                        placeholder="What will be dilivered to the users" 
+                        readonly="readonly">{{active_info['deliverables']}}</textarea>
+        </div>
+    </div>
 
-<div class="form-group required content-one" style="display: none;"><label class="col-md-3 control-label">Update Info</label><div class="col-md-7"><textarea class="form-control" name = update cols="30" rows="5" placeholder="You've changed tool's progress, please leave some update on this change" required="required" readonly="readonly"></textarea></div></div>
-
-<div class="form-group required"><label class="col-md-3 control-label">Estimated Return</label><div class="col-md-7"><textarea class="form-control" name = 'e_return' cols="30" rows="5" placeholder="Describe what we can expect from this tool" readonly="readonly">{{active_info['return']}}</textarea></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Deliverables</label><div class="col-md-7"><textarea class="form-control" name = 'deliverables' cols="30" rows="5" placeholder="What will be dilivered to the users" readonly="readonly">{{active_info['deliverables']}}</textarea></div></div>
-
-<input type=hidden id="hidden_tool_origin_id" name="id" value="{{active_info['tool_id']}}">
-<input type=hidden id="hidden_tool_origin_progress" name="original_progress" value="{{active_info['progress']}}">
+    <input type=hidden id="hidden_tool_origin_id" name="id" value="{{active_info['tool_id']}}">
+    <input type=hidden id="hidden_tool_origin_progress" name="original_progress" value="{{active_info['progress']}}">
 
     <div class="form-group">
-    <label class="col-md-3 control-label"></label>
-    <div class="col-md-7 div_same_line" style="text-align: left;">
+        <label class="col-md-3 control-label"></label>
+        <div class="col-md-7 div_same_line" style="text-align: left;">
+        </div>
     </div>
-    </div>
+
 </form>
 
     <hr>
@@ -110,6 +217,7 @@
         {% endfor %}
         </tbody>
     </table>
+
 {%else%}
     <a id="tool_activate" class="btn btn-danger" style="width: 100px;">Activate</a>
 {% endif %}
