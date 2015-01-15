@@ -344,6 +344,7 @@ function ss_change(){
         query_tab_table("active"); //if the select is 'NOW', show the active TAB, tools_active_table_frag.html 
         return; 
     }
+    document.getElementById("table_place_holder").innerHTML = 'Loading...';
     $.ajax({
         type: "GET",
         url: "/Tools_Active_Snapshots",
