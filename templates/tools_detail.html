@@ -1,23 +1,5 @@
 {% extends "layout.html" %}
 {% if session.logged_in %}
-<head>
-    {%block head%}
-    <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
-    <script src="static/js/jquery-1.11.1.js"></script>
-    <script src="static/js/jquery-ui.js"></script>
-
-    <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
-    {%endblock%}
-</head>
-<body>
-    {%block body%}
-        <div class="row col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            <h1 class="page-header">
-                <h2 class="sub-header">Tool Details</h2>
-            </h1>
-<div class="col-md-7" id="tool_info_all">
-<div class="col-md-12 text-center" id="tool_info">
-<form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
 
 <style>
 .form-group.required .control-label:after { 
@@ -33,14 +15,225 @@
 }
 </style>
 
-<div class="form-group required"><label class="col-md-3 control-label">Tool's Name</label><div class="col-md-7"><input class="form-control" id="id_tool_name" value="{{tool['tool_name']}}" name="tool_name" placeholder="Your Tool's Name" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Authors</label><div class="col-md-7"><input class="form-control" id="id_authors" value="{{tool['authors']}}" name="authors" placeholder="Comma-separated Names" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Contacts</label><div class="col-md-7"><input class="form-control" id="id_emails" value="{{tool['emails']}}" name="emails" placeholder="Comma-separated Emails/Alias" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Product/Component</label><div class="col-md-7"><input class="form-control" id="id_team" value="{{tool['team']}}" name="team" placeholder="Team" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Keywords</label><div class="col-md-7"><input class="form-control" id="id_keywords" value="{{tool['keywords']}}" name="keywords" placeholder="Comma-separated keywords" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Maturity Level</label><div class="col-md-7"><input class="form-control" id="id_maturity" value="{{tool['maturity']}}" name="maturity" placeholder="Maturity" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Source</label><div class="col-md-7"><input list=source_options class="form-control" id="id_source" maxlength="30" value="{{tool['source']}}" name="source" placeholder="Unknown" required="required" title="" type="text" readonly="readonly"/></div></div>
-<div class="form-group required"><label class="col-md-3 control-label">Description</label><div class="col-md-7"><textarea class="form-control" name = description cols="30" rows="10" placeholder="Describe your tools" readonly="readonly">{{tool['description']}}</textarea></div></div>
+<head>
+    {%block head%}
+    <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
+    <script src="static/js/jquery-1.11.1.js"></script>
+    <script src="static/js/jquery-ui.js"></script>
+
+    <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
+    {%endblock%}
+</head>
+<body>
+    {%block body%}
+        <div class="row col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">
+                <h2 class="sub-header">Tool Details</h2>
+            </h1>
+            <div class="col-md-7" id="tool_info_all">
+                <div class="col-md-12 text-center" id="tool_info">
+                    <form action="{{ url_for('Register_Tool') }}" method=post class="form-horizontal" id="tool_read_only_form">
+
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                            Tool's Name
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_tool_name" 
+                                        value="{{tool['tool_name']}}" 
+                                        name="tool_name" 
+                                        placeholder="Your Tool's Name" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                             </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Authors
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_authors" 
+                                        value="{{tool['authors']}}" 
+                                        name="authors" 
+                                        placeholder="Comma-separated Names" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Contacts
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_emails" 
+                                        value="{{tool['emails']}}" 
+                                        name="emails" 
+                                        placeholder="Comma-separated Emails/Alias" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Product/Component
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_team" 
+                                        value="{{tool['team']}}" 
+                                        name="team" 
+                                        placeholder="Team" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Keywords
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_keywords" 
+                                        value="{{tool['keywords']}}" 
+                                        name="keywords" 
+                                        placeholder="Comma-separated keywords" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Maturity Level
+                            </label>
+                            <div class="col-md-7">
+                                <input  class="form-control" 
+                                        id="id_maturity" 
+                                        value="{{tool['maturity']}}" 
+                                        name="maturity" 
+                                        placeholder="Maturity" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Source
+                            </label>
+                            <div class="col-md-7">
+                                <input  list=source_options 
+                                        class="form-control" 
+                                        id="id_source" 
+                                        maxlength="30" 
+                                        value="{{tool['source']}}" 
+                                        name="source" 
+                                        placeholder="Unknown" 
+                                        required="required" 
+                                        title="" 
+                                        type="text" 
+                                        readonly="readonly"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group required">
+                            <label class="col-md-3 control-label">
+                                Description
+                            </label>
+                            <div class="col-md-7">
+                                <textarea   class="form-control" 
+                                            name = description 
+                                            cols="30" 
+                                            rows="10" 
+                                            placehold="Describe your tools" 
+                                            readonly="readonly">{{tool['description']}}</textarea>
+                            </div>
+                        </div>
+
+
+
+                    <div class="form-group">
+    i                   <label class="col-md-3 control-label"></label>
+                        <div class="col-md-7 div_same_line" style="text-align: left;">
+                            {%if tool['url']%}
+                                <a  href='{{tool['url']}}' 
+                                    class="btn btn-info"  
+                                    target="_blank" 
+                                    id='tool_activity_app_{{tool['tool_id']}}'>Launch APP</a>
+                            {%endif%}
+                            {%if tool['wiki']%}
+                                <a  href='{{tool['wiki']}}' 
+                                    class="btn btn-success"  
+                                    target="_blank" 
+                                    id='tool_activity_wiki_{{tool['tool_id']}}'>Open Wiki</a>
+                            {%endif%}
+                            <a  id="tool_edit_button" 
+                                class="btn btn-danger" 
+                                style="width: 100px;"
+                            >
+                                Edit
+                            </a>
+                            <a  class='btn btn-default do_like_a' 
+                                ref="{{tool['tool_id']}}" 
+                                id="img_div_{{tool['tool_id']}}"
+                            >
+                                <img src="static/images/like.svg" width="30px" height="20px" />
+                            </a> 
+                            <span class="badge" id='likes_{{tool['tool_id']}}'>0</span>
+                                <!--<span class="glyphicon glyphicon-star"></span>--> 
+                            <script>
+                                query_tool_likes({{tool['tool_id']}});
+                            </script>
+                            <style>
+                                 #img_div a {
+                                     display: inline-block;
+                                     position: relative;
+                                     line-height: 0;
+                                     float: left;
+                                 }
+                                 #img_div img {
+                                 }
+                                 #img_div span {
+                                     position: absolute;
+                                     top: 5px;
+                                 }
+                             </style>
+                             <style>
+                                 .div_same_line {
+                                     overflow: hidden;
+                                     white-space: nowrap;
+                                 }
+                             </style>
+                        </div>
+                    </div>
+             </form>
+        </div><!--tool_info-->
+
+        <div class="col-md-12 text-left">
+            <h3>Plan&Track</h3>
+            <div id="tool_active_info">
+            </div><!--tool_active_info-->
+        </div>
+    </div><!--tool_info_all-->
 
 <script>
 function rebind_like(){
@@ -87,8 +280,6 @@ function rebind_like(){
 }
 </script>
 
-
-
 <script>
 function query_tool_likes(id) {
     $.ajax({
@@ -111,54 +302,6 @@ function query_tool_likes(id) {
     });
 }
 </script>
-
-
-
-    <div class="form-group">
-    <label class="col-md-3 control-label"></label>
-    <div class="col-md-7 div_same_line" style="text-align: left;">
-      {%if tool['url']%}<a href='{{tool['url']}}' class="btn btn-info"  target="_blank" id='tool_activity_app_{{tool['tool_id']}}'>Launch APP</a>{%endif%}
-      {%if tool['wiki']%}<a href='{{tool['wiki']}}' class="btn btn-success"  target="_blank" id='tool_activity_wiki_{{tool['tool_id']}}'>Open Wiki</a>{%endif%}
-      <a id="tool_edit_button" class="btn btn-danger" style="width: 100px;">Edit</a>
-      <a class='btn btn-default do_like_a' ref="{{tool['tool_id']}}" id="img_div_{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a><span class="badge" id='likes_{{tool['tool_id']}}'>0</span>
-        <!--<span class="glyphicon glyphicon-star"></span>--> 
-      <script>
-          query_tool_likes({{tool['tool_id']}});
-      </script>
-      <style>
-          #img_div a {
-              display: inline-block;
-              position: relative;
-              line-height: 0;
-              float: left;
-          }
-          #img_div img {
-          }
-          #img_div span {
-              position: absolute;
-              top: 5px;
-          }
-      </style>
-
-      <style>
-          .div_same_line {
-              overflow: hidden;
-              white-space: nowrap;
-          }
-      </style>
-    </div>
-    </div>
-    </form>
-</div><!--tool_info-->
-
-<div class="col-md-12 text-left">
-<h3>Plan&Track</h3>
-<div id="tool_active_info">
-</div><!--tool_active_info-->
-</div>
-
-
-</div><!--tool_info_all-->
 
 <script>
 function update_active_tool_info(id){
@@ -361,25 +504,43 @@ img.avatar-small {
     padding-left: 0px;
 }
 </style>
-<div class='comment-container col-md-5'>
-    <div class='col-sm-12'>
-    <h3 style="font-family: bebasneue">Comments</h3>
-        <div>
-        <form accept-charset="UTF-8" id="commentForm" action="/Tool_Post_Comment"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="1" /></div><input id="comment_id" name="comment_tool_id" type="hidden" value="{{tool['tool_id']}}" />
-        <textarea class="form-control" style="resize: vertical; margin-bottom:5px;" id="comment_content" name="comment_content" {%if session['logged_in']%} placeholder="Leave a comment..."{%else %} placeholder="Login before leave comments..." disabled{%endif%} required="required" rows="2"></textarea>
-        {%if session['logged_in']%}
-        <button class="btn btn-primary" type="submit"><i class='fa fa-comment'></i>
-        Comment
-        </button>{%endif%}
-</form>
 
+
+    <div class='comment-container col-md-5'>
+        <div class='col-sm-12'>
+            <h3 style="font-family: bebasneue">Comments</h3>
+                <div>
+                    <form   accept-charset="UTF-8" id="commentForm" action="/Tool_Post_Comment">
+                        <div style="margin:0; padding:0; display:inline">
+                            <input name="utf8" type="hidden" value="1" />
+                        </div>
+                        <input id="comment_id" name="comment_tool_id" type="hidden" value="{{tool['tool_id']}}" />
+                        <textarea   class="form-control" 
+                                    style="resize: vertical; margin-bottom:5px;" 
+                                    id="comment_content" 
+                                    name="comment_content" 
+                                    {%if session['logged_in']%} 
+                                        placeholder="Leave a comment..."
+                                    {%else %} 
+                                        placeholder="Login before leave comments..." 
+                                        disabled
+                                    {%endif%} 
+                                    required="required" 
+                                    rows="2">
+                        </textarea>
+                        {%if session['logged_in']%}
+                            <button class="btn btn-primary" type="submit">
+                            <i class='fa fa-comment'></i>
+                                Comment
+                            </button>
+                        {%endif%}
+                </form>
+
+            </div>
+            <div class='comments'>
+            </div><!--comments-->
         </div>
-<div class='comments'>
-
-</div><!--comments-->
-
-</div>
-</div><!--comments-container-->
+    </div><!--comments-container-->
 
 <script>
 //callback handler for form submit must under the form
@@ -428,7 +589,6 @@ function query_comments(id) {
             alert("There is one internal error when loadding comments");
         }
     });
-
 }
 
 query_comments({{tool['tool_id']}})

@@ -3563,7 +3563,7 @@ def internal_error(error):
     except:
         from_addr = "fangchiw@vmware.com"
     to_addr = "fangchiw@vmware.com"
-    subject = """[TriageRobot Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
+    subject = """[CPD Tools Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'
     sendemail(from_addr, to_addr, subject, message, error=1)
