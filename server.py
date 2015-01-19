@@ -484,7 +484,7 @@ def Tool_Active_Info_Edit():
         e_timeline = request.form["e_timeline"]
         deliverables = request.form["deliverables"]
         flag = '1'
-    
+
         if "backlog_check" in request.form.keys():
             backlog = True
             flag = '0'
@@ -514,8 +514,6 @@ def Tool_Active_Info_Edit():
 
         v_has_changed = has_changed()
 
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-        cursor = conn.cursor()
 
         #sql="""
         #    DELETE FROM tools
@@ -523,19 +521,20 @@ def Tool_Active_Info_Edit():
         #    """
         #cursor.execute(sql, {"tool_id":tool_id})
 
-        sql="""
-            INSERT INTO active_tools
-            (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
-            VALUES
-            (%s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-            `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s
-            """
-
-        cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
-
 
         if update:
+            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+            cursor = conn.cursor()
+            sql="""
+                INSERT INTO active_tools
+                (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s
+                """
+            cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
+
             username = session['username']
             new_progress = progress
             date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
@@ -546,6 +545,9 @@ def Tool_Active_Info_Edit():
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
             cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
+            cursor.close()
+            conn.commit()
+            conn.close()
             res['res'] = 'success'
         elif v_has_changed:
             res['res'] = 'Please leave some update on this INFO change'
@@ -557,10 +559,7 @@ def Tool_Active_Info_Edit():
         except:
             pass
 
-        cursor.close()
-        conn.commit()
-        conn.close()
-    return jsonify(res) 
+    return jsonify(res)
 
 def check_tool_actvie(tool_id, force=False):
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
