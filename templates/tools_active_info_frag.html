@@ -200,7 +200,7 @@
                 <td {%if progress['return_f'] %} 
                     class="td-bg-yellow" 
                     {% endif %}>
-                    {{progress['return']}}
+                    {{progress['return'][0:60]}}...
                 </td>
                 <td {%if progress['deliverables_f'] %} 
                     class="td-bg-yellow" 
