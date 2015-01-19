@@ -513,7 +513,7 @@ def Tool_Active_Info_Edit():
             return False
 
         v_has_changed = has_changed()
- 
+
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         cursor = conn.cursor()
 
@@ -534,7 +534,7 @@ def Tool_Active_Info_Edit():
 
         cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
 
-               
+
         if update:
             username = session['username']
             new_progress = progress
@@ -837,10 +837,9 @@ def Tool_Active_Lasr_Query():
         date = datetime.strptime(track['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
         #print (now - date).days
-        if (now - date).days >= 14:
-            #print "hit"
+        if ((now - date).days >= 14) and (track['new_progress'] != '100%'):
             res['flag'] = 1
-        elif (now - date).days >= 7:
+        elif ((now - date).days >= 7) and (track['new_progress'] != '100%'):
             res['flag'] = 2
         else:
             res['flag'] = 0
