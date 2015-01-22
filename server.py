@@ -219,12 +219,12 @@ def Tools_Catalog_Query():
         data = impure_results
         res['res'] = 'success'
         res['data'] = render_template(template, tools=impure_results, ss_month_ret = ss_month)
-           
+
     cursor.close()
     conn.commit()
     conn.close()
     return jsonify(res)
- 
+
 @app.route('/Tools_Catalog')
 def Tools_Catalog(active_view = 0):
     """
@@ -232,16 +232,72 @@ def Tools_Catalog(active_view = 0):
     """
 
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-        
+
     sql = """SELECT * from tools"""
-    
     cursor = conn.cursor()
     cursor.execute(sql)
     columns = [column[0] for column in cursor.description]
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
     return render_template('tools_catalog.html', tools=impure_results, catalog=2, active_view=active_view)
+
+
+@app.route('/Tools_Send_Mail')
+def Tools_Send_Mail():
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    sql = """
+            SELECT active_track.*
+            from active_track
+            INNER JOIN active_tools
+            on active_track.tool_id = active_tools.tool_id
+            where active_tools.flag=1
+          """
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+    latest_act_tools = []
+    all_act_tools_id = get_tools_all_id()
+    for act_tool_id in all_act_tools_id:
+        last_update_date = ''
+        temp = {}
+        for row in impure_results:
+            if row['tool_id'] == act_tool_id:
+                if row['date'] >= last_update_date:
+                #find the the last change
+                    temp = row
+                    last_update_date = row['date']
+        if len(temp) != 0:
+            latest_act_tools.append(temp)
+
+    for row in latest_act_tools:
+        date = datetime.strptime(row['date'],"%Y-%m-%d, %H:%M:%S PST")
+        now = datetime.now()
+        if ((now - date).days >= 20) and (row['new_progress'] != '100%'):
+            #print row
+            #from_addr = "xiangw@vmware.com"
+            from_addr = row['username'] + "@vmware.com"
+            to_addr = "xiangw@vmware.com"
+            toolname = get_tool_name(row['tool_id'])
+            subject = """[CPD Tool Update Remind] {}""".format(datetime.now().strftime(FMT_YMDHMS))
+            message = "Hello!\n"
+            message += "\n   Your CPD Tool " + toolname + " haven't been updated for 6 days. It will be marked yellow tomorrow. Please update it at http://cpdtools.eng.vmware.com as soon as possible.\n"
+            message += "\n   If you have any questions, please contact the Email: fangchiw@vmware.com\n"
+            message += "\nThanks!\n"
+            sendemail(from_addr, to_addr, subject, message, error=1)
+
+    return index()
+
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
@@ -250,16 +306,16 @@ def Register_Tool():
     if request.method == 'GET':
         return render_template('tools_register.html', catalog=0)
     else:
-        tool_name = str(request.form["tool_name"]) 
-        authors = str(request.form["authors"]) 
-        team = str(request.form["team"]) 
-        keywords = str(request.form["keywords"]) 
-        maturity = str(request.form["maturity"]) 
-        url = str(request.form["url"]) 
-        wiki = str(request.form["wiki"]) 
-        description = request.form["description"] 
-        emails = str(request.form["emails"]) 
-        source = str(request.form["source"]) 
+        tool_name = str(request.form["tool_name"])
+        authors = str(request.form["authors"])
+        team = str(request.form["team"])
+        keywords = str(request.form["keywords"])
+        maturity = str(request.form["maturity"])
+        url = str(request.form["url"])
+        wiki = str(request.form["wiki"])
+        description = request.form["description"]
+        emails = str(request.form["emails"])
+        source = str(request.form["source"])
 
         conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
         cursor = conn.cursor()
@@ -288,28 +344,28 @@ def Tools_Active_Snapshots():
     res['res'] = 'internal error'
     para = request.args
     ss_month = para.get('ss_month', '').strip()
-    
+
     # change the ss_month to ss_date for complare, such as :
     # 201411 to 20141132
     # 201412 to 20141232
-    # 201501 to 20150132 
-    ss_date = ss_month + '32' 
-    
+    # 201501 to 20150132
+    ss_date = ss_month + '32'
+
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     cursor = conn.cursor()
 
     template = "tools_active_table_frag.html"
     sql="""
         select tools.*, active_track.*
-        from 
+        from
             tools
-                INNER JOIN 
+                INNER JOIN
             active_tools
             on tools.tool_id = active_tools.tool_id
                 INNER JOIN
             active_track
             on active_tools.tool_id = active_track.tool_id
-            where active_tools.flag = 1 
+            where active_tools.flag = 1
         """
     if sql:
         cursor.execute(sql)
@@ -318,9 +374,9 @@ def Tools_Active_Snapshots():
         snap_res = []
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
-        all_id = get_active_tools_all_id() 
-       
-        for act_tool_id in all_id:
+        all_act_tools_id = get_tools_all_id()
+
+        for act_tool_id in all_act_tools_id:
             temp = {}
             last_act_eta = ''
             last_act_date = ''
@@ -330,12 +386,12 @@ def Tools_Active_Snapshots():
                     if row['eta']:
                         act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:10]
                         #cut the eta: '2014-12-12,...'
-                        if act_eta < ss_date:  
+                        if act_eta < ss_date:
                         #filter the eta > ss_date
                             if act_eta >= last_act_eta:
-                            #find the the last change before ss_date 
+                            #find the the last change before ss_date
                                 temp = row
-                                last_act_eta = act_eta 
+                                last_act_eta = act_eta
             if len(temp) == 0:
                 for row in impure_results:
                     if row['tool_id'] == act_tool_id:
@@ -344,38 +400,51 @@ def Tools_Active_Snapshots():
                             continue
                         act_date = row['date'][0:4] + row['date'][5:7] + row['date'][8:10]
                         #cut the date: '2014-12-12,...'
-                        if act_date < ss_date:  
+                        if act_date < ss_date:
                         #filter the date > ss_date
                             if act_date >= last_act_date:
-                            #find the the last change before ss_date 
+                            #find the the last change before ss_date
                                 temp = row
-                                last_act_date = act_date 
+                                last_act_date = act_date
             if len(temp) != 0:
-                snap_res.append(temp)            
-                       
+                snap_res.append(temp)
+
         data = snap_res
         res['res'] = 'success'
-        print snap_res
+        #print snap_res
         res['data'] = render_template(template, tools=snap_res, ss_month_ret=ss_month)
         res['spec'] = "active"
-           
+
     cursor.close()
     conn.commit()
     conn.close()
     return jsonify(res)
 
-def get_active_tools_all_id():
-    
+def get_tool_name(g_tool_id):
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-        
+    sql = """SELECT tool_name from tools
+             where tool_id = %(g_tool_id)s 
+          """
+    cursor = conn.cursor()
+    cursor.execute(sql, {'g_tool_id': g_tool_id})
+    toolname = cursor.fetchone()[0]
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return toolname
+
+def get_tools_all_id():
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     sql = """SELECT * from active_tools"""
-    
     cursor = conn.cursor()
     cursor.execute(sql)
     columns = [column[0] for column in cursor.description]
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
     all_id = []
     for data in impure_results:
         all_id.append(data['tool_id'])
@@ -396,7 +465,7 @@ def Tools_Stats():
     stats['app'], stats['wiki'] = get_stats_on_app_wiki()
     res['res'] = 'success'
     res['data'] = render_template('tools_catalog_stats_popover_table.html', stats=stats)
-    
+
     return jsonify(res)
 
 def get_stats_on_app_wiki():
@@ -407,11 +476,9 @@ def get_stats_on_app_wiki():
           SELECT
             SUM(activity= 'app') AS app,
             SUM(activity = 'wiki') AS wiki
-          FROM activity 
+          FROM activity
           """
     cursor.execute(sql)
-
-
     row = cursor.fetchone()
     #print row
 
@@ -454,8 +521,7 @@ def Tool_Deactivate():
             cursor = conn.cursor()
             sql = """update active_tools
                      set `flag`=0
-                     where tool_id = %(tool_id)s
-                  """
+                     where tool_id = %(tool_id)s """ 
             cursor.execute(sql, {"tool_id":tool_id})
 
             cursor.close()
@@ -627,6 +693,9 @@ def Tool_Edit_Frag():
             cursor.execute(sql, {"tool_id":tool_id})
             if cursor.fetchone():
                 active = 1
+            cursor.close()
+            conn.commit()
+            conn.close()
             res['data'] = render_template('tools_edit_form.html', tool=impure_results[0], catalog=1, active=active)
             res['res'] = 'success'
         else:
@@ -784,6 +853,9 @@ def Show_Tool_Details():
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
 
+    cursor.close()
+    conn.commit()
+    conn.close()
     return render_template('tools_detail.html', tool=impure_results[0], catalog=1)
 
 @app.route('/Tool_Active_Info_Frag')
@@ -877,6 +949,9 @@ def Tool_Like():
             res['res'] = 'success'
         except:
             res['res'] = 'already'
+        cursor.close()
+        conn.commit()
+        conn.close()
     return jsonify(res)
 
 @app.route('/Tool_Unlike', methods=['GET', 'POST'])
@@ -900,6 +975,9 @@ def Tool_Unlike():
             return
         try:
             cursor.execute(sql, {'tool_id':tool_id, 'username':username})
+            cursor.close()
+            conn.commit()
+            conn.close()
         except:
             return "you have already liked it"
         return "success"
@@ -946,10 +1024,13 @@ def Tool_Like_Query():
             res['liked'] = 0
 
     res['res'] = 'success'
+    cursor.close()
+    conn.commit()
+    conn.close()
 
     return jsonify(res)
-        
-        
+
+
 COMMENT_INNER_TEMPLATE = '''
      <div class='comment'>
      <div class='comment-meta clearfix row'><!---->
@@ -992,13 +1073,13 @@ def Tool_Post_Comment():
         cursor.close()
         conn.commit()
         conn.close()
-        
+
         res['res'] = 'success'
         res['data'] = {'username':username, 'realname':realname, 'comment':comment, 'date':date_str}
 
         res['new_div'] = render_template('comment.html', data=res['data'])
         #print res
-        
+
     return jsonify(res)
 
 @app.route('/Tool_Get_Comments', methods=['GET'])
@@ -1042,24 +1123,24 @@ def Tool_Activity():
 
     if len(paratuple) > 1:
         tool_id = int(paratuple[1])
-    
+
     activity = paratuple[0]
-    
+
     try:
         update_activity(activity, tool_id)
         res['res'] = 'success'
     except:
         res['res'] = 'internal error'
-    
+
     return jsonify(res)
-   
+
 
 def update_activity(activity='', tool_id=0):
     if not ('logged_in' in session.keys() and session['logged_in']):
         username = request.remote_addr
     else:
         username = session['username']
-    
+
     if not activity:
         activity = str(request)
 
@@ -1084,7 +1165,7 @@ def update_activity(activity='', tool_id=0):
 
 def get_conn():
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-    
+
     return conn
 
 
@@ -1111,7 +1192,7 @@ def Logout():
     This function helps user to log out.
     All the session will be left
     """
-    
+
     try:
         logging.warning("{} logout successfully.".format(session['username']))
     except:
@@ -1126,7 +1207,7 @@ def Logout():
 
 @app.route('/Entries_Processing', methods = ['GET', 'POST'])
 def Entries_Processing():
-    
+
     from collections import defaultdict
     """
     This function handles entries_processing.html
@@ -1134,7 +1215,7 @@ def Entries_Processing():
     This function also provides the function of add/remove keywords and add comments
     """
     Update_List={}
-   
+
     try: 
         cookie_file = session['cookie_file']
         #print os.path.abspath(cookie_file)
@@ -1307,12 +1388,12 @@ def Entries_Processing():
             except:
                 return None
         error_message = None
-        
+
         for key in target_list:
             product_id = find_product_id(key["product"],cursor)
 
             if product_id != None:
-                
+
                 version_id = find_version_id(key["version"],cursor,product_id)
                 if version_id != None:
                     phase_id = find_phase_id(key["phase"],cursor,version_id)
@@ -1322,11 +1403,11 @@ def Entries_Processing():
                     error_message="version"
             else:
                 error_message="product"
-            
+
             if error_message:
                 logging.warning("{} processings are not approved since the {} name '{}' is wrong.".format(session['username'], error_message, key[error_message]))
                 return "Processing are not approved since the {} name '{}' is wrong".format(error_message, key[error_message])
-            
+
             key["product_rn"] = key["product"]
             key["product"] = product_id
             key["version_rn"] = key["version"]
@@ -1341,11 +1422,11 @@ def Entries_Processing():
                 key["fix_by_data"]['fix_by_version'] = key["version_rn"]
             if key["phase_rn"]:
                 key["fix_by_data"]['fix_by_phase'] = key["phase_rn"]
-            
+
         #This line will remove all the 0_0_0 case in target_list
         target_list[:] = [x for x in target_list if not (x['product'],x['version'],x['phase'])==(0,0,0)]
         return target_list
-    
+
     def update_result_fix_by(result, id, fix_by_str_list, add=True):
         if add:
             add_rm_key = 'remove_fix_by'
@@ -1377,7 +1458,7 @@ def Entries_Processing():
         fix_by_str_list = server.remove_fix_bys(key["bug_id"], fix_by_information)
         Update_List[key["bug_id"]]=True
         update_result_fix_by(result, key["bug_id"], fix_by_str_list, add=False)
-    
+
     #Process Add_list
     Record = product_version_phase_realname_to_ID(Fix_By_Add_List)
     if isinstance(Record, str):
@@ -1403,7 +1484,7 @@ def Entries_Processing():
     """
     #print request.form
     for key in request.form.keys():
-        if "check_id_" in key: 
+        if "check_id_" in key:
             """
             since the there are lots of other keys will be transmited with request.form
             Therefore, I set a "if" to retrieve bug_id value
@@ -1450,14 +1531,14 @@ def Entries_Processing():
                 result[comment_id]["comments"] = str(request.form[key])
             logging.warning("{} add comments:{} to {}.".format(session['username'], str(request.form[key]), comment_id))
             server.add_comment(comment_id, request.form[key])
-    
+
     """
     After building the dictionary, in order to match the flask format, The process has to rebuild the dictionary into list data type
     """
     results = []
     for key in result:
         results.append(result[key])
-    
+
     """
     Follow the instructions in the metting on 07/22/2014, after each update, the whole record in the local database should be updated again
     """
@@ -1466,8 +1547,8 @@ def Entries_Processing():
         ID_String = " ".join(map(str,Update_List.keys()))
         command = "cd %s; python BAR.py" %SCRIPTS_DIR
         os.system(command + " --ID " + ID_String)
-    
-    
+
+
     return render_template('entries_processing.html', bugs=results, message = "Finish Processing at {}".format(datetime.now().strftime(FMT_YMDHMS)))
 
 
@@ -2218,7 +2299,7 @@ def Triage_Report():
     for report_item in report_name_list:
         report.append(tr.get_report_data(report_item, options))
 
-    print report
+    #print report
     return render_template('triage_chart_report.html', report=report)
 
  
@@ -2830,13 +2911,13 @@ def format_sql(input_string):
                 return "'" + str(input_string) + "'"
             else:
                 return input_string
-                
-#def sendemail(from_addr, to_addr_list, cc_addr_list, 
+
+#def sendemail(from_addr, to_addr_list, cc_addr_list,
 def sendemail(from_addr, to_addr,
         subject, message, SMTP_SERVER='smtp.vmware.com', error=0):
     """
     This function helps users sending mail to vmware mail system
-    
+
     This is a critical bug in this system.
     Since the new outlook vmware mail system send mails without authentication, 
     users are able to send email with any source mail address, even if the mail address is upapplicable
@@ -2851,7 +2932,7 @@ def sendemail(from_addr, to_addr,
     #message = header + message + '\n' + str(datetime.now())
     message = header + message
 
-    
+
     server = smtplib.SMTP(SMTP_SERVER)
     #server.login(login, password)
     if error:
@@ -2860,22 +2941,18 @@ def sendemail(from_addr, to_addr,
         server.sendmail(from_addr, [to_addr, from_addr], message)
 
     server.quit()
-    
+
 
 @app.route('/autocomplete_profile',methods=['GET'])
 def autocomplete_profile():
     import json
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
-    
-    
     results = []
     cursor = conn.cursor()
-    
     if "@:" in request.args.get('term'):
         term = str(request.args.get('term')).replace("@:","")
     else:
         term = str(request.args.get('term'))
-    
     sql = """SELECT alias_name from custom_alias
     where userid = {}
     and alias_name like "%{}%"
@@ -2886,19 +2963,16 @@ def autocomplete_profile():
         if not record:
             break
         results.append(record[0])
-    
     sql = """SELECT login_name from profiles 
         where login_name like "%{}%" or
         realname like "%{}%"
         LIMIT 10""".format(term,term)
-        
     cursor.execute(sql)
     while True:
         record = cursor.fetchone()
         if not record:
             break
         results.append(record[0])
-    
     """
     Use to process cite-in
     """
@@ -2913,7 +2987,6 @@ def autocomplete_profile():
 def autocomplete_product():
     import json
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
-    
     sql = """SELECT name from products 
         where name like "{}%"
         LIMIT 10""".format(request.args.get('term'))
