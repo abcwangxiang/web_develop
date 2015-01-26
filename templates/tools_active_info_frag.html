@@ -14,7 +14,7 @@
 </style>
 
 <style>
-    .td-bg-yellow{
+    .td-bg-red{
         color:red;
         font-weight:bold;
     }
@@ -175,7 +175,7 @@
         {% for progress in active_progress_info %}
             <tr>
                 <td {%if progress['new_progress_f'] %} 
-                    class="td-bg-yellow" 
+                    class="td-bg-red" 
                     {% endif %}>
                     {{progress['new_progress']}}
                 </td>
@@ -183,41 +183,62 @@
                     {{progress['date']}}
                 </td>
                 <td {%if progress['master_pr_f'] %} 
-                    class="td-bg-yellow" 
+                    class="td-bg-red"
                     {% endif %}>
                     {{progress['master_pr']}}
                 </td>
-                <td {%if progress['eta_f'] %} 
-                    class="td-bg-yellow" 
+                <td {%if progress['eta_f'] %}
+                    class="td-bg-red"
                     {% endif %}>
                     {{progress['eta']}}
                 </td>
-                <td {%if progress['resource_f'] %} 
-                    class="td-bg-yellow" 
+                <td {%if progress['resource_f'] %}
+                    class="td-bg-red"
                     {% endif %}>
                     {{progress['resource']}}
                 </td>
-                <td {%if progress['return_f'] %} 
-                    class="td-bg-yellow" 
+                <td {%if progress['return_f'] %}
+                    class="td-bg-red"
                     {% endif %}>
-                    {{progress['return'][0:60]}}...
+					<div class="tooltip-wide">
+					<p data-toggle="tooltip" data-placement="right" title="{{progress['return']}}">
+					  {{progress['return'][0:30]}}...
+					</p>
+					</div>
                 </td>
-                <td {%if progress['deliverables_f'] %} 
-                    class="td-bg-yellow" 
+                <td {%if progress['deliverables_f'] %}
+                    class="td-bg-red"
                     {% endif %}>
-                    {{progress['deliverables'][0:60]}}...
+					<div class="tooltip-wide">
+					<p data-toggle="tooltip" data-placement="right" title="{{progress['deliverables']}}">
+					  {{progress['deliverables'][0:30]}}...
+					</p>
+					</div>
                 </td>
                 <td>
                     {{progress['username']}}
                 </td>
-                <td>
-                    {{progress['update'][0:60]}}...
-                </td>
+				<td>
+					<div class="tooltip-wide">
+					<p data-toggle="tooltip" data-placement="right" title="{{progress['update']}}">
+					  {{progress['update'][0:30]}}...
+					</p>
+					</div>
+				</td>
             </tr>
         {% endfor %}
         </tbody>
-    </table>
-
+	</table>
+	<script>
+		$('[data-toggle=tooltip]').tooltip();
+	</script>
+	<style>
+	    .tooltip-wide .tooltip{
+			min-width: 250px;
+			font-size: 15px;
+            font-weight:bold;
+		}
+	</style>
 {%else%}
     <a id="tool_activate" class="btn btn-danger" style="width: 100px;">Activate</a>
 {% endif %}

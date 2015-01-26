@@ -20,6 +20,7 @@ import time
 import logging
 import traceback
 import string
+import re
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from collections import OrderedDict
@@ -90,8 +91,14 @@ EMAIL_WARNING_MESSAGE = "If you want to send additinal message after default {} 
 
 FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 
-
 NO_LOGIN = 'Please login before register/edit tools'
+
+EMAIL_MESSAGE_TOOL_UPDATE = """\
+\nThanks!
+\n--------------------------------
+\nThis Email is sent by CPDtools website automatically.
+If you have any questions, please contact: fangchiw@vmware.com
+"""
 
 with app.test_request_context('/hello', method='POST'):
     # now you can do something with the request until the
@@ -102,7 +109,7 @@ with app.test_request_context('/hello', method='POST'):
 
 @app.route('/')
 def index():
-    
+
     visited_file = os.path.join(SCRIPTS_DIR, 'log/visited.log')
     new = os.popen('touch %s; echo 1 >> %s'%(visited_file, visited_file)).read()
     return Tools_Catalog(0)
@@ -283,19 +290,41 @@ def Tools_Send_Mail():
     for row in latest_act_tools:
         date = datetime.strptime(row['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
-        if ((now - date).days >= 20) and (row['new_progress'] != '100%'):
-            #print row
+        if (row['new_progress'] != '100%'):
             #from_addr = "xiangw@vmware.com"
             from_addr = row['username'] + "@vmware.com"
             to_addr = "xiangw@vmware.com"
-            toolname = get_tool_name(row['tool_id'])
-            subject = """[CPD Tool Update Remind] {}""".format(datetime.now().strftime(FMT_YMDHMS))
+            toolname = get_tool_attr(row['tool_id'], 'tool_name')
+            subject = """[CPD Tool Update Reminder] {}""".format(datetime.now().strftime(FMT_YMDHMS))
             message = "Hello!\n"
-            message += "\n   Your CPD Tool " + toolname + " haven't been updated for 6 days. It will be marked yellow tomorrow. Please update it at http://cpdtools.eng.vmware.com as soon as possible.\n"
-            message += "\n   If you have any questions, please contact the Email: fangchiw@vmware.com\n"
-            message += "\nThanks!\n"
-            sendemail(from_addr, to_addr, subject, message, error=1)
-
+            tool_id_str = `row['tool_id']`
+            message += "\n   Your Project *" + toolname
+            message += "* at : http://cpdtools.eng.vmware.com/Show_Tool_Details?id="
+            message += tool_id_str[0:len(tool_id_str)-1] + " haven't been updated for"
+          #  if ((now - date).days == 6):
+          #      message += " 6 days. It will be marked orange tomorrow.\n"
+          #      message += EMAIL_MESSAGE_TOOL_UPDATE
+          #      sendemail(from_addr, to_addr, subject, message, error=1)
+          #      continue
+          #  if ((now - date).days >= 7) and ((now - date).days < 13) :
+          #      message += " several days. It has been marked orange .\n"
+          #      message += EMAIL_MESSAGE_TOOL_UPDATE
+          #      sendemail(from_addr, to_addr, subject, message, error=1)
+          #      continue
+          #  if ((now - date).days == 13):
+          #      message += " 13 days. It will be marked red tomorrow.\n"
+          #      message += EMAIL_MESSAGE_TOOL_UPDATE
+          #      sendemail(from_addr, to_addr, subject, message, error=1)
+          #      continue
+            if ((now - date).days >=25):
+                message += " several days. It has been marked red.\n"
+                message += EMAIL_MESSAGE_TOOL_UPDATE
+                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
+                #real_mail_addrs = re.findall(r'[\w-\._\+%]+@vmware\.com', mail_addrs)
+                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
+                print real_mail_addrs
+                for addre in real_mail_addrs:
+                    sendemail(addre, to_addr, subject, message, error=1)
     return index()
 
 
@@ -420,11 +449,10 @@ def Tools_Active_Snapshots():
     conn.close()
     return jsonify(res)
 
-def get_tool_name(g_tool_id):
+def get_tool_attr(g_tool_id, g_tool_attr):
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-    sql = """SELECT tool_name from tools
-             where tool_id = %(g_tool_id)s 
-          """
+    sql = """SELECT """ + g_tool_attr
+    sql += """ from tools where tool_id = %(g_tool_id)s """
     cursor = conn.cursor()
     cursor.execute(sql, {'g_tool_id': g_tool_id})
     toolname = cursor.fetchone()[0]
@@ -632,7 +660,7 @@ def check_tool_actvie(tool_id, force=False):
     cursor = conn.cursor()
     sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
     if not force:
-        sql += " and flag = 1"""
+        sql += """ and flag = 1"""
     cursor.execute(sql, {"tool_id":tool_id})
 
     columns = [column[0] for column in cursor.description]

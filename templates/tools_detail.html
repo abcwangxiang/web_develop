@@ -313,8 +313,9 @@ function update_active_tool_info(id){
         cache:false, //......
         success:function(res){
             if(res.res=="success"){
-                document.getElementById("tool_active_info").innerHTML = res.data;
-                var Progress_table = $('#Table_Active_Progress').DataTable({
+               // document.getElementById("tool_active_info").innerHTML = res.data;
+			   $('#tool_active_info').html(res.data); 
+			   var Progress_table = $('#Table_Active_Progress').DataTable({
                     dom: 't',
                     paging:         false,
                     autoWidth:      false,
