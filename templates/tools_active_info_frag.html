@@ -200,40 +200,39 @@
                 <td {%if progress['return_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<div class="tooltip-wide">
-					<p data-toggle="tooltip" data-placement="right" title="{{progress['return']}}">
+					<p	data-toggle="popover" data-content="{{progress['return']}}">
 					  {{progress['return'][0:30]}}...
 					</p>
-					</div>
                 </td>
                 <td {%if progress['deliverables_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<div class="tooltip-wide">
-					<p data-toggle="tooltip" data-placement="right" title="{{progress['deliverables']}}">
+					<p	data-toggle="popover" data-content="{{progress['deliverables']}}">
 					  {{progress['deliverables'][0:30]}}...
 					</p>
-					</div>
                 </td>
                 <td>
                     {{progress['username']}}
                 </td>
 				<td>
-					<div class="tooltip-wide">
-					<p data-toggle="tooltip" data-placement="right" title="{{progress['update']}}">
+					<p	data-toggle="popover" data-content="{{progress['update']}}">
 					  {{progress['update'][0:30]}}...
 					</p>
-					</div>
 				</td>
             </tr>
         {% endfor %}
         </tbody>
 	</table>
 	<script>
-		$('[data-toggle=tooltip]').tooltip();
+	//	$('[data-toggle=tooltip]').tooltip();
+	$('[data-toggle=popover]').popover({
+		delay: {show: 50, hide: 30},
+		trigger: "hover click",
+		placement: "right",
+	});
 	</script>
 	<style>
-	    .tooltip-wide .tooltip{
+	    .popover{
 			min-width: 250px;
 			font-size: 15px;
             font-weight:bold;

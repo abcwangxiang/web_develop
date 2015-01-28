@@ -93,11 +93,14 @@ FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 
 NO_LOGIN = 'Please login before register/edit tools'
 
+REAL_MAIL_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 'myildirim@vmware.com', 'sgadi@vmware.com', 'hillzhao@vmware.com']
+
 EMAIL_MESSAGE_TOOL_UPDATE = """\
 \nThanks!
-\n--------------------------------
+CPDTools Committe
+--------------------------------
 \nThis Email is sent by CPDtools website automatically.
-If you have any questions, please contact: fangchiw@vmware.com
+If you have any questions, please contact: fangchiw@vmware.com, xiangw@vmware.com
 """
 
 with app.test_request_context('/hello', method='POST'):
@@ -138,14 +141,14 @@ def Login():
     if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
         return render_template('query.html', error = "Error Account/Password, Please Login again")
-        
-    
+
+
     session['username'] = request.form['BG_account']
     if session['username']:
         session['username'] = session['username'].split('@')[0]
     session['password'] = request.form['BG_password']
     session['cookie_file'] = cookie_file
-    
+
     #conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
     #cursor = conn.cursor()
     #sql="""
@@ -153,11 +156,10 @@ def Login():
     #    """.format(session["username"])
     #cursor.execute(sql)
     #profile_number = cursor.fetchone()[0]
-    
-    
+
     #session['userid'] = profile_number
     session['logged_in'] = True
-    
+
     admin_file_path = open(BAR_ADMINFILE, "r")
     admin_members = []
     for line in admin_file_path:
@@ -166,12 +168,11 @@ def Login():
         session['admin'] = True
     else:
         session['admin'] = False
-    
+
     #cache.set('username', str(request.form["BG_account"]))
     #cache.set('cookie', cookie_file)
     logging.warning("{} login into the bugzilla successfully.".format(session['username']))
-    
-    
+
     return index()
     #return render_template('query.html')
 
@@ -290,42 +291,105 @@ def Tools_Send_Mail():
     for row in latest_act_tools:
         date = datetime.strptime(row['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
+        cc_addrs = ""
+        for cc in REAL_MAIL_ADDRS:
+            cc_addrs += cc + ", "
         if (row['new_progress'] != '100%'):
-            #from_addr = "xiangw@vmware.com"
-            from_addr = row['username'] + "@vmware.com"
-            to_addr = "xiangw@vmware.com"
+            to_addr = row['username'] + "@vmware.com"
+            from_addr = "xiangw@vmware.com"
             toolname = get_tool_attr(row['tool_id'], 'tool_name')
-            subject = """[CPD Tool Update Reminder] {}""".format(datetime.now().strftime(FMT_YMDHMS))
-            message = "Hello!\n"
+            #subject = """[CPD Tool Update Reminder] {}""".format(datetime.now().strftime(FMT_YMDHMS))
+            subject = "[Your CPD Tool * " + toolname + " * No Update Reminder]"
+            message = "Hello,\n"
             tool_id_str = `row['tool_id']`
-            message += "\n   Your Project *" + toolname
+            message += "\nYour Project *" + toolname
             message += "* at : http://cpdtools.eng.vmware.com/Show_Tool_Details?id="
-            message += tool_id_str[0:len(tool_id_str)-1] + " haven't been updated for"
-          #  if ((now - date).days == 6):
-          #      message += " 6 days. It will be marked orange tomorrow.\n"
-          #      message += EMAIL_MESSAGE_TOOL_UPDATE
-          #      sendemail(from_addr, to_addr, subject, message, error=1)
-          #      continue
-          #  if ((now - date).days >= 7) and ((now - date).days < 13) :
-          #      message += " several days. It has been marked orange .\n"
-          #      message += EMAIL_MESSAGE_TOOL_UPDATE
-          #      sendemail(from_addr, to_addr, subject, message, error=1)
-          #      continue
-          #  if ((now - date).days == 13):
-          #      message += " 13 days. It will be marked red tomorrow.\n"
-          #      message += EMAIL_MESSAGE_TOOL_UPDATE
-          #      sendemail(from_addr, to_addr, subject, message, error=1)
-          #      continue
-            if ((now - date).days >=25):
-                message += " several days. It has been marked red.\n"
+            message += tool_id_str[0:len(tool_id_str)-1] + " hasn't been updated for " + str((now - date).days) + " days."
+            message += "\nYour last update is at " + str(date) + ".\nNow "
+            addr_strings = ""
+            if ((now - date).days == 6):
+                message += "it will be marked orange tomorrow.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
                 mail_addrs = get_tool_attr(row['tool_id'], 'emails')
-                #real_mail_addrs = re.findall(r'[\w-\._\+%]+@vmware\.com', mail_addrs)
                 real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
-                print real_mail_addrs
+                for addre in REAL_MAIL_ADDRS: #CC
+                    #sendemail(from_addr, addre, subject, message, error=0)
+                    print addre
                 for addre in real_mail_addrs:
-                    sendemail(addre, to_addr, subject, message, error=1)
+                    #sendemail(from_addr, addre, subject, message, error=1)
+                    addr_strings += addre + ", "
+                if to_addr not in real_mail_addrs:
+                    addr_strings += from_addr
+                    #sendemail(from_addr, to_addr, subject, message, error=1)
+                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 1)
+                continue
+            if ((now - date).days >= 7) and ((now - date).days < 13) :
+                message += "it has been marked orange .\n"
+                message += EMAIL_MESSAGE_TOOL_UPDATE
+                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
+                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
+                for addre in REAL_MAIL_ADDRS: #CC
+                    #sendemail(from_addr, addre, subject, message, error=0)
+                    print addre
+                for addre in real_mail_addrs:
+                    #sendemail(from_addr, addre, subject, message, error=1)
+                    addr_strings += addre + ", "
+                if to_addr not in real_mail_addrs:
+                    addr_strings += from_addr
+                    #sendemail(from_addr, to_addr, subject, message, error=1)
+                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 2)
+                continue
+            if ((now - date).days == 13):
+                message += "it will be marked red tomorrow.\n"
+                message += EMAIL_MESSAGE_TOOL_UPDATE
+                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
+                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
+                for addre in REAL_MAIL_ADDRS:  #CC
+                    #sendemail(from_addr, addre, subject, message, error=0)
+                    print addre
+                for addre in real_mail_addrs:
+                    #sendemail(from_addr, addre, subject, message, error=1)
+                    addr_strings += addre + ", "
+                if to_addr not in real_mail_addrs:
+                    addr_strings += from_addr
+                    #sendemail(from_addr, to_addr, subject, message, error=1)
+                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 3)
+                continue
+            if ((now - date).days >= 14):
+                message += "it has been marked red.\n"
+                message += EMAIL_MESSAGE_TOOL_UPDATE
+                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
+                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
+                for addre in REAL_MAIL_ADDRS: #CC
+                    #sendemail(from_addr, addre, subject, message, error=0)
+                    print addre
+                for addre in real_mail_addrs:
+                    #sendemail(from_addr, addre, subject, message, error=1)
+                    addr_strings += addre + ", "
+                if to_addr not in real_mail_addrs:
+                    addr_strings += from_addr
+                    #sendemail(from_addr, to_addr, subject, message, error=1)
+                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 4)
+
     return index()
+
+
+def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
+
+    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    cursor = conn.cursor()
+    now = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+    sql="""
+           INSERT INTO email_track
+            (`tool_id`, `send_time`, `sender`, `receiver_addrs`, `cc_addrs`, `send_reason`)
+            VALUES
+            (%s, %s, %s, %s, %s, %s)
+        """
+    cursor.execute(sql, (tool_id, now, sender, receiver, cc_addrs, reason))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return 0
 
 
 @app.route('/Register_Tool', methods=['GET', 'POST'])
@@ -523,7 +587,7 @@ def Tool_Activate():
     else:
         para = request.args
         tool_id = int(para.get('id', '').strip())
-        active_info = check_tool_actvie(tool_id, force=True) 
+        active_info = check_tool_actvie(tool_id, force=True)
         if not active_info:
             active_info = dict()
             active_info['tool_id'] = tool_id
@@ -543,13 +607,13 @@ def Tool_Deactivate():
     else:
         para = request.args
         tool_id = int(para.get('id', '').strip())
-        active_info = check_tool_actvie(tool_id) 
+        active_info = check_tool_actvie(tool_id)
         if active_info:
             conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
             cursor = conn.cursor()
             sql = """update active_tools
                      set `flag`=0
-                     where tool_id = %(tool_id)s """ 
+                     where tool_id = %(tool_id)s """
             cursor.execute(sql, {"tool_id":tool_id})
 
             cursor.close()
@@ -695,7 +759,7 @@ def get_act_pro_info(tool_id):
     #            row[key] = ''
     #print progress_results
     return progress_results
-    
+
 @app.route("/Tool_Edit_Frag", methods=['GET', 'POST'])
 def Tool_Edit_Frag():
     res = {}
@@ -714,7 +778,7 @@ def Tool_Edit_Frag():
             for row in cursor.fetchall():
                 impure_results.append(dict(zip(columns, row)))
             #print impure_results[0]
-            
+
             #if it is active tool
             active = 0
             sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
@@ -736,14 +800,14 @@ def Tool_Edit_Frag():
     return jsonify(res)
 
 def edit_tool_details():
-    tool_name = str(request.form["tool_name"]) 
-    authors = str(request.form["authors"]) 
-    team = str(request.form["team"]) 
-    keywords = str(request.form["keywords"]) 
-    maturity = str(request.form["maturity"]) 
-    url = str(request.form["url"]) 
-    wiki = str(request.form["wiki"]) 
-    description = request.form["description"] 
+    tool_name = str(request.form["tool_name"])
+    authors = str(request.form["authors"])
+    team = str(request.form["team"])
+    keywords = str(request.form["keywords"])
+    maturity = str(request.form["maturity"])
+    url = str(request.form["url"])
+    wiki = str(request.form["wiki"])
+    description = request.form["description"]
     original_name = str(request.form["original_name"])
     emails = str(request.form["emails"])
     tool_id = str(request.form["id"])
@@ -799,7 +863,7 @@ def edit_tool_details():
     logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
 
     return True, impure_results[0], ""
-    
+
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
 def Edit_Tool_Details():
     if not ('logged_in' in session.keys() and session['logged_in']):
@@ -826,14 +890,14 @@ def Edit_Tool_Details():
             active = 1
         return render_template('tools_edit.html', tool=impure_results[0], catalog=1, active=active)
     elif request.method == 'POST':
-        tool_name = str(request.form["tool_name"]) 
-        authors = str(request.form["authors"]) 
-        team = str(request.form["team"]) 
-        keywords = str(request.form["keywords"]) 
-        maturity = str(request.form["maturity"]) 
-        url = str(request.form["url"]) 
-        wiki = str(request.form["wiki"]) 
-        description = request.form["description"] 
+        tool_name = str(request.form["tool_name"])
+        authors = str(request.form["authors"])
+        team = str(request.form["team"])
+        keywords = str(request.form["keywords"])
+        maturity = str(request.form["maturity"])
+        url = str(request.form["url"])
+        wiki = str(request.form["wiki"])
+        description = request.form["description"]
         original_name = str(request.form["original_name"])
         emails = str(request.form["emails"])
         tool_id = str(request.form["id"])
@@ -866,7 +930,7 @@ def Edit_Tool_Details():
         logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
 
         return Tools_Catalog(0)
-       
+
 @app.route("/Show_Tool_Details")
 def Show_Tool_Details():
     para = request.args
@@ -899,22 +963,22 @@ def Tool_Active_Info_Frag():
         act_pro_info = get_act_pro_info(tool_id)
         for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
-        
+
         for i in range(len(act_pro_info) - 1):
             keys = act_pro_info[i].keys()
             for key in keys:
-                if act_pro_info[i][key] != act_pro_info[i+1][key]: 
+                if act_pro_info[i][key] != act_pro_info[i+1][key]:
                     #mark the modified item in active_track and highlight it
                     act_pro_info[i][str(key)+'_f'] = 1
                 else:
                     act_pro_info[i][str(key)+'_f'] = 0
-     
-    res['data'] = render_template('tools_active_info_frag.html', 
+
+    res['data'] = render_template('tools_active_info_frag.html',
                             active_flag=active_flag, active_info=active_info,
                             active_progress_info=act_pro_info)
     res['res'] = 'success'
     return jsonify(res)
-   
+
 @app.route('/Tool_Active_Lasr_Query')
 def Tool_Active_Lasr_Query():
     res = {}
@@ -922,7 +986,7 @@ def Tool_Active_Lasr_Query():
     tool_id = int(para.get('id', '').strip())
     conn = get_conn()
     cursor = conn.cursor()
-    sql = """SELECT * from active_track 
+    sql = """SELECT * from active_track
              where tool_id = %(tool_id)s
              ORDER BY id DESC
              LIMIT 1
@@ -935,7 +999,7 @@ def Tool_Active_Lasr_Query():
         res['data'] = track['date']
         date = datetime.strptime(track['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
-        #print (now - date).days
+        # if the progress is 100%, don't highlight it
         if ((now - date).days >= 14) and (track['new_progress'] != '100%'):
             res['flag'] = 1
         elif ((now - date).days >= 7) and (track['new_progress'] != '100%'):
@@ -1097,14 +1161,11 @@ def Tool_Post_Comment():
                     (%s, %s, %s, %s, %s)
                     """
         cursor.execute(sql, (username,tool_id,comment,date_str,realname))
-
         cursor.close()
         conn.commit()
         conn.close()
-
         res['res'] = 'success'
         res['data'] = {'username':username, 'realname':realname, 'comment':comment, 'date':date_str}
-
         res['new_div'] = render_template('comment.html', data=res['data'])
         #print res
 
@@ -1129,7 +1190,6 @@ def Tool_Get_Comments():
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-
     cursor.close()
     conn.commit()
     conn.close()
@@ -1168,16 +1228,12 @@ def update_activity(activity='', tool_id=0):
         username = request.remote_addr
     else:
         username = session['username']
-
     if not activity:
         activity = str(request)
-
     mydate = datetime.now()
     date_str = mydate.strftime("%b %d %H:%M:%S, %Y")
-
     conn = get_conn()
     cursor = conn.cursor()
-
     sql="""
         INSERT INTO activity
         (username,tool_id,time,activity)
@@ -1185,7 +1241,6 @@ def update_activity(activity='', tool_id=0):
         (%s, %s, %s, %s)
         """
     cursor.execute(sql, (username,tool_id,date_str,activity))
-
     cursor.close()
     conn.commit()
     conn.close()
@@ -1244,30 +1299,23 @@ def Entries_Processing():
     """
     Update_List={}
 
-    try: 
+    try:
         cookie_file = session['cookie_file']
         #print os.path.abspath(cookie_file)
-        
         #if cookie_file is None:
         #    session['logged_in'] = False
         #    return redirect(url_for('query'))
         server = BugzillaServer(BUGZILLA_URL, cookie_file)
-   
+
         login_result = server.login(str(session["username"]), str(session["password"]))
     except:
         return render_template('query.html', error = "Session Contains Invalid Account/Password, Please LogOUT and IN again")
-        
-    if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
         return render_template('query.html', error = "Error Account/Password, Please Login again")
-    
-    
-    
     result={}
-    
     checked_list = []
     for key in request.form.keys():
-        if "check_id_" in key: 
+        if "check_id_" in key:
             check_id = int(key.replace("check_id_",""))
             checked_list.append(check_id)
     if not checked_list:
@@ -1289,15 +1337,15 @@ def Entries_Processing():
     sql = """select bug_id, fix_by_product_rn, fix_by_version_rn, fix_by_phase_rn from bug_fix_by_map
         where bug_id in ({})
         """.format(",".join(map(str, Bug_ID)))
-    
+
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
     if not conn:
         flash("Fail to Connect my Sql, please try again later")
         return render_template('query.html', error="Fail to Connect MySQL, Please try again later")
     cursor=conn.cursor()
     Database_Bug_ID_Results = bug_fix_by_SQL(sql, cursor)
-    
-    
+
+
     """
     Start parse the request.form
     And build comparison form and remove map
@@ -1305,10 +1353,10 @@ def Entries_Processing():
     Local_Bug_ID_Results = {}
     Local_Query_Map=defaultdict(lambda: defaultdict(lambda: defaultdict(str)))
     Local_Remove_Map=defaultdict(lambda: defaultdict(lambda: defaultdict(str)))
-    
+
     for key in Bug_ID:
         Local_Bug_ID_Results[key] = []
-    
+
     for key in request.form.keys():
         if "fix_by_" in key:
             string_split = [int(k) for k in key.split('_') if k.isdigit()]
@@ -1358,7 +1406,7 @@ def Entries_Processing():
                 temp["bug_id"] = ID
                 temp.update(fix_number)
                 Fix_By_Add_List.append(temp)
-                
+
     for ID in Database_Bug_ID_Results:
         for fix_number in Database_Bug_ID_Results[ID]:
             if fix_number not in Local_Bug_ID_Results[ID]:
@@ -1366,8 +1414,8 @@ def Entries_Processing():
                 temp["bug_id"] = ID
                 temp.update(fix_number)
                 Fix_By_Remove_List.append(temp)
-    
-    
+
+
     """
     This function transfer all the realname list into id list.
     It also helps user removing all the 0_0_0 case.
@@ -1587,27 +1635,27 @@ def Query():
     This function queries the database first.
     If there is custom setting in local database, it will fill into respective columns initially.
     """
-    
+
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
     cursor = conn.cursor()
-    
+
     sql="""
         select userid from profiles where login_name = '{}'
         """.format(session["username"])
     cursor.execute(sql)
     profile_number = cursor.fetchone()[0]
-    
+
     sql="""
     select * from custom_setting where userid = {}
     """.format(profile_number)
     cursor.execute(sql)
-    
+
     columns = [column[0] for column in cursor.description]
     results = []
     for row in cursor.fetchall():
         results.append(dict(zip(columns, row)))
     if results:
-        return render_template('query.html', 
+        return render_template('query.html',
             query_assignee = results[0]["query_assignee"],
             query_product = results[0]["query_product"],
             query_version = results[0]["query_version"],
@@ -1627,7 +1675,7 @@ def Show_Entries():
     The rule will be recorded in local database after retrieving the data from bugzilla.
     Then, the functino will query the data from out local database again.
     """
-    
+
     """
     Since the request.form['assigned_to'] will probably include ',' and space character, 
     we have to preprocess the request.form['assigned_to']
