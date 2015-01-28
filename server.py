@@ -93,7 +93,7 @@ FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 
 NO_LOGIN = 'Please login before register/edit tools'
 
-REAL_MAIL_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 'myildirim@vmware.com', 'sgadi@vmware.com', 'hillzhao@vmware.com']
+ADMINI_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 'myildirim@vmware.com', 'sgadi@vmware.com', 'hillzhao@vmware.com']
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
 \nThanks!
@@ -112,7 +112,6 @@ with app.test_request_context('/hello', method='POST'):
 
 @app.route('/')
 def index():
-
     visited_file = os.path.join(SCRIPTS_DIR, 'log/visited.log')
     new = os.popen('touch %s; echo 1 >> %s'%(visited_file, visited_file)).read()
     return Tools_Catalog(0)
@@ -274,6 +273,7 @@ def Tools_Send_Mail():
     conn.commit()
     conn.close()
 
+    #find the active tools' last update in active_track
     latest_act_tools = []
     all_act_tools_id = get_tools_all_id()
     for act_tool_id in all_act_tools_id:
@@ -288,17 +288,16 @@ def Tools_Send_Mail():
         if len(temp) != 0:
             latest_act_tools.append(temp)
 
+    now = datetime.now()
     for row in latest_act_tools:
         date = datetime.strptime(row['date'],"%Y-%m-%d, %H:%M:%S PST")
-        now = datetime.now()
-        cc_addrs = ""
-        for cc in REAL_MAIL_ADDRS:
-            cc_addrs += cc + ", "
-        if (row['new_progress'] != '100%'):
+        day_dist = (now - date).days
+        if (row['new_progress'] != '100%') and day_dist >= 6:
             to_addr = row['username'] + "@vmware.com"
             from_addr = "xiangw@vmware.com"
             toolname = get_tool_attr(row['tool_id'], 'tool_name')
-            #subject = """[CPD Tool Update Reminder] {}""".format(datetime.now().strftime(FMT_YMDHMS))
+
+            ############   The message   ###########
             subject = "[Your CPD Tool * " + toolname + " * No Update Reminder]"
             message = "Hello,\n"
             tool_id_str = `row['tool_id']`
@@ -306,71 +305,45 @@ def Tools_Send_Mail():
             message += "* at : http://cpdtools.eng.vmware.com/Show_Tool_Details?id="
             message += tool_id_str[0:len(tool_id_str)-1] + " hasn't been updated for " + str((now - date).days) + " days."
             message += "\nYour last update is at " + str(date) + ".\nNow "
-            addr_strings = ""
-            if ((now - date).days == 6):
+
+            #get the tools' builder's emails
+            mail_addrs = get_tool_attr(row['tool_id'], 'emails') 
+            real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
+            if to_addr not in real_mail_addrs: #the one who last update the tool
+                real_mail_addrs.append(to_addr)
+
+            #change list to a string
+            to_addr_string = ', '.join(real_mail_addrs)
+            cc_addr_string = ', '.join(ADMINI_ADDRS)
+
+            if (day_dist== 6):
                 message += "it will be marked orange tomorrow.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
-                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
-                for addre in REAL_MAIL_ADDRS: #CC
-                    #sendemail(from_addr, addre, subject, message, error=0)
-                    print addre
-                for addre in real_mail_addrs:
-                    #sendemail(from_addr, addre, subject, message, error=1)
-                    addr_strings += addre + ", "
-                if to_addr not in real_mail_addrs:
-                    addr_strings += from_addr
-                    #sendemail(from_addr, to_addr, subject, message, error=1)
-                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 1)
+               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 1)
                 continue
-            if ((now - date).days >= 7) and ((now - date).days < 13) :
+            if (day_dist >= 7) and ((now - date).days < 13) :
                 message += "it has been marked orange .\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
-                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
-                for addre in REAL_MAIL_ADDRS: #CC
-                    #sendemail(from_addr, addre, subject, message, error=0)
-                    print addre
-                for addre in real_mail_addrs:
-                    #sendemail(from_addr, addre, subject, message, error=1)
-                    addr_strings += addre + ", "
-                if to_addr not in real_mail_addrs:
-                    addr_strings += from_addr
-                    #sendemail(from_addr, to_addr, subject, message, error=1)
-                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 2)
+               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 2)
                 continue
-            if ((now - date).days == 13):
+            if (day_dist == 13):
                 message += "it will be marked red tomorrow.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
-                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
-                for addre in REAL_MAIL_ADDRS:  #CC
-                    #sendemail(from_addr, addre, subject, message, error=0)
-                    print addre
-                for addre in real_mail_addrs:
-                    #sendemail(from_addr, addre, subject, message, error=1)
-                    addr_strings += addre + ", "
-                if to_addr not in real_mail_addrs:
-                    addr_strings += from_addr
-                    #sendemail(from_addr, to_addr, subject, message, error=1)
-                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 3)
+               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 3)
                 continue
-            if ((now - date).days >= 14):
+            if (day_dist >= 14):
                 message += "it has been marked red.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-                mail_addrs = get_tool_attr(row['tool_id'], 'emails')
-                real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
-                for addre in REAL_MAIL_ADDRS: #CC
-                    #sendemail(from_addr, addre, subject, message, error=0)
-                    print addre
-                for addre in real_mail_addrs:
-                    #sendemail(from_addr, addre, subject, message, error=1)
-                    addr_strings += addre + ", "
-                if to_addr not in real_mail_addrs:
-                    addr_strings += from_addr
-                    #sendemail(from_addr, to_addr, subject, message, error=1)
-                record_email_send_info(row['tool_id'], 'xiangw', addr_strings, cc_addrs, 4)
-
+               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 4)
+               # print message
+               # print from_addr
+               # print real_mail_addrs
+               # print ADMINI_ADDRS
+               # print subject
     return index()
 
 
@@ -2930,7 +2903,7 @@ def Admin_Email_Processing():
         else:
             continue
         message = message+'\n======This email is automatically sent by TriageRobot ======\n'
-        sendemail(from_addr, to_addr, subject, message)
+        send_email(from_addr,[to_addr], [], subject, message)
         logging.warning("{} sent email to {}, for {}, bug_id: {}".format(session['username'], to_addr, str(key), str(Bug_id)))
    
     
@@ -2988,36 +2961,26 @@ def format_sql(input_string):
             else:
                 return input_string
 
-#def sendemail(from_addr, to_addr_list, cc_addr_list,
-def sendemail(from_addr, to_addr,
-        subject, message, SMTP_SERVER='smtp.vmware.com', error=0):
-    """
-    This function helps users sending mail to vmware mail system
-
-    This is a critical bug in this system.
-    Since the new outlook vmware mail system send mails without authentication, 
-    users are able to send email with any source mail address, even if the mail address is upapplicable
-    For example, you could send email from a@vmware.com.
-    """
+def send_email(from_addr, to_addrs, cc_addrs, subject, body):
+    # to_addrs and  cc_addrs must be email_address list
+    SMTP_SERVER='smtp.vmware.com'
     import smtplib
-    header  = 'From: {}\n'.format(str(from_addr))
-    header += 'To: {}\n'.format(str(to_addr))
-    if not error:
-        header += 'CC: {}\n'.format(str(from_addr))
-    header += 'Subject: {}\n\n'.format(str(subject))
-    #message = header + message + '\n' + str(datetime.now())
-    message = header + message
-
-
+    from email.mime.text import MIMEText
     server = smtplib.SMTP(SMTP_SERVER)
-    #server.login(login, password)
-    if error:
-        server.sendmail(from_addr, to_addr, message)
-    else:
-        server.sendmail(from_addr, [to_addr, from_addr], message)
-
+    msg_subject = subject
+    msg_body = body
+    msg = MIMEText(msg_body)
+    msg['Subject'] = msg_subject
+    msg['From'] = from_addr
+    msg['To'] = ', '.join(to_addrs)
+    print msg['To']
+    receivers = to_addrs
+    if cc_addrs:
+        msg['Cc'] = ', '.join(cc_addrs)
+        receivers += cc_addrs
+    server.sendmail(from_addr, receivers, msg.as_string())
     server.quit()
-
+    return 0
 
 @app.route('/autocomplete_profile',methods=['GET'])
 def autocomplete_profile():
@@ -3709,11 +3672,11 @@ def internal_error(error):
         from_addr = session["username"] + "@vmware.com"
     except:
         from_addr = "fangchiw@vmware.com"
-    to_addr = "fangchiw@vmware.com"
+    to_addr = ["xiangw@vmware.com"]
     subject = """[CPD Tools Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
     message += '\n\n'+str(request)+'\n\n'
-    sendemail(from_addr, to_addr, subject, message, error=1)
+    send_email(from_addr, to_addr, [], subject, message) # no CC_addrs
     return render_template('error.html', error="OOPS! There is an internal error occured, a report has been filed.")
 
 def initialize_logger(output_dir):
