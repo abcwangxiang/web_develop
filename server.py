@@ -94,6 +94,7 @@ FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 NO_LOGIN = 'Please login before register/edit tools'
 
 ADMINI_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 'myildirim@vmware.com', 'sgadi@vmware.com', 'hillzhao@vmware.com']
+FROM_ADDR = "fangchiw@vmware.com"
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
 \nThanks!
@@ -294,7 +295,7 @@ def Tools_Send_Mail():
         day_dist = (now - date).days
         if (row['new_progress'] != '100%') and day_dist >= 6:
             to_addr = row['username'] + "@vmware.com"
-            from_addr = "xiangw@vmware.com"
+            from_addr = FROM_ADDR
             toolname = get_tool_attr(row['tool_id'], 'tool_name')
 
             ############   The message   ###########
@@ -2966,7 +2967,6 @@ def send_email(from_addr, to_addrs, cc_addrs, subject, body):
     SMTP_SERVER='smtp.vmware.com'
     import smtplib
     from email.mime.text import MIMEText
-    server = smtplib.SMTP(SMTP_SERVER)
     msg_subject = subject
     msg_body = body
     msg = MIMEText(msg_body)
@@ -2978,8 +2978,12 @@ def send_email(from_addr, to_addrs, cc_addrs, subject, body):
     if cc_addrs:
         msg['Cc'] = ', '.join(cc_addrs)
         receivers += cc_addrs
-    server.sendmail(from_addr, receivers, msg.as_string())
-    server.quit()
+    try:
+        server = smtplib.SMTP(SMTP_SERVER)
+        server.sendmail(from_addr, receivers, msg.as_string())
+        server.quit()
+    except SMTPException:
+        print "Unable send email with SMTP"
     return 0
 
 @app.route('/autocomplete_profile',methods=['GET'])
@@ -3671,7 +3675,7 @@ def internal_error(error):
     try:
         from_addr = session["username"] + "@vmware.com"
     except:
-        from_addr = "fangchiw@vmware.com"
+        from_addr = FROM_ADDR
     to_addr = ["xiangw@vmware.com"]
     subject = """[CPD Tools Problem Report] {}""".format(datetime.now().strftime(FMT_YMDHMS))
     message = traceback.format_exc()
