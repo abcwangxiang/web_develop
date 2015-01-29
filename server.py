@@ -340,6 +340,15 @@ def Tools_Send_Mail():
                 message += EMAIL_MESSAGE_TOOL_UPDATE
                #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 4)
+               # from1 = "fangchiw@vmware.com"
+               # to1 = ['xiangw@vmware.com', '1049899739@qq.com']
+               # cc1 = ['abcwangxiang@163.com','xiangw@vmware.com', '1049899739@qq.com']
+               # send_email(from1, to1, cc1, subject, message)
+               # print "***************************************"
+               # print from1
+               # print to1
+               # print cc1
+               # print "***************************************"
                # print message
                # print from_addr
                # print real_mail_addrs
@@ -2974,10 +2983,11 @@ def send_email(from_addr, to_addrs, cc_addrs, subject, body):
     msg['From'] = from_addr
     msg['To'] = ', '.join(to_addrs)
     print msg['To']
-    receivers = to_addrs
     if cc_addrs:
         msg['Cc'] = ', '.join(cc_addrs)
-        receivers += cc_addrs
+        receivers = to_addrs + cc_addrs
+    else:
+        receivers = to_addrs
     try:
         server = smtplib.SMTP(SMTP_SERVER)
         server.sendmail(from_addr, receivers, msg.as_string())
