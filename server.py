@@ -323,7 +323,7 @@ def Tools_Send_Mail():
                #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 1)
                 continue
-            if (day_dist >= 7) and ((now - date).days < 13) :
+            if (day_dist >= 7) and (day_dist < 13) :
                 message += "it has been marked orange .\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
                #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
