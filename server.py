@@ -97,7 +97,7 @@ ADMINI_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 
 FROM_ADDR = "fangchiw@vmware.com"
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
-\nThanks!
+\nThanks
 CPDTools Committe
 --------------------------------
 \nThis Email is sent by CPDtools website automatically.
@@ -320,25 +320,25 @@ def Tools_Send_Mail():
             if (day_dist== 6):
                 message += "it will be marked orange tomorrow.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 1)
                 continue
             if (day_dist >= 7) and (day_dist < 13) :
                 message += "it has been marked orange .\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 2)
                 continue
             if (day_dist == 13):
                 message += "it will be marked red tomorrow.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 3)
                 continue
             if (day_dist >= 14):
                 message += "it has been marked red.\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
-               #send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
+                send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 4)
                # from1 = "fangchiw@vmware.com"
                # to1 = ['xiangw@vmware.com', '1049899739@qq.com']
