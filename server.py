@@ -256,6 +256,8 @@ def Tools_Catalog(active_view = 0):
 
 @app.route('/Tools_Send_Mail')
 def Tools_Send_Mail():
+    if (request.host != "localhost"):
+        return index()
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
     sql = """
             SELECT active_track.*
@@ -340,20 +342,7 @@ def Tools_Send_Mail():
                 message += EMAIL_MESSAGE_TOOL_UPDATE
                 send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 4)
-               # from1 = "fangchiw@vmware.com"
-               # to1 = ['xiangw@vmware.com', '1049899739@qq.com']
-               # cc1 = ['abcwangxiang@163.com','xiangw@vmware.com', '1049899739@qq.com']
-               # send_email(from1, to1, cc1, subject, message)
-               # print "***************************************"
-               # print from1
-               # print to1
-               # print cc1
-               # print "***************************************"
-               # print message
-               # print from_addr
-               # print real_mail_addrs
-               # print ADMINI_ADDRS
-               # print subject
+
     return index()
 
 
