@@ -344,29 +344,6 @@ def Tools_Send_Mail():
     return index()
 
 
-def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
-
-    conn = get_conn()
-    cursor = conn.cursor()
-    now = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
-    sql="""
-           INSERT INTO email_track
-            (`tool_id`, `send_time`, `sender`, `receiver_addrs`, `cc_addrs`, `send_reason`)
-            VALUES
-            (%s, %s, %s, %s, %s, %s)
-        """
-    # the send_reason
-    # 1: 6 days not update
-    # 2: 7~12 days not upate
-    # 3: 13 days not update
-    # 4: >=14 days not update
-    cursor.execute(sql, (tool_id, now, sender, receiver, cc_addrs, reason))
-    cursor.close()
-    conn.commit()
-    conn.close()
-    return 0
-
-
 @app.route('/Register_Tool', methods=['GET', 'POST'])
 def Register_Tool():
     if not ('logged_in' in session.keys() and session['logged_in']):
@@ -488,34 +465,6 @@ def Tools_Active_Snapshots():
     conn.close()
     return jsonify(res)
 
-def get_tool_attr(g_tool_id, g_tool_attr):
-    conn = get_conn()
-    sql = """SELECT """ + g_tool_attr
-    sql += """ from tools where tool_id = %(g_tool_id)s """
-    cursor = conn.cursor()
-    cursor.execute(sql, {'g_tool_id': g_tool_id})
-    toolname = cursor.fetchone()[0]
-    cursor.close()
-    conn.commit()
-    conn.close()
-    return toolname
-
-def get_tools_all_id():
-    conn = get_conn()
-    sql = """SELECT * from active_tools"""
-    cursor = conn.cursor()
-    cursor.execute(sql)
-    columns = [column[0] for column in cursor.description]
-    impure_results = []
-    for row in cursor.fetchall():
-        impure_results.append(dict(zip(columns, row)))
-    cursor.close()
-    conn.commit()
-    conn.close()
-    all_id = []
-    for data in impure_results:
-        all_id.append(data['tool_id'])
-    return all_id
 
 @app.route('/Tools_Stats')
 def Tools_Stats():
@@ -535,24 +484,6 @@ def Tools_Stats():
 
     return jsonify(res)
 
-def get_stats_on_app_wiki():
-
-    conn = get_conn()
-    cursor = conn.cursor()
-    sql = """
-          SELECT
-            SUM(activity= 'app') AS app,
-            SUM(activity = 'wiki') AS wiki
-          FROM activity
-          """
-    cursor.execute(sql)
-    row = cursor.fetchone()
-    #print row
-
-    cursor.close()
-    conn.commit()
-    conn.close()
-    return int(row[0])+1532, int(row[1])+1431
 
 @app.route('/Tool_Activate')
 def Tool_Activate():
@@ -647,14 +578,6 @@ def Tool_Active_Info_Edit():
 
         v_has_changed = has_changed()
 
-
-        #sql="""
-        #    DELETE FROM tools
-        #    WHERE tool_id=%(tool_id)s
-        #    """
-        #cursor.execute(sql, {"tool_id":tool_id})
-
-
         if update:
             conn = get_conn()
             cursor = conn.cursor()
@@ -694,46 +617,6 @@ def Tool_Active_Info_Edit():
 
     return jsonify(res)
 
-def check_tool_actvie(tool_id, force=False):
-    conn = get_conn()
-    cursor = conn.cursor()
-    sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
-    if not force:
-        sql += """ and flag = 1"""
-    cursor.execute(sql, {"tool_id":tool_id})
-
-    columns = [column[0] for column in cursor.description]
-    row = cursor.fetchone()
-    if row:
-        res = dict(zip(columns, row))
-    else:
-        res = ""
-    cursor.close()
-    conn.commit()
-    conn.close()
-    #print res
-    return res
-
-def get_act_pro_info(tool_id):
-    conn = get_conn()
-    cursor = conn.cursor()
-    sql = """SELECT * from active_track where tool_id = %(tool_id)s
-             ORDER BY id DESC"""
-    cursor.execute(sql, {"tool_id":tool_id})
-
-    columns = [column[0] for column in cursor.description]
-    progress_results = []
-    for row in cursor.fetchall():
-        progress_results.append(dict(zip(columns, row)))
-    cursor.close()
-    conn.commit()
-    conn.close()
-    #for row in progress_results:
-    #    for key in row:
-    #        if row[key] is None:
-    #            row[key] = ''
-    #print progress_results
-    return progress_results
 
 @app.route("/Tool_Edit_Frag", methods=['GET', 'POST'])
 def Tool_Edit_Frag():
@@ -774,69 +657,6 @@ def Tool_Edit_Frag():
                 res['res'] = message
     return jsonify(res)
 
-def edit_tool_details():
-    tool_name = str(request.form["tool_name"])
-    authors = str(request.form["authors"])
-    team = str(request.form["team"])
-    keywords = str(request.form["keywords"])
-    maturity = str(request.form["maturity"])
-    url = str(request.form["url"])
-    wiki = str(request.form["wiki"])
-    description = request.form["description"]
-    original_name = str(request.form["original_name"])
-    emails = str(request.form["emails"])
-    tool_id = str(request.form["id"])
-    source = str(request.form["source"])
-
-    conn = get_conn()
-    cursor = conn.cursor()
-
-    #sql="""
-    #    DELETE FROM tools
-    #    WHERE tool_id=%(tool_id)s
-    #    """
-    #cursor.execute(sql, {"tool_id":tool_id})
-
-    sql="""
-    INSERT INTO tools
-                (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
-                VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s,source=%s
-                """
-
-    cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
-
-    #edit active tool table, we don't need it here anymore
-    #if update:
-    #    username = session['username']
-    #    new_progress = maturity
-    #    date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
-    #    sql="""
-    #            insert into active_track
-    #            (tool_id,username,date,`update`,new_progress)
-    #            values
-    #            (%s,%s,%s,%s,%s)
-    #        """
-    #    cursor.execute(sql,(tool_id, username, date, update, new_progress))
-    #elif str(request.form["original_active"])=="1" and maturity!=str(request.form["original_maturity"]):
-    #    return False, "", "please leave some progress update"
-
-    sql = """SELECT * from tools where tool_id = %(tool_id)s"""
-    cursor.execute(sql, {"tool_id": tool_id})
-    columns = [column[0] for column in cursor.description]
-    impure_results = []
-    for row in cursor.fetchall():
-        impure_results.append(dict(zip(columns, row)))
-
-    cursor.close()
-    conn.commit()
-    conn.close()
-
-    logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
-
-    return True, impure_results[0], ""
 
 @app.route("/Edit_Tool_Details", methods=['GET', 'POST'])
 def Edit_Tool_Details():
@@ -879,13 +699,6 @@ def Edit_Tool_Details():
 
         conn = get_conn()
         cursor = conn.cursor()
-
-        #sql="""
-        #    DELETE FROM tools
-        #    WHERE tool_id=%(tool_id)s
-        #    """
-        #cursor.execute(sql, {"tool_id":tool_id})
-
         sql="""
         INSERT INTO tools
                     (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
@@ -1222,7 +1035,6 @@ def update_activity(activity='', tool_id=0):
 
 def get_conn():
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-
     return conn
 
 def get_realname(username):
@@ -1233,14 +1045,164 @@ def get_realname(username):
         Where login_name = %(login_name)s
         """
     cursor.execute(sql, {'login_name':username})
-
     username = cursor.fetchone()[0]
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return username
+
+def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    now = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+    sql="""
+           INSERT INTO email_track
+            (`tool_id`, `send_time`, `sender`, `receiver_addrs`, `cc_addrs`, `send_reason`)
+            VALUES
+            (%s, %s, %s, %s, %s, %s)
+        """
+    # the send_reason
+    # 1: 6 days not update
+    # 2: 7~12 days not upate
+    # 3: 13 days not update
+    # 4: >=14 days not update
+    cursor.execute(sql, (tool_id, now, sender, receiver, cc_addrs, reason))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return 0
+
+def get_tool_attr(g_tool_id, g_tool_attr):
+    conn = get_conn()
+    sql = """SELECT """ + g_tool_attr
+    sql += """ from tools where tool_id = %(g_tool_id)s """
+    cursor = conn.cursor()
+    cursor.execute(sql, {'g_tool_id': g_tool_id})
+    toolname = cursor.fetchone()[0]
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return toolname
+
+def get_tools_all_id():
+    conn = get_conn()
+    sql = """SELECT * from active_tools"""
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    all_id = []
+    for data in impure_results:
+        all_id.append(data['tool_id'])
+    return all_id
+
+def get_stats_on_app_wiki():
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """
+          SELECT
+            SUM(activity= 'app') AS app,
+            SUM(activity = 'wiki') AS wiki
+          FROM activity
+          """
+    cursor.execute(sql)
+    row = cursor.fetchone()
+    #print row
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return int(row[0])+1532, int(row[1])+1431
+
+def check_tool_actvie(tool_id, force=False):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
+    if not force:
+        sql += """ and flag = 1"""
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    row = cursor.fetchone()
+    if row:
+        res = dict(zip(columns, row))
+    else:
+        res = ""
+    cursor.close()
+    conn.commit()
+    conn.close()
+    #print res
+    return res
+
+def get_act_pro_info(tool_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from active_track where tool_id = %(tool_id)s
+             ORDER BY id DESC"""
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    progress_results = []
+    for row in cursor.fetchall():
+        progress_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    #for row in progress_results:
+    #    for key in row:
+    #        if row[key] is None:
+    #            row[key] = ''
+    #print progress_results
+    return progress_results
+
+def edit_tool_details():
+    tool_name = str(request.form["tool_name"])
+    authors = str(request.form["authors"])
+    team = str(request.form["team"])
+    keywords = str(request.form["keywords"])
+    maturity = str(request.form["maturity"])
+    url = str(request.form["url"])
+    wiki = str(request.form["wiki"])
+    description = request.form["description"]
+    original_name = str(request.form["original_name"])
+    emails = str(request.form["emails"])
+    tool_id = str(request.form["id"])
+    source = str(request.form["source"])
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    sql="""
+    INSERT INTO tools
+                (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source)
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                authors=%s, team=%s,tool_name=%s,description=%s,keywords=%s,url=%s,wiki=%s, maturity=%s,emails=%s,source=%s
+                """
+
+    cursor.execute(sql, (tool_id, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source, authors,team,tool_name,description,keywords,url,wiki,maturity,emails,source))
+
+    sql = """SELECT * from tools where tool_id = %(tool_id)s"""
+    cursor.execute(sql, {"tool_id": tool_id})
+    columns = [column[0] for column in cursor.description]
+    impure_results = []
+    for row in cursor.fetchall():
+        impure_results.append(dict(zip(columns, row)))
 
     cursor.close()
     conn.commit()
     conn.close()
 
-    return username
+    logging.warning("user: %s edit tool: %s."%(session['username'], tool_id))
+
+    return True, impure_results[0], ""
 
 @app.route('/Logout', methods=['GET', 'POST'])
 def Logout():
