@@ -182,7 +182,7 @@ def Tools_Catalog_Query():
     res['res'] = 'internal error'
     para = request.args
     tool_tab_id = para.get('id', '').strip()
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     ss_month = ''
     template = "tools_catalog_table_frag.html"
@@ -238,9 +238,7 @@ def Tools_Catalog(active_view = 0):
     """
     This should be modified to match the database
     """
-
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
-
+    conn = get_conn()
     sql = """SELECT * from tools"""
     cursor = conn.cursor()
     cursor.execute(sql)
@@ -258,7 +256,7 @@ def Tools_Catalog(active_view = 0):
 def Tools_Send_Mail():
     if (request.host != "localhost"):
         return index()
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     sql = """
             SELECT active_track.*
             from active_track
@@ -310,7 +308,7 @@ def Tools_Send_Mail():
             message += "\nYour last update is at " + str(date) + ".\nNow "
 
             #get the tools' builder's emails
-            mail_addrs = get_tool_attr(row['tool_id'], 'emails') 
+            mail_addrs = get_tool_attr(row['tool_id'], 'emails')
             real_mail_addrs = re.findall(r'[\w\._-]+@vmware\.com', mail_addrs)
             if to_addr not in real_mail_addrs: #the one who last update the tool
                 real_mail_addrs.append(to_addr)
@@ -348,7 +346,7 @@ def Tools_Send_Mail():
 
 def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
     sql="""
@@ -357,6 +355,11 @@ def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
             VALUES
             (%s, %s, %s, %s, %s, %s)
         """
+    # the send_reason
+    # 1: 6 days not update
+    # 2: 7~12 days not upate
+    # 3: 13 days not update
+    # 4: >=14 days not update
     cursor.execute(sql, (tool_id, now, sender, receiver, cc_addrs, reason))
     cursor.close()
     conn.commit()
@@ -382,7 +385,7 @@ def Register_Tool():
         emails = str(request.form["emails"])
         source = str(request.form["source"])
 
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        conn = get_conn()
         cursor = conn.cursor()
         sql="""
         INSERT INTO tools
@@ -416,7 +419,7 @@ def Tools_Active_Snapshots():
     # 201501 to 20150132
     ss_date = ss_month + '32'
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
 
     template = "tools_active_table_frag.html"
@@ -486,7 +489,7 @@ def Tools_Active_Snapshots():
     return jsonify(res)
 
 def get_tool_attr(g_tool_id, g_tool_attr):
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     sql = """SELECT """ + g_tool_attr
     sql += """ from tools where tool_id = %(g_tool_id)s """
     cursor = conn.cursor()
@@ -498,7 +501,7 @@ def get_tool_attr(g_tool_id, g_tool_attr):
     return toolname
 
 def get_tools_all_id():
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     sql = """SELECT * from active_tools"""
     cursor = conn.cursor()
     cursor.execute(sql)
@@ -534,7 +537,7 @@ def Tools_Stats():
 
 def get_stats_on_app_wiki():
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     sql = """
           SELECT
@@ -653,7 +656,7 @@ def Tool_Active_Info_Edit():
 
 
         if update:
-            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+            conn = get_conn()
             cursor = conn.cursor()
             sql="""
                 INSERT INTO active_tools
@@ -692,7 +695,7 @@ def Tool_Active_Info_Edit():
     return jsonify(res)
 
 def check_tool_actvie(tool_id, force=False):
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     sql = """SELECT * from active_tools where tool_id = %(tool_id)s"""
     if not force:
@@ -712,7 +715,7 @@ def check_tool_actvie(tool_id, force=False):
     return res
 
 def get_act_pro_info(tool_id):
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     sql = """SELECT * from active_track where tool_id = %(tool_id)s
              ORDER BY id DESC"""
@@ -741,7 +744,7 @@ def Tool_Edit_Frag():
         if request.method == 'GET':
             para = request.args
             tool_id = para.get('id', '').strip()
-            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+            conn = get_conn()
             sql = """SELECT * from tools where tool_id = %(tool_id)s"""
             cursor = conn.cursor()
             cursor.execute(sql, {"tool_id":tool_id})
@@ -785,7 +788,7 @@ def edit_tool_details():
     tool_id = str(request.form["id"])
     source = str(request.form["source"])
 
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
 
     #sql="""
@@ -827,7 +830,6 @@ def edit_tool_details():
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
 
-
     cursor.close()
     conn.commit()
     conn.close()
@@ -844,7 +846,7 @@ def Edit_Tool_Details():
         para = request.args
         tool_name = para.get('name', '').strip()
         tool_id = para.get('id', '').strip()
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        conn = get_conn()
         sql = """SELECT * from tools where tool_id = %(tool_id)s"""
         cursor = conn.cursor()
         cursor.execute(sql, {"tool_id":tool_id})
@@ -875,7 +877,7 @@ def Edit_Tool_Details():
         tool_id = str(request.form["id"])
         source = str(request.form["source"])
 
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        conn = get_conn()
         cursor = conn.cursor()
 
         #sql="""
@@ -908,7 +910,7 @@ def Show_Tool_Details():
     para = request.args
     tool_name = para.get('name', '').strip()
     tool_id = int(para.get('id', '').strip())
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     sql = """SELECT * from tools where tool_id = %(tool_id)s"""
     cursor = conn.cursor()
     cursor.execute(sql, {"tool_id": tool_id})
@@ -1000,7 +1002,7 @@ def Tool_Like():
         username = session['username']
         para = request.args
         tool_id = int(para.get('id', '').strip())
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+        conn = get_conn()
         sql="""
         INSERT INTO likes
                     (username, tool_id)
@@ -1027,7 +1029,7 @@ def Tool_Unlike():
             username = session['username']
             para = request.args
             tool_id = int(para.get('id', '').strip())
-            conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+            conn = get_conn()
             sql="""
                 DELETE FROM likes
                 WHERE tool_id=%(tool_id)s
@@ -1053,7 +1055,7 @@ def Tool_Like_Query():
     res = {}
     para = request.args
     tool_id = int(para.get('id', '').strip())
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE)
+    conn = get_conn()
     sql="""
         SELECT COUNT(tool_id)
                 from likes
@@ -1124,7 +1126,7 @@ def Tool_Post_Comment():
         mydate = datetime.now()
         date_str = mydate.strftime("%b %d, %Y")
         realname = get_realname(username)
-        conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+        conn = get_conn()
         cursor = conn.cursor()
         sql="""
         INSERT INTO comments
@@ -1149,7 +1151,7 @@ def Tool_Get_Comments():
     res['new_div'] = ''
     para = request.args
     tool_id = int(para.get('id', '').strip())
-    conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
+    conn = get_conn()
     cursor = conn.cursor()
     sql="""
         Select * from comments
@@ -1222,7 +1224,6 @@ def get_conn():
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db=LOCAL_DATABASE_DATABASE, charset='utf8')
 
     return conn
-
 
 def get_realname(username):
     conn = MySQLdb.connect(host=LOCAL_DATABASE_HOST, user=LOCAL_DATABASE_USER, passwd=LOCAL_DATABASE_PW, db='TriageRobot', charset='utf8')
@@ -1672,7 +1673,7 @@ def Show_Entries():
             if key[0] != "@" and key[1] != ":":
                 return render_template('query.html', error = "cite @: using error")
             cite_username = key.replace("@:", "")
-            
+
             sql = """
             select userid from profiles 
             where login_name = '{}'
@@ -3689,7 +3690,7 @@ def initialize_logger(output_dir):
     """
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-     
+
     # create console handler and set level to info
     handler = logging.StreamHandler()
     #handler.setLevel(logging.INFO)
@@ -3697,7 +3698,7 @@ def initialize_logger(output_dir):
     formatter = logging.Formatter("%(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
- 
+
     # create debug file handler and set level to debug
     handler = logging.FileHandler(os.path.join(output_dir, "query_and_logging.log"),"a")
     handler.setLevel(logging.WARNING)
