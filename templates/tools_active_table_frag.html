@@ -90,14 +90,14 @@
                 <td>{{tool['resource']}}</td>
                 <td>{{tool['progress']}}</td>
 				<td>
-					<p data-toggle="popover" data-content="{{tool['return']}}">
-						{{tool['return'][0:30]}}...
-					<p>
+					<div class="pop" data-content="{{tool['return']}}">
+						{{tool['deliverables'][0:30]}}...
+					<div>
 				</td>
 				<td>
-					<p data-toggle="popover" data-content="{{tool['deliverables']}}">
+					<div class="pop" data-content="{{tool['deliverables']}}">
 						{{tool['deliverables'][0:30]}}...
-					<p>
+					<div>
 				</td>
                 <td>{{tool['master_pr']}}</td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
@@ -121,20 +121,25 @@
                         white-space: nowrap;
                     }
                 </style>
-				<script>
-				//	$('[data-toggle=tooltip]').tooltip();
-				$('[data-toggle=popover]').popover({
-					delay: {show: 5, hide: 3},
-					trigger: "hover click",
-					placement: "bottom",
-				});
-				</script>
 				<style>
 				    .popover{
 						min-width: 250px;
 						font-size: 15px;
 					}
 				</style>
+					<script>
+						$('.pop').each(function(){
+						 var $elem=$(this);
+						 $elem.popover({
+							 trigger: 'hover',
+							 html: true,
+							 container: $elem,
+							 animation:true,
+							 placememt: 'bottom',
+						 });
+						}
+					  );
+					</script>
             </tr>
         {% endfor %}
         </tbody>

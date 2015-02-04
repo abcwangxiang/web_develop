@@ -200,14 +200,14 @@
                 <td {%if progress['return_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<p	data-toggle="popover" data-content="{{progress['return']}}">
+					<p	class="pop" data-content="{{progress['return']}}">
 					  {{progress['return'][0:30]}}...
 					</p>
                 </td>
                 <td {%if progress['deliverables_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<p	data-toggle="popover" data-content="{{progress['deliverables']}}">
+					<p	class="pop" data-content="{{progress['deliverables']}}">
 					  {{progress['deliverables'][0:30]}}...
 					</p>
                 </td>
@@ -215,7 +215,7 @@
                     {{progress['username']}}
                 </td>
 				<td>
-					<p	data-toggle="popover" data-content="{{progress['update']}}">
+					<p	class="pop" data-content="{{progress['update']}}">
 					  {{progress['update'][0:30]}}...
 					</p>
 				</td>
@@ -224,12 +224,17 @@
         </tbody>
 	</table>
 	<script>
-	//	$('[data-toggle=tooltip]').tooltip();
-	$('[data-toggle=popover]').popover({
-		delay: {show: 5, hide: 3},
-		trigger: "hover click",
-		placement: "right",
-	});
+		$('.pop').each(function(){
+		 var $elem=$(this);
+		 $elem.popover({
+			 trigger: 'hover',
+			 html: true,
+			 container: $elem,
+			 animation:true,
+			 placememt: 'bottom',
+		 });
+		}
+	  );
 	</script>
 	<style>
 	    .popover{
