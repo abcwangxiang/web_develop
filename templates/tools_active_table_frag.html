@@ -99,7 +99,9 @@
 						{{tool['deliverables'][0:30]}}...
 					<div>
 				</td>
-                <td>{{tool['master_pr']}}</td>
+				<td>
+					<a href="https://bugzilla.eng.vmware.com/show_bug.cgi?id={{tool['master_pr']}}" target="_blank" >{{tool['master_pr']}}</a>
+				</td>
                 <td><div style="display:none;" id='hidden_likes_{{tool['tool_id']}}'></div><div class="div_same_line" id="{{tool['tool_id']}}" ><div class="btn btn-default" id="img_div_{{tool['tool_id']}}"><a class='do_like_a' id="{{tool['tool_id']}}"><img src="static/images/like.svg" width="30px" height="20px" /></a></div><span class="badge" id='likes_{{tool['tool_id']}}'>0</span></div></td>
                 <style>
                     #img_div a {
