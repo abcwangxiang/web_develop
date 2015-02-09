@@ -68,7 +68,7 @@ BAR_ADMINFILE = BAR_OPTION_DIRECTORY + "admin.p"
 
 FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 NO_LOGIN = 'Please login before register/edit tools'
-ADMINI_ADDRS = ['chenh@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com', 'myildirim@vmware.com', 'sgadi@vmware.com', 'hillzhao@vmware.com']
+ADMINI_ADDRS = ['cpd-serviceability-sc@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com']
 FROM_ADDR = "fangchiw@vmware.com"
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
