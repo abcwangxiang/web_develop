@@ -339,6 +339,7 @@ def Register_Tool():
         cursor.close()
         conn.commit()
         conn.close()
+        logging.warning("user: %s register tool: %s."%(session['username'], tool_name))
         return Tools_Catalog()
 
 @app.route('/Active_Tools')
