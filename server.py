@@ -73,7 +73,7 @@ FROM_ADDR = "fangchiw@vmware.com"
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
 \nThanks
-CPDTools Committe
+CPDTools Committee
 --------------------------------
 \nThis Email is sent by CPDtools website automatically.
 If you have any questions, please contact: fangchiw@vmware.com, xiangw@vmware.com
