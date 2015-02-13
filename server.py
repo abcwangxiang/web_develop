@@ -747,9 +747,9 @@ def Tool_Active_Lasr_Query():
         date = datetime.strptime(track['date'],"%Y-%m-%d, %H:%M:%S PST")
         now = datetime.now()
         # if the progress is 100%, don't highlight it
-        if ((now - date).days >= 14) and (track['new_progress'] != '100%'):
+        if ((now - date).days >= 15) and (track['new_progress'] != '100%'):
             res['flag'] = 1
-        elif ((now - date).days >= 7) and (track['new_progress'] != '100%'):
+        elif ((now - date).days >= 8) and (track['new_progress'] != '100%'):
             res['flag'] = 2
         else:
             res['flag'] = 0
