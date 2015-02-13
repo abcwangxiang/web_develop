@@ -287,7 +287,7 @@ def Tools_Send_Mail():
                 send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
                 record_email_send_info(row['tool_id'], 'xiangw', to_addr_string, cc_addr_string, 1)
                 continue
-            if (day_dist >= 8) and (day_dist < 13) :
+            if (day_dist >= 8) and (day_dist <= 13) :
                 message += "it has been marked orange .\n"
                 message += EMAIL_MESSAGE_TOOL_UPDATE
                 send_email(from_addr, real_mail_addrs, ADMINI_ADDRS, subject, message)
@@ -1020,10 +1020,10 @@ def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
             (%s, %s, %s, %s, %s, %s)
         """
     # the send_reason
-    # 1: 6 days not update
-    # 2: 7~12 days not upate
-    # 3: 13 days not update
-    # 4: >=14 days not update
+    # 1: 7 days not update
+    # 2: 8~13 days not upate
+    # 3: 14 days not update
+    # 4: >=15 days not update
     cursor.execute(sql, (tool_id, now, sender, receiver, cc_addrs, reason))
     cursor.close()
     conn.commit()
