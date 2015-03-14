@@ -103,7 +103,46 @@
             />
         </div>
     </div>
-
+<!---------------------------------------------------------------->
+    <div class="form-group required">
+        <label class="col-md-3 control-label control-label3 cpdtools_timeline_change">
+			Resource Detail
+		</label>
+        <table class="col-md-7">
+            <tr>
+                <td>Resource Name:</td>
+                <td><input type="text" id="r_name"></td>
+            </tr>
+            <tr>
+                <td>Num:</td>
+                <td><input type="text" id="r_num">
+            </tr>
+            <tr>
+                <td>Manager:</td>
+                <td><input type="text" id="r_manager"></td>
+                <input type="button" id="add" value="Add" onclick="Javascript:addRow()"></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+		
+		<label class="col-md-3 control-label control-label3 cpdtools_timeline_change">
+			Resource List
+		</label>
+        <table class="col-md-3" id="myTableData" border="2" cellpadding="10", width="15">
+            <tr>
+                <td><b>Resource Name</b></td>
+                <td><b>Num</b></td>
+                <td><b>Manager</b></td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+        &nbsp;
+    </div>
+<!---------------------------------------------------------------->
 
     <div class="form-group required">
         <label  class="col-md-3 control-label control-label3 cpdtools_timeline_change">
@@ -116,10 +155,10 @@
                     name="progress" 
                     placeholder="Progress in current phase" 
                     required="required" 
-                   title="" 
+                    title="" 
                     type="text" 
                     onchange="update_maturity_wx();"
-            />
+            >
                 <option value="{{active_info['progress']}}">
                     {{active_info['progress']}}
                 </option>
@@ -140,11 +179,11 @@
             Estimated Return
         </label>
         <div class="col-md-7">
-            <textarea   class="form-control cpdtools_need_update" 
-                        name = 'e_return' 
-                        cols="30" 
-                        rows="5" 
-                        onchange="update_maturity_wx();"  
+            <textarea   class="form-control cpdtools_need_update"
+                        name = 'e_return'
+                        cols="30"
+                        rows="5"
+                        onchange="update_maturity_wx();"
                         placeholder="Describe what we can expect from this tool"
             >{{active_info['return']}}</textarea>
         </div>
@@ -156,11 +195,11 @@
             Deliverables
         </label>
         <div class="col-md-7">
-            <textarea   class="form-control cpdtools_need_update" 
-                        name = 'deliverables' 
-                        cols="30" 
-                        rows="5" 
-                        onchange="update_maturity_wx();" 
+            <textarea   class="form-control cpdtools_need_update"
+                        name = 'deliverables'
+                        cols="30"
+                        rows="5"
+                        onchange="update_maturity_wx();"
                         placeholder="What will be dilivered to the users"
             >{{active_info['deliverables']}}</textarea>
         </div>
@@ -176,7 +215,7 @@
                         name = update 
                         cols="30" 
                         rows="5"
-                        placeholder="You've changed some INFO, please leave some update on this change" 
+                        placeholder="You've changed some INFO, please leave some update on this change"
                         required="required"
             ></textarea>
         </div>
@@ -199,3 +238,47 @@
 
 </form>
 
+<!---------------------------------------------------------------->
+<script>
+
+    function addRow() {
+        var myName = document.getElementById("r_name");
+        var num = document.getElementById("r_num");
+        var manager = document.getElementById("r_manager");
+        var table = document.getElementById("myTableData");
+
+        var rowCount = table.rows.length;
+        var row = table.insertRow(rowCount);
+
+        row.insertCell(0).innerHTML= myName.value;
+        row.insertCell(1).innerHTML= num.value;
+        row.insertCell(2).innerHTML= manager.value;
+        row.insertCell(3).innerHTML= '<input type="button" value = "Delete" onClick="Javacsript:deleteRow(this)">';
+    }
+
+    function deleteRow(obj) {
+        var index = obj.parentNode.parentNode.rowIndex;
+        var table = document.getElementById("myTableData");
+        table.deleteRow(index);
+    }
+
+/*    function addTable() {
+        var myTableDiv = document.getElementById("myDynamicTable");
+        var table = document.createElement('TABLE');
+        table.border='1';
+        var tableBody = document.createElement('TBODY');
+        table.appendChild(tableBody);
+        for (var i=0; i<3; i++){
+           var tr = document.createElement('TR');
+           tableBody.appendChild(tr);
+           for (var j=0; j<4; j++){
+               var td = document.createElement('TD');
+               td.width='75';
+               td.appendChild(document.createTextNode("Cell " + i + "," + j));
+               tr.appendChild(td);
+           }
+        }
+        myTableDiv.appendChild(table);
+    } */
+</script>
+<!---------------------------------------------------------------->

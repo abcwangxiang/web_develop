@@ -495,6 +495,14 @@ def Tool_Deactivate():
         res['res'] = 'success'
     return jsonify(res)
 
+#@app.route('/Tool_Resource_Detail', methods=['GET', 'POST'])
+#def Tool_Resource_Detail():
+#    res = {}
+#    para = request.args
+#    print para
+#    res['res'] = 'success'
+#    return jsonify(res)
+
 @app.route('/Tool_Active_Info_Edit', methods=['GET', 'POST'])
 def Tool_Active_Info_Edit():
     res = {}
@@ -509,7 +517,11 @@ def Tool_Active_Info_Edit():
         e_resource = request.form["e_resource"]
         e_timeline = request.form["e_timeline"]
         deliverables = request.form["deliverables"]
+        
+#        source_table = request.form["aaaa"]
         flag = '1'
+
+#       print source_table
 
         if "backlog_check" in request.form.keys():
             backlog = True
