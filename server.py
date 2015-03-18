@@ -495,14 +495,6 @@ def Tool_Deactivate():
         res['res'] = 'success'
     return jsonify(res)
 
-#@app.route('/Tool_Resource_Detail', methods=['GET', 'POST'])
-#def Tool_Resource_Detail():
-#    res = {}
-#    para = request.args
-#    print para
-#    res['res'] = 'success'
-#    return jsonify(res)
-
 @app.route('/Tool_Active_Info_Edit', methods=['GET', 'POST'])
 def Tool_Active_Info_Edit():
     res = {}
@@ -517,11 +509,7 @@ def Tool_Active_Info_Edit():
         e_resource = request.form["e_resource"]
         e_timeline = request.form["e_timeline"]
         deliverables = request.form["deliverables"]
-        
-#        source_table = request.form["aaaa"]
         flag = '1'
-
-#       print source_table
 
         if "backlog_check" in request.form.keys():
             backlog = True
@@ -555,6 +543,7 @@ def Tool_Active_Info_Edit():
         if update:
             conn = get_conn()
             cursor = conn.cursor()
+            ########### Insert active_tools #############
             sql="""
                 INSERT INTO active_tools
                 (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
@@ -565,6 +554,7 @@ def Tool_Active_Info_Edit():
                 """
             cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
 
+            ########### Insert active_track #############
             username = session['username']
             new_progress = progress
             date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
@@ -575,6 +565,29 @@ def Tool_Active_Info_Edit():
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
             cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
+
+            ########### Insert resource_detail_track #############
+            # we use the same date insert into active_track 
+            # and resource_detail_track, and  bind them in a same update
+            resource_name = ""
+            resource_max_num = int(request.form["r_max_num"])
+            sql="""
+                   INSERT INTO resource_detail_track
+                    (`tool_id`, `r_name`, `r_number`, `r_manager`, `r_date`)
+                    VALUES
+                    (%s, %s, %s, %s, %s)
+                """
+            for i in range(resource_max_num + 1):
+                i = i + 1
+                resource_name = "r_name" + str(i)
+                resource_number = "r_number" + str(i)
+                resource_manager = "r_manager" + str(i)
+                if resource_name in request.form.keys():
+                    r_name = request.form[resource_name]
+                    r_number = request.form[resource_number]
+                    r_manager = request.form[resource_manager]
+                    cursor.execute(sql, (tool_id, r_name, r_number, r_manager, date))
+
             cursor.close()
             conn.commit()
             conn.close()
@@ -717,9 +730,14 @@ def Tool_Active_Info_Frag():
     active_flag = False
     act_pro_info = []
     active_info = check_tool_actvie(tool_id)
+    resource_detail = get_last_resource_detail(tool_id)
+    print "*****************************"
+    print resource_detail
     if active_info:
         active_flag = True
         act_pro_info = get_act_pro_info(tool_id)
+
+
         for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
 
@@ -734,7 +752,7 @@ def Tool_Active_Info_Frag():
 
     res['data'] = render_template('tools_active_info_frag.html',
                             active_flag=active_flag, active_info=active_info,
-                            active_progress_info=act_pro_info)
+                            active_progress_info=act_pro_info, resource_detail=resource_detail)
     res['res'] = 'success'
     return jsonify(res)
 
@@ -1088,6 +1106,28 @@ def get_stats_on_app_wiki():
     conn.commit()
     conn.close()
     return int(row[0])+1532, int(row[1])+1431
+
+
+def get_last_resource_detail(tool_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from resource_detail_track where tool_id = %(tool_id)s
+             ORDER BY id DESC"""
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    r_results = []
+    for row in cursor.fetchall():
+        r_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    #for row in progress_results:
+    #    for key in row:
+    #        if row[key] is None:
+    #            row[key] = ''
+    #print progress_results
+    return r_results
 
 def check_tool_actvie(tool_id, force=False):
     conn = get_conn()
