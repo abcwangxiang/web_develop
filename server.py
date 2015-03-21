@@ -456,10 +456,13 @@ def Tool_Activate():
         para = request.args
         tool_id = int(para.get('id', '').strip())
         active_info = check_tool_actvie(tool_id, force=True)
+        resource_detail = get_last_resource_detail(tool_id)
+        print "*****************************"
+        print resource_detail
         if not active_info:
             active_info = dict()
             active_info['tool_id'] = tool_id
-        res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info)
+        res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info, resource_detail=resource_detail, resource_detail_length=len(resource_detail))
         res['res'] = 'success'
         try:
             logging.warning("user: %s activated tool: %s."%(session['username'], tool_id))
@@ -521,24 +524,24 @@ def Tool_Active_Info_Edit():
             res['res'] = 'Missing one or more mandatory fields'
             return jsonify(res)
 
-        def has_changed():
-            current_info = check_tool_actvie(tool_id)
-            if current_info:
-                if progress!=current_info['progress']:
-                    return True
-                if master_pr!=current_info['master_pr']:
-                    return True
-                if e_return!=current_info['return']:
-                    return True
-                if e_timeline!=current_info['eta']:
-                    return True
-                if e_resource!=current_info['resource']:
-                    return True
-                if deliverables!=current_info['deliverables']:
-                    return True
-            return False
-
-        v_has_changed = has_changed()
+#        def has_changed():
+#            current_info = check_tool_actvie(tool_id)
+#            if current_info:
+#                if progress!=current_info['progress']:
+#                    return True
+#                if master_pr!=current_info['master_pr']:
+#                    return True
+#                if e_return!=current_info['return']:
+#                    return True
+#                if e_timeline!=current_info['eta']:
+#                    return True
+#                if e_resource!=current_info['resource']:
+#                    return True
+#                if deliverables!=current_info['deliverables']:
+#                    return True
+#            return False
+#
+#        v_has_changed = has_changed()
 
         if update:
             conn = get_conn()
@@ -577,8 +580,7 @@ def Tool_Active_Info_Edit():
                     VALUES
                     (%s, %s, %s, %s, %s)
                 """
-            for i in range(resource_max_num + 1):
-                i = i + 1
+            for i in range(1, resource_max_num + 1):
                 resource_name = "r_name" + str(i)
                 resource_number = "r_number" + str(i)
                 resource_manager = "r_manager" + str(i)
@@ -592,11 +594,12 @@ def Tool_Active_Info_Edit():
             conn.commit()
             conn.close()
             res['res'] = 'success'
-        elif v_has_changed:
-            res['res'] = 'Please leave some update on this INFO change'
+#        elif v_has_changed:
+#            res['res'] = 'Please leave some update on this INFO change'
+#        else:
+#            res['res'] = 'success'
         else:
-            res['res'] = 'success'
-
+            res['res'] = 'Please leave some update on this INFO change! If you modified nothing, please click cancel button!'
         try:
             logging.warning("user: %s modified active tool: %s."%(session['username'], tool_id))
         except:
@@ -731,8 +734,6 @@ def Tool_Active_Info_Frag():
     act_pro_info = []
     active_info = check_tool_actvie(tool_id)
     resource_detail = get_last_resource_detail(tool_id)
-    print "*****************************"
-    print resource_detail
     if active_info:
         active_flag = True
         act_pro_info = get_act_pro_info(tool_id)
@@ -1117,17 +1118,27 @@ def get_last_resource_detail(tool_id):
 
     columns = [column[0] for column in cursor.description]
     r_results = []
+    last_detail = []
     for row in cursor.fetchall():
         r_results.append(dict(zip(columns, row)))
     cursor.close()
     conn.commit()
     conn.close()
+    ##### select the "last" updated items using date ####
+    if len(r_results):
+        last_date = r_results[0]['r_date']
+    else:
+        return last_detail
+    for row in r_results:
+        if row['r_date'] == last_date:
+            last_detail.append(row)
+
     #for row in progress_results:
     #    for key in row:
     #        if row[key] is None:
     #            row[key] = ''
     #print progress_results
-    return r_results
+    return last_detail
 
 def check_tool_actvie(tool_id, force=False):
     conn = get_conn()

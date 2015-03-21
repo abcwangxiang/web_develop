@@ -18,7 +18,8 @@
 <form action="{{ url_for('Tool_Active_Info_Edit') }}" 
       method=post 
       class="form-horizontal" 
-      id="tool_active_info_edit_form">
+	  id="tool_active_info_edit_form"
+	  >
 
 
     <div class="form-group">
@@ -132,31 +133,60 @@
 						</th>
 					</tr>
 				</thead>
+
 				<tbody>
-    				<tr id='addr0' data-id="0" class="hidden">
-						<td data-name="r_name">
-						    <input type="text" name='r_name0'  placeholder='Resource Name' class=""/>
-						</td>
-						<td data-name="r_number">
-						    <input type="text" name='r_number0' placeholder='Number' class=""/>
-						</td>
-						<td data-name="r_manager">
-						    <input type="text" name="r_manager0" placeholder="Manager" class=""/>
-						</td>
-                        <td data-name="del">
-							<button name="del0" class='btn btn-danger row-remove'>Delete</button>
-                        </td>
-					</tr>
+				{% for r_detail in resource_detail %}
+				<tr id='addr{{loop.index}}' data-id="{{loop.index}}" class="r_d_c">
+					<td data-name="r_name">
+						<input type="text" name="r_name{{loop.index}}"  placeholder='Resource Name'
+                               onchange="update_maturity_wx();"
+						       value="{{r_detail['r_name']}}" class=""/>
+					</td>
+					<td data-name="r_number">
+						<input type="text" name='r_number{{loop.index}}'  placeholder='Resource Number' 
+                               onchange="update_maturity_wx();"
+						       value="{{r_detail['r_number']}}" class=""/>
+					</td>
+					<td data-name="r_manager">
+						<input type="text" name='r_manager{{loop.index}}'  placeholder='Resource Manager' 
+                               onchange="update_maturity_wx();"
+						       value="{{r_detail['r_manager']}}" class=""/>
+				    </td>
+                    <td data-name="del">
+						<button name="del{{loop.index}}" class='btn btn-danger row-remove'>Delete</button>
+					</td>
+				</tr>
+				{% endfor %}
+				<tr id='addr0' data-id="0" class="hidden">
+					<td data-name="r_name">
+						<input type="text" name="r_name0"  placeholder='Resource Name'
+                               onchange="update_maturity_wx();"
+						       class=""/>
+					</td>
+					<td data-name="r_number">
+						<input type="text" name='r_number0'  placeholder='Resource Number' 
+                               onchange="update_maturity_wx();"
+						       class=""/>
+					</td>
+					<td data-name="r_manager">
+						<input type="text" name='r_manager0'  placeholder='Resource Manager' 
+                               onchange="update_maturity_wx();"
+						       class=""/>
+					</td>
+                    <td data-name="del">
+						<button name="del0" class='btn btn-danger row-remove'>Delete</button>
+                    </td>
+				</tr>
 				</tbody>
 			</table>
 		</div>
 	</div>
-    <div class="col-md-21 ">
-		<button id="add_row" class='btn btn-primary pull-right'>Add</button>
+		<a id="add_row" class='btn btn-primary pull-right'>Add</a>
     </div>
-	<input type="hidden" name="r_max_num" id="r_max_num_id"/>
+	<input type="hidden" name="r_max_num" value="0" id="r_max_num_id"/>
 </div>
 
+<!---------------------------------------------------------------->
 <!---------------------------------------------------------------->
 <script>
 $(document).ready(function() {
@@ -213,11 +243,19 @@ $(document).ready(function() {
         */
         // add the new row
         $(tr).appendTo($('#tab_logic'));
-
         $(tr).find("td button.row-remove").on("click", function() {
              $(this).closest("tr").remove();
+        update_maturity_wx();
         });
+        update_maturity_wx();
     });
+	
+	$(".r_d_c").find("td button.row-remove").on("click", function() {
+             $(this).closest("tr").remove();
+             update_maturity_wx();
+        });
+    //$("#add_row").trigger("click");
+	
 /*
     // Sortable Code
     var fixHelperModified = function(e, tr) {
@@ -237,98 +275,9 @@ $(document).ready(function() {
 
     $(".table-sortable thead").disableSelection();
 */
-    $("#add_row").trigger("click");
 });
 </script>
-
-
 <!---------------------------------------------------------------->
-<!---------------------------------------------------------------->
-<!--    <div class="form-group required">
-        <label class="col-md-3 control-label control-label3 cpdtools_timeline_change">
-			Resource Detail
-		</label>
-        <table class="col-md-7">
-            <tr>
-                <td>Resource Name:</td>
-                <td><input type="text" id="r_name"></td>
-            </tr>
-            <tr>
-                <td>Num:</td>
-                <td><input type="text" id="r_num">
-            </tr>
-            <tr>
-                <td>Manager:</td>
-                <td><input type="text" id="r_manager"></td>
-                <input type="button" id="add" value="Add" onclick="Javascript:addRow()"></td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-        </table>
-		
-		<label class="col-md-3 control-label control-label3 cpdtools_timeline_change">
-			Resource List
-		</label>
-        <table class="col-md-3" id="myTableData" border="2" cellpadding="10", width="15">
-            <tr>
-                <td><b>Resource Name</b></td>
-                <td><b>Num</b></td>
-                <td><b>Manager</b></td>
-                <td>&nbsp;</td>
-            </tr>
-        </table>
-        &nbsp;
-		<div id="field">
-			<input  type="hidden" class="" id="" name="reso1"/>
-		</div>
-	</div>    -->
-<!---------------------------------------------------------------->
-<!---------------------------------------------------------------->
-<script>
-/*
-    function addRow() {
-        var myName = document.getElementById("r_name");
-        var num = document.getElementById("r_num");
-        var manager = document.getElementById("r_manager");
-        var table = document.getElementById("myTableData");
-
-        var rowCount = table.rows.length;
-        var row = table.insertRow(rowCount);
-
-        row.insertCell(0).innerHTML= myName.value;
-        row.insertCell(1).innerHTML= num.value;
-        row.insertCell(2).innerHTML= manager.value;
-        row.insertCell(3).innerHTML= '<input type="button" value = "Delete" onClick="Javacsript:deleteRow(this)">';
-    }
-
-    function deleteRow(obj) {
-        var index = obj.parentNode.parentNode.rowIndex;
-        var table = document.getElementById("myTableData");
-        table.deleteRow(index);
-    }
-*/
-/*    function addTable() {
-        var myTableDiv = document.getElementById("myDynamicTable");
-        var table = document.createElement('TABLE');
-        table.border='1';
-        var tableBody = document.createElement('TBODY');
-        table.appendChild(tableBody);
-        for (var i=0; i<3; i++){
-           var tr = document.createElement('TR');
-           tableBody.appendChild(tr);
-           for (var j=0; j<4; j++){
-               var td = document.createElement('TD');
-               td.width='75';
-               td.appendChild(document.createTextNode("Cell " + i + "," + j));
-               tr.appendChild(td);
-           }
-        }
-        myTableDiv.appendChild(table);
-    } */
-</script>
 <!---------------------------------------------------------------->
 
     <div class="form-group required">
@@ -403,7 +352,6 @@ $(document).ready(function() {
                         cols="30" 
                         rows="5"
                         placeholder="You've changed some INFO, please leave some update on this change"
-                        required="required"
             ></textarea>
         </div>
     </div>
