@@ -140,16 +140,19 @@
 					<td data-name="r_name">
 						<input type="text" name="r_name{{loop.index}}"  placeholder='Resource Name'
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       value="{{r_detail['r_name']}}" class=""/>
 					</td>
 					<td data-name="r_number">
 						<input type="text" name='r_number{{loop.index}}'  placeholder='Resource Number' 
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       value="{{r_detail['r_number']}}" class=""/>
 					</td>
 					<td data-name="r_manager">
 						<input type="text" name='r_manager{{loop.index}}'  placeholder='Resource Manager' 
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       value="{{r_detail['r_manager']}}" class=""/>
 				    </td>
                     <td data-name="del">
@@ -161,16 +164,19 @@
 					<td data-name="r_name">
 						<input type="text" name="r_name0"  placeholder='Resource Name'
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       class=""/>
 					</td>
 					<td data-name="r_number">
 						<input type="text" name='r_number0'  placeholder='Resource Number' 
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       class=""/>
 					</td>
 					<td data-name="r_manager">
 						<input type="text" name='r_manager0'  placeholder='Resource Manager' 
                                onchange="update_maturity_wx();"
+                               required="required" 
 						       class=""/>
 					</td>
                     <td data-name="del">
@@ -183,7 +189,7 @@
 	</div>
 		<a id="add_row" class='btn btn-primary pull-right'>Add</a>
     </div>
-	<input type="hidden" name="r_max_num" value="0" id="r_max_num_id"/>
+	<input type="hidden" name="r_max_num" value="{{resource_detail_length}}" id="r_max_num_id"/>
 </div>
 
 <!---------------------------------------------------------------->
@@ -351,6 +357,7 @@ $(document).ready(function() {
                         name = update 
                         cols="30" 
                         rows="5"
+                        required="required" 
                         placeholder="You've changed some INFO, please leave some update on this change"
             ></textarea>
         </div>
@@ -362,9 +369,9 @@ $(document).ready(function() {
     <div class="form-group">
         <label class="col-md-3 control-label"></label>
         <div class="col-md-7 div_same_line" style="text-align: left;">
-            <a id="active_info_edit_submit" class="btn btn-danger" style="width: 100px;">
-                Submit
-            </a>
+            <button type="submit" id="active_info_edit_submit" class="btn btn-danger" style="width: 100px;">
+				Submit
+			</button>
             <a id="active_info_edit_cancel" class="btn btn-info" style="width: 100px;">
                 Cancel
             </a>

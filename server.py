@@ -580,7 +580,7 @@ def Tool_Active_Info_Edit():
                     VALUES
                     (%s, %s, %s, %s, %s)
                 """
-            for i in range(1, resource_max_num + 1):
+            for i in range(resource_max_num, 0, -1):   # 1 to max_num
                 resource_name = "r_name" + str(i)
                 resource_number = "r_number" + str(i)
                 resource_manager = "r_manager" + str(i)
@@ -588,6 +588,9 @@ def Tool_Active_Info_Edit():
                     r_name = request.form[resource_name]
                     r_number = request.form[resource_number]
                     r_manager = request.form[resource_manager]
+                    if ((r_name == "") or (r_number == "") or (r_manager == "")):
+                        res['res'] = 'Please fill the blank field in resource detail!'
+                        return jsonify(res)
                     cursor.execute(sql, (tool_id, r_name, r_number, r_manager, date))
 
             cursor.close()
@@ -599,7 +602,7 @@ def Tool_Active_Info_Edit():
 #        else:
 #            res['res'] = 'success'
         else:
-            res['res'] = 'Please leave some update on this INFO change! If you modified nothing, please click cancel button!'
+            res['res'] = 'Please leave some update on this INFO change!\nIf you modified nothing, please click cancel button!'
         try:
             logging.warning("user: %s modified active tool: %s."%(session['username'], tool_id))
         except:
@@ -1113,7 +1116,7 @@ def get_last_resource_detail(tool_id):
     conn = get_conn()
     cursor = conn.cursor()
     sql = """SELECT * from resource_detail_track where tool_id = %(tool_id)s
-             ORDER BY id DESC"""
+          """
     cursor.execute(sql, {"tool_id":tool_id})
 
     columns = [column[0] for column in cursor.description]
