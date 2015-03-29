@@ -222,55 +222,103 @@
         <tbody>
         {% for progress in active_progress_info %}
             <tr>
-                <td {%if progress['new_progress_f'] %} 
+                <td {%if progress[0]['new_progress_f'] %} 
                     class="td-bg-red" 
                     {% endif %}>
-                    {{progress['new_progress']}}
+                    {{progress[0]['new_progress']}}
                 </td>
                 <td>
-                    {{progress['date']}}
+                    {{progress[0]['date']}}
                 </td>
-                <td {%if progress['master_pr_f'] %} 
+                <td {%if progress[0]['master_pr_f'] %} 
                     class="td-bg-red"
                     {% endif %}>
-                    {{progress['master_pr']}}
+                    {{progress[0]['master_pr']}}
                 </td>
-                <td {%if progress['eta_f'] %}
+                <td {%if progress[0]['eta_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-                    {{progress['eta']}}
+                    {{progress[0]['eta']}}
                 </td>
-                <td {%if progress['resource_f'] %}
+                <td {%if progress[0]['resource_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-                    {{progress['resource']}}
+					<!---------------------------------------------------------------------------->
+						{{progress[0]['resource']}}
+				    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal"> Detail</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                      <div class="modal-dialog"> <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Resource Detail</h4>
+                          </div>
+                          <div class="modal-body">
+								<table class="table" id="tab_logic">
+									<thead>
+										<tr >
+											<th class="text-center">
+												Resource Name
+											</th>
+											<th class="text-center">
+												Number
+											</th>
+											<th class="text-center">
+												Manager
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for detail in progress[1:] %}
+									    <tr>
+											<td>
+												{{detail['r_name']}}
+											</td>
+											<td>
+												{{detail['r_number']}}
+											</td>
+											<td>
+												{{detail['r_manager']}}
+											</td>
+										</tr>
+									{% endfor %}
+								    </tbody>
+								</table>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+					<!---------------------------------------------------------------------------->
                 </td>
-                <td {%if progress['return_f'] %}
+                <td {%if progress[0]['return_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<p	class="pop" data-content="{{progress['return']}}">
-					  {{progress['return'][0:30]}}...
+					<p	class="pop" data-content="{{progress[0]['return']}}">
+					  {{progress[0]['return'][0:30]}}...
 					</p>
                 </td>
-                <td {%if progress['deliverables_f'] %}
+                <td {%if progress[0]['deliverables_f'] %}
                     class="td-bg-red"
                     {% endif %}>
-					<p	class="pop" data-content="{{progress['deliverables']}}">
-					  {{progress['deliverables'][0:30]}}...
+					<p	class="pop" data-content="{{progress[0]['deliverables']}}">
+					  {{progress[0]['deliverables'][0:30]}}...
 					</p>
                 </td>
                 <td>
-                    {{progress['username']}}
+                    {{progress[0]['username']}}
                 </td>
 				<td>
-					<p	class="pop" data-content="{{progress['update']}}">
-					  {{progress['update'][0:30]}}...
+					<p	class="pop" data-content="{{progress[0]['update']}}">
+					  {{progress[0]['update'][0:30]}}...
 					</p>
 				</td>
             </tr>
         {% endfor %}
         </tbody>
 	</table>
+	
 	<script>
 		$('.pop').each(function(){
 		 var $elem=$(this);

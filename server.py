@@ -456,9 +456,7 @@ def Tool_Activate():
         para = request.args
         tool_id = int(para.get('id', '').strip())
         active_info = check_tool_actvie(tool_id, force=True)
-        resource_detail = get_last_resource_detail(tool_id)
-        print "*****************************"
-        print resource_detail
+        resource_detail = get_last_resource_detail(tool_id, active_info['date'])
         if not active_info:
             active_info = dict()
             active_info['tool_id'] = tool_id
@@ -546,21 +544,21 @@ def Tool_Active_Info_Edit():
         if update:
             conn = get_conn()
             cursor = conn.cursor()
+            date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
             ########### Insert active_tools #############
             sql="""
                 INSERT INTO active_tools
-                (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
+                (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`, `date`)
                 VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s)
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
-                `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s
+                `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s, date=%s
                 """
-            cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
+            cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, date, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, date))
 
             ########### Insert active_track #############
             username = session['username']
             new_progress = progress
-            date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
             sql="""
                    INSERT INTO active_track
                     (`tool_id`, `username`, `date`, `update`, `new_progress`, `master_pr`, `eta`, `resource`, `return`, `deliverables`)
@@ -736,7 +734,7 @@ def Tool_Active_Info_Frag():
     active_flag = False
     act_pro_info = []
     active_info = check_tool_actvie(tool_id)
-    resource_detail = get_last_resource_detail(tool_id)
+    resource_detail = get_last_resource_detail(tool_id, active_info['date'])
     if active_info:
         active_flag = True
         act_pro_info = get_act_pro_info(tool_id)
@@ -754,9 +752,24 @@ def Tool_Active_Info_Frag():
                 else:
                     act_pro_info[i][str(key)+'_f'] = 0
 
+        res_detail = get_resource_detail(tool_id)
+        result_all = []
+        for temp_dict in act_pro_info:
+            temp_list = []
+            temp_list.append(temp_dict)
+            for row in res_detail:
+                if row['r_date'] == temp_dict['date']:
+                    temp_list.append(row)
+            result_all.append(temp_list)
+        print "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
+        print result_all
+    #res['data'] = render_template('tools_active_info_frag.html',
+    #                       active_flag=active_flag, active_info=active_info,
+    #                        active_progress_info=act_pro_info, resource_detail=resource_detail)
     res['data'] = render_template('tools_active_info_frag.html',
-                            active_flag=active_flag, active_info=active_info,
-                            active_progress_info=act_pro_info, resource_detail=resource_detail)
+                           active_flag=active_flag, active_info=active_info,
+                            active_progress_info=result_all, resource_detail=resource_detail)
+    
     res['res'] = 'success'
     return jsonify(res)
 
@@ -1112,36 +1125,36 @@ def get_stats_on_app_wiki():
     return int(row[0])+1532, int(row[1])+1431
 
 
-def get_last_resource_detail(tool_id):
-    conn = get_conn()
-    cursor = conn.cursor()
-    sql = """SELECT * from resource_detail_track where tool_id = %(tool_id)s
-          """
-    cursor.execute(sql, {"tool_id":tool_id})
-
-    columns = [column[0] for column in cursor.description]
+def get_last_resource_detail(tool_id, last_date):
     r_results = []
     last_detail = []
-    for row in cursor.fetchall():
-        r_results.append(dict(zip(columns, row)))
-    cursor.close()
-    conn.commit()
-    conn.close()
+    r_results = get_resource_detail(tool_id)
     ##### select the "last" updated items using date ####
-    if len(r_results):
-        last_date = r_results[0]['r_date']
-    else:
+    if not len(r_results):
         return last_detail
     for row in r_results:
         if row['r_date'] == last_date:
             last_detail.append(row)
 
-    #for row in progress_results:
-    #    for key in row:
-    #        if row[key] is None:
-    #            row[key] = ''
-    #print progress_results
     return last_detail
+
+def get_resource_detail(tool_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from resource_detail_track where tool_id = %(tool_id)s
+             ORDER BY id DESC
+          """
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    r_results = []
+    for row in cursor.fetchall():
+        r_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return r_results
+
 
 def check_tool_actvie(tool_id, force=False):
     conn = get_conn()
