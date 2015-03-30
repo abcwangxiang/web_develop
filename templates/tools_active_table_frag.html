@@ -14,9 +14,6 @@
                 {% if ss_month_ret == 'NOW' %} 
                     NOW
                 {% endif %}
-                {% if ss_month_ret == '201411' %} 
-                    Nov. 2014
-                {% endif %}
                 {% if ss_month_ret == '201412' %} 
                     Dec. 2014
                 {% endif %}
@@ -29,12 +26,18 @@
                 {% if ss_month_ret == '201503' %} 
                     Mar. 2015
                 {% endif %}
+                {% if ss_month_ret == '201504' %} 
+                    Apr. 2015
+                {% endif %}
+                {% if ss_month_ret == '201505' %} 
+                    May. 2015
+                {% endif %}
+                {% if ss_month_ret == '201506' %} 
+                    Jun. 2015
+                {% endif %}
             </option>
             {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
             <option value="NOW">NOW</option>
-            {% endif %}
-            {% if not ss_month_ret == '201411' %}  <!-- avoid the option show twice--> 
-            <option value="201411">Nov. 2014</option>
             {% endif %}
             {% if not ss_month_ret == '201412' %}  <!-- avoid the option show twice--> 
             <option value="201412">Dec. 2014</option>
@@ -47,6 +50,15 @@
             {% endif %}
             {% if not ss_month_ret == '201503' %}  <!-- avoid the option show twice--> 
             <option value="201503">Mar. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201504' %}  <!-- avoid the option show twice--> 
+            <option value="201504">Apr. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201505' %}  <!-- avoid the option show twice--> 
+            <option value="201505">May. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201506' %}  <!-- avoid the option show twice--> 
+            <option value="201506">Jun. 2015</option>
             {% endif %}
         </select>
         </div>
