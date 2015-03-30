@@ -456,10 +456,11 @@ def Tool_Activate():
         para = request.args
         tool_id = int(para.get('id', '').strip())
         active_info = check_tool_actvie(tool_id, force=True)
+        resource_detail = get_last_resource_detail(tool_id, active_info['date'])
         if not active_info:
             active_info = dict()
             active_info['tool_id'] = tool_id
-        res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info)
+        res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info, resource_detail=resource_detail, resource_detail_length=len(resource_detail))
         res['res'] = 'success'
         try:
             logging.warning("user: %s activated tool: %s."%(session['username'], tool_id))
@@ -521,41 +522,43 @@ def Tool_Active_Info_Edit():
             res['res'] = 'Missing one or more mandatory fields'
             return jsonify(res)
 
-        def has_changed():
-            current_info = check_tool_actvie(tool_id)
-            if current_info:
-                if progress!=current_info['progress']:
-                    return True
-                if master_pr!=current_info['master_pr']:
-                    return True
-                if e_return!=current_info['return']:
-                    return True
-                if e_timeline!=current_info['eta']:
-                    return True
-                if e_resource!=current_info['resource']:
-                    return True
-                if deliverables!=current_info['deliverables']:
-                    return True
-            return False
-
-        v_has_changed = has_changed()
+#        def has_changed():
+#            current_info = check_tool_actvie(tool_id)
+#            if current_info:
+#                if progress!=current_info['progress']:
+#                    return True
+#                if master_pr!=current_info['master_pr']:
+#                    return True
+#                if e_return!=current_info['return']:
+#                    return True
+#                if e_timeline!=current_info['eta']:
+#                    return True
+#                if e_resource!=current_info['resource']:
+#                    return True
+#                if deliverables!=current_info['deliverables']:
+#                    return True
+#            return False
+#
+#        v_has_changed = has_changed()
 
         if update:
             conn = get_conn()
             cursor = conn.cursor()
+            date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+            ########### Insert active_tools #############
             sql="""
                 INSERT INTO active_tools
-                (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`)
+                (`tool_id`, `master_pr`, `return`, `eta`, `resource`, `deliverables`, `progress`, `flag`, `date`)
                 VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s)
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
-                `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s
+                `master_pr`=%s,`return`=%s,eta=%s,resource=%s,deliverables=%s,progress=%s,flag=%s, date=%s
                 """
-            cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag))
+            cursor.execute(sql, (tool_id, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, date, master_pr, e_return, e_timeline, e_resource, deliverables, progress, flag, date))
 
+            ########### Insert active_track #############
             username = session['username']
             new_progress = progress
-            date = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
             sql="""
                    INSERT INTO active_track
                     (`tool_id`, `username`, `date`, `update`, `new_progress`, `master_pr`, `eta`, `resource`, `return`, `deliverables`)
@@ -563,15 +566,41 @@ def Tool_Active_Info_Edit():
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
             cursor.execute(sql, (tool_id, username, date, update, new_progress, master_pr, e_timeline, e_resource, e_return, deliverables ))
+
+            ########### Insert resource_detail_track #############
+            # we use the same date insert into active_track 
+            # and resource_detail_track, and  bind them in a same update
+            resource_name = ""
+            resource_max_num = int(request.form["r_max_num"])
+            sql="""
+                   INSERT INTO resource_detail_track
+                    (`tool_id`, `r_name`, `r_number`, `r_manager`, `r_date`)
+                    VALUES
+                    (%s, %s, %s, %s, %s)
+                """
+            for i in range(resource_max_num, 0, -1):   # 1 to max_num
+                resource_name = "r_name" + str(i)
+                resource_number = "r_number" + str(i)
+                resource_manager = "r_manager" + str(i)
+                if resource_name in request.form.keys():
+                    r_name = request.form[resource_name]
+                    r_number = request.form[resource_number]
+                    r_manager = request.form[resource_manager]
+                    if ((r_name == "") or (r_number == "") or (r_manager == "")):
+                        res['res'] = 'Please fill the blank field in resource detail!'
+                        return jsonify(res)
+                    cursor.execute(sql, (tool_id, r_name, r_number, r_manager, date))
+
             cursor.close()
             conn.commit()
             conn.close()
             res['res'] = 'success'
-        elif v_has_changed:
-            res['res'] = 'Please leave some update on this INFO change'
+#        elif v_has_changed:
+#            res['res'] = 'Please leave some update on this INFO change'
+#        else:
+#            res['res'] = 'success'
         else:
-            res['res'] = 'success'
-
+            res['res'] = 'Please leave some update on this INFO change!\nIf you modified nothing, please click cancel button!'
         try:
             logging.warning("user: %s modified active tool: %s."%(session['username'], tool_id))
         except:
@@ -705,9 +734,12 @@ def Tool_Active_Info_Frag():
     active_flag = False
     act_pro_info = []
     active_info = check_tool_actvie(tool_id)
+    resource_detail = get_last_resource_detail(tool_id, active_info['date'])
     if active_info:
         active_flag = True
         act_pro_info = get_act_pro_info(tool_id)
+
+
         for progress in act_pro_info:
             progress['username'] = get_realname(progress['username'])
 
@@ -720,9 +752,24 @@ def Tool_Active_Info_Frag():
                 else:
                     act_pro_info[i][str(key)+'_f'] = 0
 
+        res_detail = get_resource_detail(tool_id)
+        result_all = []
+        for temp_dict in act_pro_info:
+            temp_list = []
+            temp_list.append(temp_dict)
+            for row in res_detail:
+                if row['r_date'] == temp_dict['date']:
+                    temp_list.append(row)
+            result_all.append(temp_list)
+        print "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
+        print result_all
+    #res['data'] = render_template('tools_active_info_frag.html',
+    #                       active_flag=active_flag, active_info=active_info,
+    #                        active_progress_info=act_pro_info, resource_detail=resource_detail)
     res['data'] = render_template('tools_active_info_frag.html',
-                            active_flag=active_flag, active_info=active_info,
-                            active_progress_info=act_pro_info)
+                           active_flag=active_flag, active_info=active_info,
+                            active_progress_info=result_all, resource_detail=resource_detail)
+    
     res['res'] = 'success'
     return jsonify(res)
 
@@ -1076,6 +1123,38 @@ def get_stats_on_app_wiki():
     conn.commit()
     conn.close()
     return int(row[0])+1532, int(row[1])+1431
+
+
+def get_last_resource_detail(tool_id, last_date):
+    r_results = []
+    last_detail = []
+    r_results = get_resource_detail(tool_id)
+    ##### select the "last" updated items using date ####
+    if not len(r_results):
+        return last_detail
+    for row in r_results:
+        if row['r_date'] == last_date:
+            last_detail.append(row)
+
+    return last_detail
+
+def get_resource_detail(tool_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from resource_detail_track where tool_id = %(tool_id)s
+             ORDER BY id DESC
+          """
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    r_results = []
+    for row in cursor.fetchall():
+        r_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return r_results
+
 
 def check_tool_actvie(tool_id, force=False):
     conn = get_conn()

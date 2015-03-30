@@ -20,7 +20,6 @@
     <link rel='stylesheet' type='text/css' href='static/css/jquery-ui.css'>
     <script src="static/js/jquery-1.11.1.js"></script>
     <script src="static/js/jquery-ui.js"></script>
-
     <!-- Set Auto Complete, profiles: This script is different since it could support multiple assignes -->
     {%endblock%}
 </head>
@@ -172,7 +171,7 @@
 
 
                     <div class="form-group">
-    i                   <label class="col-md-3 control-label"></label>
+                       <label class="col-md-3 control-label"></label>
                         <div class="col-md-7 div_same_line" style="text-align: left;">
                             {%if tool['url']%}
                                 <a  href='{{tool['url']}}' 
@@ -536,7 +535,6 @@ img.avatar-small {
                             </button>
                         {%endif%}
                 </form>
-
             </div>
             <div class='comments'>
             </div><!--comments-->
@@ -644,8 +642,9 @@ function bind_activate_button() {
                     success:function(data, textStatus, jqXHR)
                     {
                         if(data.res=='success'){
-                            document.getElementById("tool_active_info").innerHTML = data.data;
-                            bind_edit_active_info_submit();
+                            //document.getElementById("tool_active_info").innerHTML = data.data;
+							$('#tool_active_info').html(data.data);
+							bind_edit_active_info_submit();
                             bind_edit_active_info_cancel();
                             active_info_edit_table_init();
                         }
@@ -670,8 +669,8 @@ function bind_edit_active_info_submit(){
     var btn = $( "#active_info_edit_submit" );
     if(btn){
         btn.click(function() {
-            var form = $( "#tool_active_info_edit_form" )
-            var postData = $(form).serializeArray();
+            var form = $( "#tool_active_info_edit_form" );
+			var postData = $(form).serializeArray();
             var formURL = $(form).attr("action");
             $.ajax(
             {
@@ -691,7 +690,8 @@ function bind_edit_active_info_submit(){
                 {
                     alert("There is one internal error.");
                 }
-            });
+			});
+
         });
 
     }
