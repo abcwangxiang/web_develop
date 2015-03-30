@@ -244,16 +244,18 @@
                     class="td-bg-red"
                     {% endif %}>
 					<!---------------------------------------------------------------------------->
-						{{progress[0]['resource']}}
-				    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal"> Detail</button>
+					{{progress[0]['resource']}}
+					<button type="button" class="btn btn-primary" data-toggle="modal" 
+							data-target="#myModal{{loop.index0}}"> Detail</button>
                     <!-- Modal -->
-                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal fade" id="myModal{{loop.index0}}" tabindex="-1" 
+						 role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                       <div class="modal-dialog"> <div class="modal-content">
                           <div class="modal-header">
                             <h4 class="modal-title" id="myModalLabel">Resource Detail</h4>
                           </div>
                           <div class="modal-body">
-								<table class="table" id="tab_logic">
+								<table class="table" id="">
 									<thead>
 										<tr >
 											<th class="text-center">
@@ -285,12 +287,12 @@
 								</table>
                           </div>
                           <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                           </div>
                         </div>
                       </div>
                     </div>
-					<!---------------------------------------------------------------------------->
+				<!---------------------------------------------------------------------------->
                 </td>
                 <td {%if progress[0]['return_f'] %}
                     class="td-bg-red"
