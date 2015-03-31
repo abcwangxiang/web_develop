@@ -665,7 +665,6 @@ def Edit_Tool_Details():
         impure_results = []
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
-        #print impure_results[0]
 
         #if it is active tool
         active = 0
@@ -761,15 +760,9 @@ def Tool_Active_Info_Frag():
                 if row['r_date'] == temp_dict['date']:
                     temp_list.append(row)
             result_all.append(temp_list)
-        print "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
-        print result_all
-    #res['data'] = render_template('tools_active_info_frag.html',
-    #                       active_flag=active_flag, active_info=active_info,
-    #                        active_progress_info=act_pro_info, resource_detail=resource_detail)
     res['data'] = render_template('tools_active_info_frag.html',
                            active_flag=active_flag, active_info=active_info,
                             active_progress_info=result_all, resource_detail=resource_detail)
-    
     res['res'] = 'success'
     return jsonify(res)
 
@@ -1268,7 +1261,6 @@ def send_email(from_addr, to_addrs, cc_addrs, subject, body):
     msg['Subject'] = msg_subject
     msg['From'] = from_addr
     msg['To'] = ', '.join(to_addrs)
-    print msg['To']
     if cc_addrs:
         msg['Cc'] = ', '.join(cc_addrs)
         receivers = to_addrs + cc_addrs

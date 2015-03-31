@@ -201,6 +201,26 @@
                                 <!--<span class="glyphicon glyphicon-star"></span>--> 
                             <script>
                                 query_tool_likes({{tool['tool_id']}});
+								function query_tool_likes(id) {
+								    $.ajax({
+								        type:"GET",
+								        url:"/Tool_Like_Query",
+								        data:"id="+id,
+								        cache:false, //......
+								        success:function(res){
+								            if(res.res=="success"){
+								                document.getElementById("likes_"+id).innerHTML = res.data;
+								                if(res.liked==1){
+								                    var button = document.getElementById("img_div_"+id);
+								                    button.style.background="#777";
+								                }
+								            }
+								            else{
+								                alert(res.res);
+								            }
+								        }
+								    });
+								}
                             </script>
                             <style>
                                  #img_div a {
@@ -280,26 +300,6 @@ function rebind_like(){
 </script>
 
 <script>
-function query_tool_likes(id) {
-    $.ajax({
-        type:"GET",
-        url:"/Tool_Like_Query",
-        data:"id="+id,
-        cache:false, //......
-        success:function(res){
-            if(res.res=="success"){
-                document.getElementById("likes_"+id).innerHTML = res.data;
-                if(res.liked==1){
-                    var button = document.getElementById("img_div_"+id);
-                    button.style.background="#777";
-                }
-            }
-            else{
-                alert(res.res);
-            }
-        }
-    });
-}
 </script>
 
 <script>
@@ -335,7 +335,6 @@ function update_active_tool_info(id){
                 bind_deactive_button();
             }
             else{
-                alert(res.res);
             }
         }
     });
