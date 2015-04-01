@@ -36,7 +36,8 @@
         <label class="col-md-3 control-label">
             Master PR
         </label>
-        <div class="col-md-7">
+		<div class="col-md-7">
+		<a href="https://bugzilla.eng.vmware.com/show_bug.cgi?id={{active_info['master_pr']}}" target="_blank">
             <input  class="form-control" 
                     id="id_master_pr" 
                     value="{{active_info['master_pr']}}" 
@@ -46,7 +47,8 @@
                     title="" 
                     type="text" 
                     readonly="readonly"
-           />
+					/>
+	    </a>
         </div>
     </div>
     <div class="form-group required">

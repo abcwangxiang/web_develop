@@ -733,8 +733,10 @@ def Tool_Active_Info_Frag():
     active_flag = False
     act_pro_info = []
     active_info = check_tool_actvie(tool_id)
-    resource_detail = get_last_resource_detail(tool_id, active_info['date'])
-    if active_info:
+    resource_detail = []
+    result_all = []
+    if len(active_info):
+        resource_detail = get_last_resource_detail(tool_id, active_info['date'])
         active_flag = True
         act_pro_info = get_act_pro_info(tool_id)
 
@@ -752,7 +754,6 @@ def Tool_Active_Info_Frag():
                     act_pro_info[i][str(key)+'_f'] = 0
 
         res_detail = get_resource_detail(tool_id)
-        result_all = []
         for temp_dict in act_pro_info:
             temp_list = []
             temp_list.append(temp_dict)
