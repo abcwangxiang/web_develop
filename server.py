@@ -456,10 +456,12 @@ def Tool_Activate():
         para = request.args
         tool_id = int(para.get('id', '').strip())
         active_info = check_tool_actvie(tool_id, force=True)
-        resource_detail = get_last_resource_detail(tool_id, active_info['date'])
+        resource_detail = []
         if not active_info:
             active_info = dict()
             active_info['tool_id'] = tool_id
+        else:
+            resource_detail = get_last_resource_detail(tool_id, active_info['date'])
         res['data'] = render_template('tool_active_edit_frag.html', active_info=active_info, resource_detail=resource_detail, resource_detail_length=len(resource_detail))
         res['res'] = 'success'
         try:
