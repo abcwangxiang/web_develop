@@ -85,6 +85,11 @@ with app.test_request_context('/hello', method='POST'):
     assert request.path == '/hello'
     assert request.method == 'POST'
 
+# a golobal variable for teams selecting and  snapshot data filter
+TEAM_NAME = "All_Teams"
+
+
+#################     back-end  start       ##########################
 
 @app.route('/')
 def index():
@@ -171,7 +176,8 @@ def Tools_Catalog_Query():
             on tools.tool_id = active_tools.tool_id
             where active_tools.flag=1
             """
-        template = "tools_active_table_frag.html"
+        #template = "tools_active_table_frag.html"
+        template = "tools_active_teams_frag.html"
         res['spec'] = "active"
         ss_month = 'NOW'
     elif tool_tab_id == "backlog":
@@ -192,6 +198,50 @@ def Tools_Catalog_Query():
         data = impure_results
         res['res'] = 'success'
         res['data'] = render_template(template, tools=impure_results, ss_month_ret = ss_month)
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return jsonify(res)
+
+@app.route('/Tools_Teams_Query')
+def Tools_Teams_Query():
+    res = {}
+    global TEAM_NAME     # use the global variable to filter data
+    res['res'] = 'internal error'
+    para = request.args
+    team_name = para.get('id', '').strip()
+    TEAM_NAME = team_name
+    print "QQQQQQQQQQQQQQQQQ"
+    print TEAM_NAME
+    conn = get_conn()
+    cursor = conn.cursor()
+    ss_month = 'NOW'
+    template = "tools_active_table_frag.html"
+    sql="""
+        select tools.*, active_tools.*
+        from tools
+        INNER JOIN active_tools
+        on tools.tool_id = active_tools.tool_id
+        where active_tools.flag=1
+        """
+    if sql:
+        cursor.execute(sql)
+        columns = [column[0] for column in cursor.description]
+        impure_results = []
+        team_results = []
+        for row in cursor.fetchall():
+            impure_results.append(dict(zip(columns, row)))
+        if team_name != "All-Teams":
+            for row in impure_results:
+                if row['team'] == team_name:
+                    team_results.append(row)
+        else:
+            team_results = impure_results
+        #print impure_results[0]
+        data = impure_results
+        res['res'] = 'success'
+        res['data'] = render_template(template, tools=team_results, ss_month_ret = ss_month)
 
     cursor.close()
     conn.commit()
@@ -349,6 +399,10 @@ def Tools_Active_Tools():
 @app.route('/Tools_Active_Snapshots')
 def Tools_Active_Snapshots():
     res = {}
+    global TEAM_NAME     # use the global variable to filter data
+    print "SSSSSSSSSSSSSSSS"
+    print TEAM_NAME
+    team_name = TEAM_NAME
     res['res'] = 'internal error'
     para = request.args
     ss_month = para.get('ss_month', '').strip()
@@ -378,16 +432,22 @@ def Tools_Active_Snapshots():
         cursor.execute(sql)
         columns = [column[0] for column in cursor.description]
         impure_results = []
+        filtered_results = []    # filtered by team name
         snap_res = []
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
+        if team_name == "All-Teams":
+            filtered_results = impure_results
+        else:
+            for row in impure_results:
+                if row['team'] == team_name:
+                    filtered_results.append(row)
         all_act_tools_id = get_tools_all_id()
-
         for act_tool_id in all_act_tools_id:
             temp = {}
             last_act_eta = ''
             last_act_date = ''
-            for row in impure_results:
+            for row in filtered_results:
                 if row['tool_id'] == act_tool_id:
                     row['progress'] = row['new_progress']
                     if row['eta']:
@@ -400,7 +460,7 @@ def Tools_Active_Snapshots():
                                 temp = row
                                 last_act_eta = act_eta
             if len(temp) == 0:
-                for row in impure_results:
+                for row in filtered_results:
                     if row['tool_id'] == act_tool_id:
                         row['progress'] = row['new_progress']
                         if not row['date']:

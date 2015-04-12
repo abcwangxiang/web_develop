@@ -1,21 +1,46 @@
 
-    <style>
-     .ss-select-style {
-        width: 160px;
-        padding: 4px;
-        font-size: 16px;
-    }
-    </style>
-    <div class = ""> <!-- the snapshots select-->
-        <label class = "">Team Select</label> 
-        <div class = "">
-        <select class = "ss-select-style"  name = "teams_select" id = "teams_select" onchange = "teams_select_change();">
+<form action="" method=post>
+<ul class="" style="padding-left:10px;">
+    <!--tab nav-->
+    <ul class="nav nav-tabs" role="tablist" id="teams_tab">
+		<li class="active">
+			<a href="" id="All-Teams" data-toggle="t_tab">All Teams</a>
+		</li>
+		<li>
+			<a href="" id="VC/VCD" data-toggle="t_tab">VC/VCD</a>
+		</li>
+		<li>
+			<a href="" id="EUC-View" data-toggle="t_tab">EUC-View</a>
+		</li>
+		<li>
+			<a href="" id="ESX-Platform" data-toggle="t_tab">ESX-Platform</a>
+		</li>
+		<li>
+			<a href="" id="ESX-Storage" data-toggle="t_tab">ESX-Storage</a>
+		</li>
+		<li>
+			<a href="" id="ESX-Kernel" data-toggle="t_tab">ESX-Kernel</a>
+		</li>
+		<li>
+			<a href="" id="ESX-Networking" data-toggle="t_tab">ESX-Networking</a>
+		</li>
+		<li>
+			<a href="" id="Availability" data-toggle="t_tab">Availablity</a>
+		</li>
+    </ul>
+</ul>
+
+<br>
+
+
+<div id='teams_holder'>
+<!-------------------------------------------------------------------------------------------------------->
+    <div class="form-inline"> <!-- the snapshots select-->
+		<label class="ss-label">Snapshots:</label> 
+        <select class = "ss-select-style"  name = "snapshots" id = "snapshots" onchange = "ss_change();">
             <option value= {{ss_month_ret}}>
                 {% if ss_month_ret == 'NOW' %} 
                     NOW
-                {% endif %}
-                {% if ss_month_ret == '201411' %} 
-                    Nov. 2014
                 {% endif %}
                 {% if ss_month_ret == '201412' %} 
                     Dec. 2014
@@ -29,12 +54,18 @@
                 {% if ss_month_ret == '201503' %} 
                     Mar. 2015
                 {% endif %}
+                {% if ss_month_ret == '201504' %} 
+                    Apr. 2015
+                {% endif %}
+                {% if ss_month_ret == '201505' %} 
+                    May. 2015
+                {% endif %}
+                {% if ss_month_ret == '201506' %} 
+                    Jun. 2015
+                {% endif %}
             </option>
             {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
             <option value="NOW">NOW</option>
-            {% endif %}
-            {% if not ss_month_ret == '201411' %}  <!-- avoid the option show twice--> 
-            <option value="201411">Nov. 2014</option>
             {% endif %}
             {% if not ss_month_ret == '201412' %}  <!-- avoid the option show twice--> 
             <option value="201412">Dec. 2014</option>
@@ -48,8 +79,16 @@
             {% if not ss_month_ret == '201503' %}  <!-- avoid the option show twice--> 
             <option value="201503">Mar. 2015</option>
             {% endif %}
+            {% if not ss_month_ret == '201504' %}  <!-- avoid the option show twice--> 
+            <option value="201504">Apr. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201505' %}  <!-- avoid the option show twice--> 
+            <option value="201505">May. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201506' %}  <!-- avoid the option show twice--> 
+            <option value="201506">Jun. 2015</option>
+            {% endif %}
         </select>
-        </div>
     </div>
     {%if not tools==[]%}
     <table id="Table_CPDtools" class="display" cellspacing="0">
@@ -149,3 +188,38 @@
     {%else%}
     N/A
     {%endif%}
+
+    <style>
+		.ss-select-style {
+        width: 160px;
+        padding: 4px;
+        font-size: 16px;
+    }
+		.ss-label {
+		font-size: 15px;
+		color:rgb(51, 153, 255);
+    }
+    </style>
+
+</div>
+<!-------------------------------------------------------------------------------------------------------->
+
+
+<script>
+
+$('#teams_tab a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+})
+
+$('a[data-toggle="t_tab"]').on('shown.bs.tab', function (e) {
+  var a = e.target; // activated tab
+  var id = a.id.replace("tools_tab_", "");
+  query_teams(id)
+  //e.relatedTarget // previous tab
+})
+
+
+</script>
+
+</form>

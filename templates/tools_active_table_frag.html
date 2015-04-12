@@ -1,14 +1,7 @@
 
-    <style>
-     .ss-select-style {
-        width: 160px;
-        padding: 4px;
-        font-size: 16px;
-    }
-    </style>
-    <div class = ""> <!-- the snapshots select-->
-        <label class = "">Snapshots</label> 
-        <div class = "">
+
+    <div class="form-inline"> <!-- the snapshots select-->
+		<label class="ss-label">Snapshots:</label> 
         <select class = "ss-select-style"  name = "snapshots" id = "snapshots" onchange = "ss_change();">
             <option value= {{ss_month_ret}}>
                 {% if ss_month_ret == 'NOW' %} 
@@ -61,7 +54,6 @@
             <option value="201506">Jun. 2015</option>
             {% endif %}
         </select>
-        </div>
     </div>
     {%if not tools==[]%}
     <table id="Table_CPDtools" class="display" cellspacing="0">
@@ -161,3 +153,16 @@
     {%else%}
     N/A
     {%endif%}
+
+    <style>
+		.ss-select-style {
+        width: 160px;
+        padding: 4px;
+        font-size: 16px;
+    }
+		.ss-label {
+		font-size: 15px;
+		color:rgb(51, 153, 255);
+    }
+    </style>
+

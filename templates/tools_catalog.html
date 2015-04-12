@@ -128,7 +128,7 @@ var fnBuild_active = function (query_last){
             query_active_tool_last(this.id.replace('hidden_last_',""));
         });
     }
-} 
+}
 
 function query_active_tool_last(id){
     $.ajax({
@@ -375,7 +375,7 @@ function ss_change(){
         query_tab_table("active"); //if the select is 'NOW', show the active TAB, tools_active_table_frag.html 
         return; 
     }
-    document.getElementById("table_place_holder").innerHTML = 'Loading...';
+    document.getElementById("teams_holder").innerHTML = 'Loading...';
     $.ajax({
         type: "GET",
         url: "/Tools_Active_Snapshots",
@@ -385,7 +385,7 @@ function ss_change(){
             if(res.res=="success"){
                 //document.getElementById("table_place_holder").innerHTML = res.data;
                 //this style for element can execute the javascript 
-                $('#table_place_holder').html(res.data); //this style for element can execute the javascript
+                $('#teams_holder').html(res.data); //this style for element can execute the javascript
                 if(res.spec=="active"){
                     fnBuild_active(false); 
                     window.history.pushState("", "", "/Active_Tools");
@@ -420,6 +420,39 @@ function query_tab_table(id) {
                 $('#table_place_holder').html(res.data);
                 if(res.spec=="active"){
                     fnBuild_active(true); 
+                    window.history.pushState("", "", "/Active_Tools");
+                }
+                else{
+                    fnBuild();
+                    window.history.pushState("", "", "/");
+                }
+                bind_like();
+                initialize_activity();
+                $('#Table_CPDtools > tbody > tr > td > div[id^=hidden_likes]').each(function(){
+                    query_tool_likes(this.id.replace('hidden_likes_',""));
+                });
+            }
+            else{
+                alert(res.res);
+            }
+        }
+    });
+}
+
+function query_teams(id) {
+    document.getElementById("teams_holder").innerHTML = 'Loading...';
+	$.ajax({
+        type:"GET",
+        url:"/Tools_Teams_Query",
+        data:"id="+id,
+        cache:false, //......
+        success:function(res){
+            if(res.res=="success"){
+                //document.getElementById("table_place_holder").innerHTML = res.data;
+                //this style for element can execute the javascript 
+                $('#teams_holder').html(res.data); //this style for element can execute the javascript
+                if(res.spec=="active"){
+                    fnBuild_active(false); 
                     window.history.pushState("", "", "/Active_Tools");
                 }
                 else{
