@@ -206,6 +206,7 @@
 
 
 <script>
+var team_name_front = 'All-Teams';
 
 $('#teams_tab a').click(function (e) {
     e.preventDefault();
@@ -216,10 +217,9 @@ $('a[data-toggle="t_tab"]').on('shown.bs.tab', function (e) {
   var a = e.target; // activated tab
   var id = a.id.replace("tools_tab_", "");
   query_teams(id)
+  team_name_front = id;
   //e.relatedTarget // previous tab
 })
-
-
 </script>
 
 </form>

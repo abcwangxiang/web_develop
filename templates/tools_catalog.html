@@ -356,6 +356,7 @@ function query_tool_likes(id) {
     <br>
 
 <script>
+
 $('#tools_tab a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
@@ -371,23 +372,18 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 function ss_change(){
     var ss_month = 0;
     ss_month = $("#snapshots").val();
-    if(ss_month == "NOW"){
-        query_tab_table("active"); //if the select is 'NOW', show the active TAB, tools_active_table_frag.html 
-        return; 
-    }
     document.getElementById("teams_holder").innerHTML = 'Loading...';
     $.ajax({
         type: "GET",
         url: "/Tools_Active_Snapshots",
-        data: "ss_month="+ss_month,
+		data: {"ss_month": ss_month, "team_name_front": team_name_front},
         cache: false, //......
         success: function(res){
             if(res.res=="success"){
-                //document.getElementById("table_place_holder").innerHTML = res.data;
                 //this style for element can execute the javascript 
                 $('#teams_holder').html(res.data); //this style for element can execute the javascript
                 if(res.spec=="active"){
-                    fnBuild_active(false); 
+                    fnBuild_active(true); 
                     window.history.pushState("", "", "/Active_Tools");
                 }
                 else{
@@ -452,7 +448,7 @@ function query_teams(id) {
                 //this style for element can execute the javascript 
                 $('#teams_holder').html(res.data); //this style for element can execute the javascript
                 if(res.spec=="active"){
-                    fnBuild_active(false); 
+                    fnBuild_active(true); 
                     window.history.pushState("", "", "/Active_Tools");
                 }
                 else{

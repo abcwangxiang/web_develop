@@ -85,9 +85,6 @@ with app.test_request_context('/hello', method='POST'):
     assert request.path == '/hello'
     assert request.method == 'POST'
 
-# a golobal variable for teams selecting and  snapshot data filter
-TEAM_NAME = "All_Teams"
-
 
 #################     back-end  start       ##########################
 
@@ -207,13 +204,9 @@ def Tools_Catalog_Query():
 @app.route('/Tools_Teams_Query')
 def Tools_Teams_Query():
     res = {}
-    global TEAM_NAME     # use the global variable to filter data
     res['res'] = 'internal error'
     para = request.args
     team_name = para.get('id', '').strip()
-    TEAM_NAME = team_name
-    print "QQQQQQQQQQQQQQQQQ"
-    print TEAM_NAME
     conn = get_conn()
     cursor = conn.cursor()
     ss_month = 'NOW'
@@ -241,6 +234,7 @@ def Tools_Teams_Query():
         #print impure_results[0]
         data = impure_results
         res['res'] = 'success'
+        res['spec'] = "active"
         res['data'] = render_template(template, tools=team_results, ss_month_ret = ss_month)
 
     cursor.close()
@@ -399,14 +393,10 @@ def Tools_Active_Tools():
 @app.route('/Tools_Active_Snapshots')
 def Tools_Active_Snapshots():
     res = {}
-    global TEAM_NAME     # use the global variable to filter data
-    print "SSSSSSSSSSSSSSSS"
-    print TEAM_NAME
-    team_name = TEAM_NAME
     res['res'] = 'internal error'
     para = request.args
     ss_month = para.get('ss_month', '').strip()
-
+    team_name = para.get('team_name_front', '').strip()
     # change the ss_month to ss_date for complare, such as :
     # 201411 to 20141132
     # 201412 to 20141232
@@ -442,43 +432,63 @@ def Tools_Active_Snapshots():
             for row in impure_results:
                 if row['team'] == team_name:
                     filtered_results.append(row)
+
         all_act_tools_id = get_tools_all_id()
-        for act_tool_id in all_act_tools_id:
-            temp = {}
-            last_act_eta = ''
-            last_act_date = ''
-            for row in filtered_results:
-                if row['tool_id'] == act_tool_id:
-                    row['progress'] = row['new_progress']
-                    if row['eta']:
-                        act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:10]
-                        #cut the eta: '2014-12-12,...'
-                        if act_eta < ss_date:
-                        #filter the eta > ss_date
-                            if act_eta >= last_act_eta:
-                            #find the the last change before ss_date
-                                temp = row
-                                last_act_eta = act_eta
-            if len(temp) == 0:
+
+        #if ss_month = "NOW" don't need to filtered by date
+        #find the last change in active_track
+        if ss_month == "NOW":
+            for act_tool_id in all_act_tools_id:
+                temp = {}
+                last_act_date = ''
                 for row in filtered_results:
                     if row['tool_id'] == act_tool_id:
                         row['progress'] = row['new_progress']
                         if not row['date']:
                             continue
                         act_date = row['date'][0:4] + row['date'][5:7] + row['date'][8:10]
-                        #cut the date: '2014-12-12,...'
-                        if act_date < ss_date:
-                        #filter the date > ss_date
-                            if act_date >= last_act_date:
-                            #find the the last change before ss_date
-                                temp = row
-                                last_act_date = act_date
-            if len(temp) != 0:
-                snap_res.append(temp)
+                        if act_date >= last_act_date:
+                        #find the the last change before ss_date
+                            temp = row
+                            last_act_date = act_date
+                if len(temp) != 0:
+                    snap_res.append(temp)
+        else:
+            for act_tool_id in all_act_tools_id:
+                temp = {}
+                last_act_eta = ''
+                last_act_date = ''
+                for row in filtered_results:
+                    if row['tool_id'] == act_tool_id:
+                        row['progress'] = row['new_progress']
+                        if row['eta']:
+                            act_eta = row['eta'][0:4] + row['eta'][5:7] + row['eta'][8:10]
+                            #cut the eta: '2014-12-12,...'
+                            if act_eta < ss_date:
+                            #filter the eta > ss_date
+                                if act_eta >= last_act_eta:
+                                #find the the last change before ss_date
+                                    temp = row
+                                    last_act_eta = act_eta
+                if len(temp) == 0:
+                    for row in filtered_results:
+                        if row['tool_id'] == act_tool_id:
+                            row['progress'] = row['new_progress']
+                            if not row['date']:
+                                continue
+                            act_date = row['date'][0:4] + row['date'][5:7] + row['date'][8:10]
+                            #cut the date: '2014-12-12,...'
+                            if act_date < ss_date:
+                            #filter the date > ss_date
+                                if act_date >= last_act_date:
+                                #find the the last change before ss_date
+                                    temp = row
+                                    last_act_date = act_date
+                if len(temp) != 0:
+                    snap_res.append(temp)
 
         data = snap_res
         res['res'] = 'success'
-        #print snap_res
         res['data'] = render_template(template, tools=snap_res, ss_month_ret=ss_month)
         res['spec'] = "active"
 
