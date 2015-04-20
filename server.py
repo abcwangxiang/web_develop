@@ -207,6 +207,8 @@ def Tools_Teams_Query():
     res['res'] = 'internal error'
     para = request.args
     team_name = para.get('id', '').strip()
+    if team_name == "VC-VCD":
+        team_name = "VC/VCD"
     conn = get_conn()
     cursor = conn.cursor()
     ss_month = 'NOW'
@@ -397,6 +399,9 @@ def Tools_Active_Snapshots():
     para = request.args
     ss_month = para.get('ss_month', '').strip()
     team_name = para.get('team_name_front', '').strip()
+    if team_name == "VC-VCD":
+        team_name = "VC/VCD"
+
     # change the ss_month to ss_date for complare, such as :
     # 201411 to 20141132
     # 201412 to 20141232

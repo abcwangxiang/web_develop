@@ -7,7 +7,7 @@
 			<a href="" id="All-Teams" data-toggle="t_tab">All Teams</a>
 		</li>
 		<li>
-			<a href="" id="VC/VCD" data-toggle="t_tab">VC/VCD</a>
+			<a href="" id="VC-VCD" data-toggle="t_tab">VC/VCD</a>
 		</li>
 		<li>
 			<a href="" id="EUC-View" data-toggle="t_tab">EUC-View</a>
@@ -213,12 +213,35 @@ $('#teams_tab a').click(function (e) {
     $(this).tab('show');
 })
 
+var local_hash = window.location.hash.replace("#", "");
+if(local_hash != ""){
+	if(local_hash == "All-Teams")
+	    $('#All-Teams').click();
+	if(local_hash == "VC-VCD")
+	    $('#VC-VCD').click();
+	if(local_hash == "EUC-View")
+	    $('#EUC-View').click();
+	if(local_hash == "ESX-Platform")
+	    $('#ESX-Platform').click();
+	if(local_hash == "ESX-Storage")
+	    $('#ESX-Storage').click();
+	if(local_hash == "ESX-Kernel")
+	    $('#ESX-Kernel').click();
+	if(local_hash == "ESX-Networking")
+	    $('#ESX-Networking').click();
+	if(local_hash == "Availability")
+	    $('#Availability').click();
+	team_name_front = local_hash;
+	query_teams(local_hash);
+}
+
 $('a[data-toggle="t_tab"]').on('shown.bs.tab', function (e) {
-  var a = e.target; // activated tab
-  var id = a.id.replace("tools_tab_", "");
-  query_teams(id)
-  team_name_front = id;
-  //e.relatedTarget // previous tab
+    var a = e.target; // activated tab
+	var id = a.id.replace("tools_tab_", "");
+	query_teams(id)
+    team_name_front = id;
+    window.location.hash=team_name_front;
+    //e.relatedTarget // previous tab
 })
 </script>
 

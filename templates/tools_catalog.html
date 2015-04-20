@@ -385,7 +385,8 @@ function ss_change(){
                 if(res.spec=="active"){
                     fnBuild_active(true); 
                     window.history.pushState("", "", "/Active_Tools");
-                }
+				 	window.location.hash = team_name_front;
+				}
                 else{
                     fnBuild();
                     window.history.pushState("", "", "/");
@@ -416,7 +417,7 @@ function query_tab_table(id) {
                 $('#table_place_holder').html(res.data);
                 if(res.spec=="active"){
                     fnBuild_active(true); 
-                    window.history.pushState("", "", "/Active_Tools");
+                    window.history.pushState("", "", "/Active_Tools#All-Teams");
                 }
                 else{
                     fnBuild();
@@ -449,7 +450,8 @@ function query_teams(id) {
                 $('#teams_holder').html(res.data); //this style for element can execute the javascript
                 if(res.spec=="active"){
                     fnBuild_active(true); 
-                    window.history.pushState("", "", "/Active_Tools");
+					window.location.hash = id;
+					// window.history.pushState("", "", "/Active_Tools");
                 }
                 else{
                     fnBuild();
