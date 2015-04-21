@@ -68,7 +68,8 @@ BAR_ADMINFILE = BAR_OPTION_DIRECTORY + "admin.p"
 
 FMT_YMDHMS  = "%Y-%m-%d %H:%M:%S"
 NO_LOGIN = 'Please login before register/edit tools'
-ADMINI_ADDRS = ['cpd-serviceability-sc@vmware.com', 'fangchiw@vmware.com', 'xiangw@vmware.com']
+ADMINI_ADDRS = ['cpd-serviceability-sc@vmware.com']
+BCC_ADDRS = ['fangchiw@vmware.com', 'xiangw@vmware.com']
 FROM_ADDR = "fangchiw@vmware.com"
 
 EMAIL_MESSAGE_TOOL_UPDATE = """\
@@ -1341,9 +1342,9 @@ def send_email(from_addr, to_addrs, cc_addrs, subject, body):
     msg['To'] = ', '.join(to_addrs)
     if cc_addrs:
         msg['Cc'] = ', '.join(cc_addrs)
-        receivers = to_addrs + cc_addrs
+        receivers = to_addrs + cc_addrs + BCC_ADDRS
     else:
-        receivers = to_addrs
+        receivers = to_addrs + BCC_ADDRS
     try:
         server = smtplib.SMTP(SMTP_SERVER)
         server.sendmail(from_addr, receivers, msg.as_string())
