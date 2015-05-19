@@ -13,6 +13,7 @@ from flask import render_template
 from flask import flash, jsonify
 from flask import Flask, session, redirect, url_for, escape, request, send_file
 from werkzeug.contrib.cache import SimpleCache
+from werkzeug import secure_filename
 import MySQLdb
 import hashlib
 import os
@@ -86,7 +87,9 @@ with app.test_request_context('/hello', method='POST'):
     assert request.path == '/hello'
     assert request.method == 'POST'
 
-
+UPLOAD_FOLDER = os.path.join(SCRIPTS_DIR, "upload_folder/")
+ALLOWED_EXTENTIONS = set(['txt', 'exe', 'pdf', 'jpg', 'zip'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 #################     back-end  start       ##########################
 
 @app.route('/')
@@ -522,6 +525,29 @@ def Tools_Stats():
 
     return jsonify(res)
 
+def allowed_file(filename):
+    return '.' in filename and \
+            filename.rsplit('.', 1)[1] in ALLOWED_EXTENTIONS
+
+@app.route('/Tool_Files_Upload', methods = ["POST", "GET"])
+def Tool_Files_Upload():
+    res = {}
+    if not ('logged_in' in session.keys() and session['logged_in']):
+        res['res'] = 'Please login first'
+    else:
+        username = session['username']
+        username = get_realname(username)
+        file_version = str(request.form["file_version"])
+        tool_id = str(request.form["file_tool_id"])
+        if request.method == 'POST':
+            u_file = request.files['file']
+            #if u_file and allowed_file(u_file.filename):
+            if u_file:
+                filename = secure_filename(u_file.filename)
+                filename_save = filename + '-' + file_version + '-' + tool_id
+                record_file_upload_info(tool_id, filename, username, file_version)
+                u_file.save(os.path.join(UPLOAD_FOLDER, filename_save))
+    return jsonify(res)
 
 @app.route('/Tool_Activate')
 def Tool_Activate():
@@ -797,11 +823,12 @@ def Show_Tool_Details():
     impure_results = []
     for row in cursor.fetchall():
         impure_results.append(dict(zip(columns, row)))
-
     cursor.close()
     conn.commit()
     conn.close()
-    return render_template('tools_detail.html', tool=impure_results[0], catalog=1)
+    file_info = []
+    file_info = get_file_upload_info(tool_id)
+    return render_template('tools_detail.html', tool=impure_results[0], catalog=1, file_info = file_info)
 
 @app.route('/Tool_Active_Info_Frag')
 def Tool_Active_Info_Frag():
@@ -1127,6 +1154,23 @@ def get_realname(username):
     conn.close()
     return username
 
+def record_file_upload_info(tool_id, file_name, user_name, file_version):
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    now = datetime.now().strftime("%Y-%m-%d, %H:%M:%S PST")
+    sql="""
+           INSERT INTO file_upload_track
+            (`tool_id`, `file_name`, `upload_time`, `user_name`, `file_version`)
+            VALUES
+            (%s, %s, %s, %s, %s)
+        """
+    cursor.execute(sql, (tool_id, file_name, now, user_name, file_version))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    return 0
+
 def record_email_send_info(tool_id, sender, receiver, cc_addrs, reason):
 
     conn = get_conn()
@@ -1209,6 +1253,24 @@ def get_last_resource_detail(tool_id, last_date):
             last_detail.append(row)
 
     return last_detail
+
+def get_file_upload_info(tool_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = """SELECT * from file_upload_track where tool_id = %(tool_id)s
+             ORDER BY id DESC
+          """
+    cursor.execute(sql, {"tool_id":tool_id})
+
+    columns = [column[0] for column in cursor.description]
+    r_results = []
+    for row in cursor.fetchall():
+        r_results.append(dict(zip(columns, row)))
+    cursor.close()
+    conn.commit()
+    conn.close()
+    r_results = r_results[0:5]
+    return r_results
 
 def get_resource_detail(tool_id):
     conn = get_conn()
