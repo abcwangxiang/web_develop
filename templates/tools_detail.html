@@ -186,12 +186,11 @@
                                     id='tool_activity_wiki_{{tool['tool_id']}}'>Open Wiki</a>
                             {%endif%}
 					<!---------------------------------------------------------------------------->
-					        <a type="button" class="btn btn-primary" data-toggle="modal" 
+					        <a type="button" id="file_upload" class="btn btn-primary" data-toggle="modal" 
 								    data-target="#myModal">
 									Up/Download
 							</a>
 				    <!---------------------------------------------------------------------------->
-
 							<a  id="tool_edit_button" 
                                 class="btn btn-danger" 
                                 style="width: 60px;"
@@ -917,6 +916,7 @@ $(document).ready( function() {
     });
 });
 
+
 </script>
 
 <style>
@@ -944,8 +944,12 @@ input[readonly] {
 }
 </style>
 <!------------------------------------------------------------------------------------------------------------>
-
-
+<script>
+	{% if file_upload_flag %}
+		$('#file_upload').click();
+	    alert("Congratulations! Upload success!");
+	{% endif %}
+</script>
 </div>
     {%endblock%}
 </body>

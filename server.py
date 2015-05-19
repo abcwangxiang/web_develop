@@ -525,15 +525,16 @@ def Tools_Stats():
 
     return jsonify(res)
 
-def allowed_file(filename):
-    return '.' in filename and \
-            filename.rsplit('.', 1)[1] in ALLOWED_EXTENTIONS
+#def allowed_file(filename):
+#    return '.' in filename and \
+#            filename.rsplit('.', 1)[1] in ALLOWED_EXTENTIONS
 
 @app.route('/Tool_Files_Upload', methods = ["POST", "GET"])
 def Tool_Files_Upload():
     res = {}
     if not ('logged_in' in session.keys() and session['logged_in']):
         res['res'] = 'Please login first'
+        return jsonify(res)
     else:
         username = session['username']
         username = get_realname(username)
@@ -547,7 +548,7 @@ def Tool_Files_Upload():
                 filename_save = filename + '-' + file_version + '-' + tool_id
                 record_file_upload_info(tool_id, filename, username, file_version)
                 u_file.save(os.path.join(UPLOAD_FOLDER, filename_save))
-    return jsonify(res)
+    return Show_Tool_Details_after_upload(tool_id)
 
 @app.route('/Tool_Activate')
 def Tool_Activate():
@@ -813,8 +814,21 @@ def Edit_Tool_Details():
 @app.route("/Show_Tool_Details")
 def Show_Tool_Details():
     para = request.args
-    tool_name = para.get('name', '').strip()
     tool_id = int(para.get('id', '').strip())
+    tool_info = []
+    file_info = []
+    tool_info = get_tool_details(tool_id)
+    file_info = get_file_upload_info(tool_id)
+    return render_template('tools_detail.html', tool = tool_info, file_upload_flag = 0, file_info = file_info)
+
+def Show_Tool_Details_after_upload(tool_id):
+    tool_info = []
+    file_info = []
+    tool_info = get_tool_details(tool_id)
+    file_info = get_file_upload_info(tool_id)
+    return render_template('tools_detail.html', tool = tool_info, file_upload_flag = 1, file_info = file_info)
+
+def get_tool_details(tool_id):
     conn = get_conn()
     sql = """SELECT * from tools where tool_id = %(tool_id)s"""
     cursor = conn.cursor()
@@ -826,9 +840,7 @@ def Show_Tool_Details():
     cursor.close()
     conn.commit()
     conn.close()
-    file_info = []
-    file_info = get_file_upload_info(tool_id)
-    return render_template('tools_detail.html', tool=impure_results[0], catalog=1, file_info = file_info)
+    return impure_results[0]
 
 @app.route('/Tool_Active_Info_Frag')
 def Tool_Active_Info_Frag():
