@@ -806,6 +806,9 @@ function active_info_edit_table_init(){
              </div>
              <div class="modal-body">
 				<h4 class="" id="" style="color:blue">Binary Download</h4>
+					<span class="help-block" style="color: red">
+					    The website only maintain five files you have uploaded. If you upload more than five times, the oldest file will be deleted automatically.
+					</span>
 					<table class="table" id="" style="width:100%" align="center">
 						<thead>
 							<tr >
@@ -821,33 +824,35 @@ function active_info_edit_table_init(){
 								<th class="text-center">
 									User Name
 								</th>
-							</tr>
-						</thead>
-						<tbody align="center">
-						{% for file_info in file_info %}
-						    <tr>
-								<td>
-									<a href="upload_folder/{{file_info['file_name']}}-{{file_info['file_version']}}-{{file_info['tool_id']}}" 
-									   download="{{file_info['file_name']}}">
-											{{file_info['file_name'][0:25]}}
-									</a>
-								</td>
-								<td>
-									{{file_info['file_version']}}
-								</td>
-								<td>
-									{{file_info['upload_time']}}
-								</td>
-								<td>
-									{{file_info['user_name']}}
-								</td>
-							</tr>
-						{% endfor %}
-					    </tbody>
-					</table>
-				<hr>
+						</tr>
+					</thead>
+					<tbody align="center">
+					{% for file_info in file_info %}
+						<tr>
+							<td>
+								<a href="upload_folder/{{file_info['file_name']}}-{{file_info['file_version']}}-{{file_info['tool_id']}}" 
+								   download="{{file_info['file_name']}}">
+										{{file_info['file_name'][0:25]}}
+								</a>
+							</td>
+							<td>
+								{{file_info['file_version']}}
+							</td>
+							<td>
+								{{file_info['upload_time']}}
+							</td>
+							<td>
+								{{file_info['user_name']}}
+							</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+			</table>
+			<hr style="border:1px solid ;" width="100%">
 				<h4 class="" id="" style="color:blue">Binary Upload</h4>
-				<br>
+				<span class="help-block" style = "color:red">
+				    Please wait until your file is uploaded completely.
+				</span>
 				<div style="width: 700px; margin: 0 auto;">
 					<form  method="POST" enctype="multipart/form-data" action="/Tool_Files_Upload">
 						<input id="file_id" name="file_tool_id" type="hidden" value="{{tool['tool_id']}}" />
@@ -876,9 +881,7 @@ function active_info_edit_table_init(){
 							    </span>
 							    <input type="text" class="form-control" readonly>
 							</div>
-							<span class="help-block">
-							    Please wait until your file is uploaded completely.
-							</span>
+							<br>
 							<input class="col-md-5 btn btn-danger" type="submit" value="Upload">
 						</div>
 						</div>
