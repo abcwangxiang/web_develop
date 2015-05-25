@@ -548,6 +548,7 @@ def Tool_Files_Upload():
                 filename_save = filename + '-' + file_version + '-' + tool_id
                 record_file_upload_info(tool_id, filename, username, file_version)
                 u_file.save(os.path.join(UPLOAD_FOLDER, filename_save))
+                upload_file_delete(tool_id)
     return Show_Tool_Details_after_upload(tool_id)
 
 @app.route('/Tool_Activate')
@@ -819,6 +820,8 @@ def Show_Tool_Details():
     file_info = []
     tool_info = get_tool_details(tool_id)
     file_info = get_file_upload_info(tool_id)
+    # only offer 5 files for downloading
+    file_info = file_info[0:5]
     return render_template('tools_detail.html', tool = tool_info, file_upload_flag = 0, file_info = file_info)
 
 def Show_Tool_Details_after_upload(tool_id):
@@ -826,6 +829,8 @@ def Show_Tool_Details_after_upload(tool_id):
     file_info = []
     tool_info = get_tool_details(tool_id)
     file_info = get_file_upload_info(tool_id)
+    # only offer 5 files for downloading
+    file_info = file_info[0:5]
     return render_template('tools_detail.html', tool = tool_info, file_upload_flag = 1, file_info = file_info)
 
 def get_tool_details(tool_id):
@@ -1281,8 +1286,17 @@ def get_file_upload_info(tool_id):
     cursor.close()
     conn.commit()
     conn.close()
-    r_results = r_results[0:5]
     return r_results
+
+def upload_file_delete(tool_id):
+    files = []
+    files = get_file_upload_info(tool_id)
+    files_number = len(files)
+    # we only save 5 file for one tools, if user upload more than 5 files, we delete the oldest one
+    if files_number > 5:
+        filename_5th = files[5]['file_name'] + '-' + files[5]['file_version'] + '-' + tool_id
+        if os.path.exists(os.path.join(UPLOAD_FOLDER, filename_5th)):
+            os.remove(os.path.join(UPLOAD_FOLDER, filename_5th))
 
 def get_resource_detail(tool_id):
     conn = get_conn()
