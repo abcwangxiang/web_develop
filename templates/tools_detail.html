@@ -186,6 +186,7 @@
                                     id='tool_activity_wiki_{{tool['tool_id']}}'>Open Wiki</a>
                             {%endif%}
 					<!---------------------------------------------------------------------------->
+					<!-- when user click the button, popup the upload/download page -->
 					        <a type="button" id="file_upload" class="btn btn-primary" data-toggle="modal" 
 								    data-target="#myModal">
 									Up/Download
@@ -796,8 +797,11 @@ function active_info_edit_table_init(){
 
 }
 </script>
+
 <!------------------------------------------------------------------------------------------------------------>
-     <!-- Modal -->
+     <!-- this part belongs to Upload Binary Feature -->
+     <!-- When user click the upload/download button, Popup this page -->
+     <!-- Modal-->
 	 <div class="modal fade" id="myModal" tabindex="-1"
 	 	 role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
          <div class="modal-dialog"> <div class="modal-content">
@@ -945,7 +949,11 @@ input[readonly] {
   cursor: text !important;
 }
 </style>
+
+<!-- this part belongs to Upload Binary Feature -->
+<!-- end -->
 <!------------------------------------------------------------------------------------------------------------>
+
 <script>
 	{% if file_upload_flag %}
 		$('#file_upload').click();
