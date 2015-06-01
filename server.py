@@ -22,6 +22,7 @@ import logging
 import traceback
 import string
 import re
+import shutil
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from collections import OrderedDict
@@ -545,9 +546,11 @@ def Tool_Files_Upload():
             #if u_file and allowed_file(u_file.filename):
             if u_file:
                 filename = secure_filename(u_file.filename)
-                filename_save = filename + '-' + file_version + '-' + tool_id
                 record_file_upload_info(tool_id, filename, username, file_version)
-                u_file.save(os.path.join(UPLOAD_FOLDER, filename_save))
+                file_folder_temp = filename + '-' + file_version + '-' + tool_id
+                save_foder = os.path.join(UPLOAD_FOLDER, file_folder_temp)
+                os.mkdir(save_foder)
+                u_file.save(os.path.join(save_foder, filename))
                 upload_file_delete(tool_id)
     return Show_Tool_Details_after_upload(tool_id)
 
@@ -1294,9 +1297,12 @@ def upload_file_delete(tool_id):
     files_number = len(files)
     # we only save 5 file for one tools, if user upload more than 5 files, we delete the oldest one
     if files_number > 5:
-        filename_5th = files[5]['file_name'] + '-' + files[5]['file_version'] + '-' + tool_id
-        if os.path.exists(os.path.join(UPLOAD_FOLDER, filename_5th)):
-            os.remove(os.path.join(UPLOAD_FOLDER, filename_5th))
+        filename_5th = files[5]['file_name']
+        file_folder_temp = files[5]['file_name'] + '-' + files[5]['file_version'] + '-' + tool_id
+        delete_foder = os.path.join(UPLOAD_FOLDER, file_folder_temp)
+        if os.path.exists(os.path.join(delete_foder, filename_5th)):
+            #os.remove(os.path.join(delete_foder, filename_5th))
+            shutil.rmtree(delete_foder)
 
 def get_resource_detail(tool_id):
     conn = get_conn()

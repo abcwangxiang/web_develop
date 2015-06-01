@@ -830,8 +830,7 @@ function active_info_edit_table_init(){
 					{% for file_info in file_info %}
 						<tr>
 							<td>
-								<a href="upload_folder/{{file_info['file_name']}}-{{file_info['file_version']}}-{{file_info['tool_id']}}" 
-								   download="{{file_info['file_name']}}">
+								<a href="upload_folder/{{file_info['file_name']}}-{{file_info['file_version']}}-{{file_info['tool_id']}}/{{file_info['file_name']}}">
 										{{file_info['file_name'][0:25]}}
 								</a>
 							</td>
