@@ -122,7 +122,8 @@ def Login():
     login_result = server.login(str(request.form["BG_account"]), str(request.form["BG_password"]))
     if not login_result:
         logging.warning("{} fails to login into the bugzilla.".format(str(request.form["BG_account"])))
-        return render_template('query.html', error = "Error Account/Password, Please Login again")
+        #return render_template('query.html', error = "Error Account/Password, Please Login again")
+        return Tools_Catalog(0, 1)
 
     session['username'] = request.form['BG_account']
     if session['username']:
@@ -250,7 +251,7 @@ def Tools_Teams_Query():
     return jsonify(res)
 
 @app.route('/Tools_Catalog')
-def Tools_Catalog(active_view = 0):
+def Tools_Catalog(active_view = 0, login_error = 0):
     """
     This should be modified to match the database
     """
@@ -265,7 +266,7 @@ def Tools_Catalog(active_view = 0):
     cursor.close()
     conn.commit()
     conn.close()
-    return render_template('tools_catalog.html', tools=impure_results, catalog=2, active_view=active_view)
+    return render_template('tools_catalog.html', tools=impure_results, catalog=2, active_view=active_view, login_error = login_error)
 
 @app.route('/Tools_Send_Mail')
 def Tools_Send_Mail():

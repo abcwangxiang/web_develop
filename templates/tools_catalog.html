@@ -473,6 +473,9 @@ function query_teams(id) {
 {%if active_view%}
     $('#active').click()
 {%endif%}
+{%if login_error%}
+    alert("ERROR Account/Password, Please Login again!");
+{%endif%}
 </script>
 
 
