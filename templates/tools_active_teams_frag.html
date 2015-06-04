@@ -42,15 +42,6 @@
                 {% if ss_month_ret == 'NOW' %} 
                     NOW
                 {% endif %}
-                {% if ss_month_ret == '201412' %} 
-                    Dec. 2014
-                {% endif %}
-                {% if ss_month_ret == '201501' %} 
-                    Jan. 2015
-                {% endif %}
-                {% if ss_month_ret == '201502' %} 
-                    Feb. 2015
-                {% endif %}
                 {% if ss_month_ret == '201503' %} 
                     Mar. 2015
                 {% endif %}
@@ -63,18 +54,27 @@
                 {% if ss_month_ret == '201506' %} 
                     Jun. 2015
                 {% endif %}
+                {% if ss_month_ret == '201507' %} 
+                    Jul. 2015
+                {% endif %}
+                {% if ss_month_ret == '201508' %} 
+                    Aug. 2015
+                {% endif %}
+                {% if ss_month_ret == '201509' %} 
+                    Sep. 2015
+                {% endif %}
+                {% if ss_month_ret == '201510' %} 
+                    Oct. 2015
+                {% endif %}
+                {% if ss_month_ret == '201511' %} 
+                    Nov. 2015
+                {% endif %}
+                {% if ss_month_ret == '201512' %} 
+                    Dec. 2015
+                {% endif %}
             </option>
             {% if not ss_month_ret == 'NOW' %}  <!-- avoid the 'NOW' option show twice--> 
             <option value="NOW">NOW</option>
-            {% endif %}
-            {% if not ss_month_ret == '201412' %}  <!-- avoid the option show twice--> 
-            <option value="201412">Dec. 2014</option>
-            {% endif %}
-            {% if not ss_month_ret == '201501' %}  <!-- avoid the option show twice--> 
-            <option value="201501">Jan. 2015</option>
-            {% endif %}
-            {% if not ss_month_ret == '201502' %}  <!-- avoid the option show twice--> 
-            <option value="201502">Feb. 2015</option>
             {% endif %}
             {% if not ss_month_ret == '201503' %}  <!-- avoid the option show twice--> 
             <option value="201503">Mar. 2015</option>
@@ -87,6 +87,24 @@
             {% endif %}
             {% if not ss_month_ret == '201506' %}  <!-- avoid the option show twice--> 
             <option value="201506">Jun. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201507' %}  <!-- avoid the option show twice--> 
+            <option value="201503">Jul. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201508' %}  <!-- avoid the option show twice--> 
+            <option value="201504">Aug. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201509' %}  <!-- avoid the option show twice--> 
+            <option value="201505">Sep. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201510' %}  <!-- avoid the option show twice--> 
+            <option value="201506">Oct. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201511' %}  <!-- avoid the option show twice--> 
+            <option value="201505">Nov. 2015</option>
+            {% endif %}
+            {% if not ss_month_ret == '201512' %}  <!-- avoid the option show twice--> 
+            <option value="201506">Dec. 2015</option>
             {% endif %}
         </select>
     </div>
