@@ -91,7 +91,10 @@ with app.test_request_context('/hello', method='POST'):
 UPLOAD_FOLDER = os.path.join(SCRIPTS_DIR, "upload_folder/")
 ALLOWED_EXTENTIONS = set(['txt', 'exe', 'pdf', 'jpg', 'zip'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-#################     back-end  start       ##########################
+
+###################################################################################
+#############################      back-end  start       ##########################
+###################################################################################
 
 @app.route('/')
 def index():
@@ -207,6 +210,7 @@ def Tools_Catalog_Query():
     conn.close()
     return jsonify(res)
 
+## This function used for Teams Select Feature
 @app.route('/Tools_Teams_Query')
 def Tools_Teams_Query():
     res = {}
@@ -233,13 +237,14 @@ def Tools_Teams_Query():
         team_results = []
         for row in cursor.fetchall():
             impure_results.append(dict(zip(columns, row)))
+        # use the team_name to filter the data getting from database.
+        # so that display the team's data when click one team
         if team_name != "All-Teams":
             for row in impure_results:
                 if row['team'] == team_name:
                     team_results.append(row)
         else:
             team_results = impure_results
-        #print impure_results[0]
         data = impure_results
         res['res'] = 'success'
         res['spec'] = "active"
@@ -266,8 +271,10 @@ def Tools_Catalog(active_view = 0, login_error = 0):
     cursor.close()
     conn.commit()
     conn.close()
+    # add the login_error viariable to flag if user input the wrong key or username when login
     return render_template('tools_catalog.html', tools=impure_results, catalog=2, active_view=active_view, login_error = login_error)
 
+# This function used to auto send remind email to user when one tool is not updated in time
 @app.route('/Tools_Send_Mail')
 def Tools_Send_Mail():
     if (request.host != "localhost"):
@@ -398,6 +405,7 @@ def Register_Tool():
 def Tools_Active_Tools():
     return Tools_Catalog(1)
 
+# This function is used to complete the 'snapshots' feature
 @app.route('/Tools_Active_Snapshots')
 def Tools_Active_Snapshots():
     res = {}
@@ -532,7 +540,7 @@ def Tools_Stats():
 #            filename.rsplit('.', 1)[1] in ALLOWED_EXTENTIONS
 
 
-# this function deal with the binary upload/download function
+# this function deal with the binary upload/download feature
 @app.route('/Tool_Files_Upload', methods = ["POST", "GET"])
 def Tool_Files_Upload():
     res = {}
